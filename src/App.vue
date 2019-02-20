@@ -1,26 +1,55 @@
 <template>
   <div id="app">
-    <img alt="Vue logo" src="./assets/logo.png">
-    <HelloWorld msg="Welcome to Your Vue.js App"/>
+    <keep-alive>
+      <router-view></router-view>
+    </keep-alive>
   </div>
 </template>
 
 <script>
-import HelloWorld from './components/HelloWorld.vue'
+  export default {
+    name: 'app',
+    data () {
+      return {
+        isLogin: false,
+        userInfo: {
+          nick: null,
+          uid: null,
+          portrait: null
+        }
+      }
+    },
+    method: {
+      // 请求用户的信息
+      getUserInfo () {
+        // 测试
+        this.userInfo = {
+          nick: '陈苗',
+          uid: '1',
+          portrait: 'profile.png'
+        }
 
-export default {
-  name: 'app',
-  components: {
-    HelloWorld
+        // 实例开发中这里会向服务端请求数据
+        // 如下(用了vue-resource):
+        // ts.$http.get(url, {
+        //   //参数
+        //   "params":{}
+        // }).then((response) => {
+        //   //Success
+        // }, (response) => {
+        //   //Error
+        // });
+
+        // 提交mutation到Store
+        this.$store.commit('updateUserInfo', this.userInfo)
+      },
+      mounted () {
+        // 组件开始挂载时获取用户信息
+        this.getUserInfo()
+      }
+    }
   }
-}
 </script>
 <style lang="stylus">
-#app
-  font-family 'Avenir', Helvetica, Arial, sans-serif
-  -webkit-font-smoothing antialiased
-  -moz-osx-font-smoothing grayscale
-  text-align center
-  color #2c3e50
-  margin-top 60px
+
 </style>
