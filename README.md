@@ -1,4 +1,5 @@
 # dada-qa
+<<<<<<< HEAD
 
 ## Project setup
 ```
@@ -27,3 +28,6 @@ npm run lint
 
 ### Customize configuration
 See [Configuration Reference](https://cli.vuejs.org/config/).
+=======
+A vue project for Graduation Project
+>>>>>>> 8e735e421b904b0e2dbd0c9ee44b8a76bab8160b
