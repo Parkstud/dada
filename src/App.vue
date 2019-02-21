@@ -1,7 +1,9 @@
 <template>
   <div id="app">
     <keep-alive>
-      <router-view></router-view>
+      <transition name="fade" mode="out-in">
+        <router-view></router-view>
+      </transition>
     </keep-alive>
   </div>
 </template>
@@ -51,5 +53,12 @@
   }
 </script>
 <style lang="stylus">
+    #app
+      .fade-enter-active, .fade-leave-active {
+        transition: opacity .5s;
+      }
 
+      .fade-enter, .fade-leave-to {
+        opacity: 0;
+      }
 </style>

@@ -1,0 +1,139 @@
+<template>
+  <div class="problem-recommend">
+    <cube-scroll ref="scroll">
+      xx<br>
+      xx<br>
+      xx<br>
+      xx<br>
+      xx<br>
+      xx<br>
+      xx<br>
+      xx<br>
+      xx<br>
+      xx<br>
+      xx<br>
+      xx<br>
+      xx<br>
+      xx<br>
+      xx<br>
+      xx<br>
+      xx<br>
+      xx<br>
+      xx<br>
+      xx<br>
+      xx<br>
+      xx<br>
+      xx<br>
+      xx<br>
+      xx<br>
+      xx<br>
+      xx<br>
+      xx<br>
+      xx<br>
+      xx<br>
+      xx<br>
+      xx<br>
+      xx<br>
+      xx<br>
+      xx<br>
+      xx<br>
+      xx<br>
+      xx<br>
+      xx<br>
+      xx<br>
+      xx<br>
+      xx<br>
+      xx<br>
+      xx<br>
+      xx<br>
+      xx<br>
+      xx<br>
+      xx<br>
+      xx<br>
+      xx<br>
+      xx<br>
+      xx<br>
+      xx<br>
+      xx<br>
+      xx<br>
+      xx<br>
+      xx<br>
+      xx<br>
+      xx<br>
+      xx<br>
+      xx<br>
+      xx<br>
+      xx<br>
+      xx<br>
+      xx<br>
+      xx<br>
+      xx<br>
+      xx<br>
+      xx<br>
+      xx<br>
+      yy<br>
+      yy<br>
+      yy<br>
+      yy<br>
+      yy<br>
+      yy<br>
+      yy<br>
+      yy<br>
+      yy<br>
+      yy<br>
+      yy<br>
+      yy<br>
+      yy<br>
+      yy<br>
+      yy<br>
+      yy<br>
+      yy<br>
+      yy<br>
+      yy<br>
+      yy<br>
+      yy<br>
+      yy<br>
+      yy<br>
+      yy<br>
+      yy<br>
+      yy<br>
+      yy<br>
+      yy<br>
+      yy<br>
+      yy<br>
+      yy<br>
+      yy<br>
+      yy<br>
+      yy<br>
+      yy<br>
+      yy<br>
+      yy<br>
+      yy<br>
+      yy<br>
+      yy<br>
+      yy<br>
+      yy<br>
+      yy<br>
+      yy<br>
+      yy<br>
+      yy<br>
+    </cube-scroll>
+  </div>
+</template>
+
+<script type='text/ecmascript-6'>
+  export default {
+    name: 'recommend',
+    data () {
+      return {
+        clientHeight: ''
+      }
+    }
+
+  }
+</script>
+
+<style lang='stylus' rel='stylesheet/stylus'>
+  .problem-recommend
+    height:100%
+</style>

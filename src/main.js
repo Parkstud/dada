@@ -6,6 +6,7 @@ import Vuex from 'vuex'
 import Login from './components/login/login'
 import Main from './components/mainapp/mainApp'
 import Register from './components/register/register'
+import Forget from './components/forget/forget'
 
 import './common/stylus/index.styl'
 
@@ -25,6 +26,10 @@ const router = new VueRouter({
     {
       path: '/register',
       component: Register
+    },
+    {
+      path: '/forgetPwd',
+      component: Forget
     }
   ]
 })
@@ -91,7 +96,7 @@ new Vue({
     checkLogin () {
       // 检查是否存在session
       console.log(this.$router.currentRoute.fullPath)
-      if (this.$router.currentRoute.fullPath === '/register') {
+      if (this.$router.currentRoute.fullPath === '/register' || this.$router.currentRoute.fullPath === '/forgetPwd') {
         return
       }
       if (!this.getCookie('session')) {
