@@ -1,7 +1,6 @@
 <template>
   <div class="navigation">
-    <div class="nav" @click="firstPage"><i class="cubeic-home item"></i><span class="text">首页</span>
-    </div>
+    <div class="nav"><i class="cubeic-home item"></i><span class="text">首页</span></div>
     <div class="nav"><i class="cubeic-search item"></i><span class="text">搜素</span></div>
     <div class="nav"><i class="cubeic-notification item"></i><span class="text">消息</span></div>
     <div class="nav"><i class="cubeic-person item"></i><span class="text">我的</span></div>
@@ -12,9 +11,6 @@
   export default {
     name: 'navigation',
     methods: {
-      firstPage () {
-
-      }
     }
   }
 </script>

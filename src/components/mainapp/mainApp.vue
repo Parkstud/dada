@@ -7,17 +7,45 @@
       <pro-rec></pro-rec>
     </div>
     <div class="footer">
-      <v-navigation></v-navigation>
+      <cube-tab-bar v-model="selectedLabelDefault"
+                    :data="tabs"
+                    @click="clickHandler"
+                    @change="changeHandler">
+
+      </cube-tab-bar>
     </div>
   </div>
 </template>
 
 <script type='text/ecmascript-6'>
-  import Navigation from '../navigation/navigation'
+  // import Navigation from '../navigation/navigation'
   import ProRec from '../problem-recommend/problem-recommend.vue'
 
   export default {
     name: 'mainApp',
+    data () {
+      return {
+        selectedLabelDefault: '首页',
+        tabs: [
+          {
+            label: '首页',
+            icon: 'cubeic-home'
+          },
+          {
+            label: '搜索',
+            icon: 'cubeic-search'
+          },
+          {
+            label: '消息',
+            icon: 'cubeic-notification'
+          },
+          {
+            label: '我的',
+            icon: 'cubeic-person'
+          }
+        ]
+      }
+    },
     methods: {
       // 注销
       logout () {
@@ -26,10 +54,16 @@
         setTimeout(() => {
           this.$router.push('/login')
         }, 1000)
+      },
+      clickHandler (label) {
+        console.log(label)
+      },
+      changeHandler (label) {
+
       }
     },
     components: {
-      'v-navigation': Navigation,
+      // 'v-navigation': Navigation,
       'ProRec': ProRec
     },
     mounted () {
@@ -56,5 +90,17 @@
       bottom 0
       left 0
       width 100%
+      height 44px
+
+      .cube-tab-bar
+        background #f3f3f3
+        color #c3c3c3
+
+        .cube-tab
+          font-size 12px
+          padding-top 3px
+
+        .cubeic-home, .cubeic-search, .cubeic-notification, .cubeic-person
+          font-size 24px
 
 </style>
