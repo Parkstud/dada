@@ -21,7 +21,7 @@
         }
       }
     },
-    method: {
+    methods: {
       // 请求用户的信息
       getUserInfo () {
         // 测试

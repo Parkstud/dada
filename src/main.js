@@ -9,6 +9,7 @@ import Register from './components/register/register'
 import Forget from './components/forget/forget'
 
 import './common/stylus/index.styl'
+import myProblem from './components/myPage/myContent/myProblem/myProblem'
 
 Vue.config.productionTip = false
 Vue.use(VueRouter)
@@ -30,7 +31,28 @@ const router = new VueRouter({
     {
       path: '/forgetPwd',
       component: Forget
+    },
+    {
+      path: '/myProblem',
+      component: myProblem
+    },
+    {
+      path: '/myProblem',
+      component: myProblem
+    },
+    {
+      path: '/myProblem',
+      component: myProblem
+    },
+    {
+      path: '/myProblem',
+      component: myProblem
+    },
+    {
+      path: '/myProblem',
+      component: myProblem
     }
+
   ]
 })
 
@@ -42,12 +64,18 @@ const store = new Vuex.Store({
       nick: null,
       uid: null,
       portrait: null
-    }
+    },
+    // 页面切换 on 入栈 off 出站
+    states: 'turn-on'
   },
   mutations: {
     // 更新用户信息
     updateUserInfo (state, newUserInfo) {
       state.userInfo = newUserInfo
+    },
+    // 页面转场动画
+    setTransition (state, states) {
+      state.states = states
     }
   }
 })
@@ -96,13 +124,12 @@ new Vue({
     checkLogin () {
       // 检查是否存在session
       console.log(this.$router.currentRoute.fullPath)
+
       if (this.$router.currentRoute.fullPath === '/register' || this.$router.currentRoute.fullPath === '/forgetPwd') {
         return
       }
       if (!this.getCookie('session')) {
         this.$router.push('/login')
-      } else {
-        this.$router.push('/mainApp')
       }
     }
   }

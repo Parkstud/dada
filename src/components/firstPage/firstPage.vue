@@ -1,6 +1,8 @@
 <template>
-  <div class="problem-recommend">
-    <cube-scroll ref="scroll" :data="items" :options="options" @pulling-down="onPullingDown"
+  <div class="first-page">
+    <cube-scroll ref="scroll" :data="items"
+                 :options="scrollOptions"
+                 @pulling-down="onPullingDown"
                  @pulling-up="onPullingUp">
       <ul>
         <li v-for="(item,index) in items" :key="index">
@@ -51,6 +53,84 @@
     },
     {
       url: 'qeqwe'
+    },
+    {
+      url: 'asasda'
+    },
+    {
+      url: 'asdasdad'
+    },
+    {
+      url: 'asdasdad'
+    },
+    {
+      url: 'asdasdad'
+    },
+    {
+      url: 'asdasdad'
+    },
+    {
+      url: 'qeqwe'
+    },
+    {
+      url: 'qeqwe'
+    },
+    {
+      url: 'qeqwe'
+    },
+    {
+      url: 'qeqwe'
+    },
+    {
+      url: 'qeqwe'
+    },
+    {
+      url: 'qeqwe'
+    },
+    {
+      url: 'qeqwe'
+    },
+    {
+      url: 'qeqwe'
+    },
+    {
+      url: 'asasda'
+    },
+    {
+      url: 'asdasdad'
+    },
+    {
+      url: 'asdasdad'
+    },
+    {
+      url: 'asdasdad'
+    },
+    {
+      url: 'asdasdad'
+    },
+    {
+      url: 'qeqwe'
+    },
+    {
+      url: 'qeqwe'
+    },
+    {
+      url: 'qeqwe'
+    },
+    {
+      url: 'qeqwe'
+    },
+    {
+      url: 'qeqwe'
+    },
+    {
+      url: 'qeqwe'
+    },
+    {
+      url: 'qeqwe'
+    },
+    {
+      url: 'qeqwe'
     }
   ]
   let cnt = 1
@@ -59,13 +139,14 @@
     data () {
       return {
         items: texts.slice(),
-        options: {
+        scrollOptions: {
           pullDownRefresh: {
             threshold: 50,
             stop: 40,
             txt: '刷新成功'
           },
-          pullUpLoad: true
+          pullUpLoad: true,
+          directionLockThreshold: 0
         }
       }
     },
@@ -104,6 +185,6 @@
 </script>
 
 <style lang='stylus' rel='stylesheet/stylus'>
-  .problem-recommend
+  .first-page
     height: 100%
 </style>

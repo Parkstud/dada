@@ -4,28 +4,54 @@
     </div>
     <div class="content" ref="containerPage">
       <cube-button @click="logout">删除session</cube-button>
-      <pro-rec></pro-rec>
+      <div class="slide-wrapper">
+        <cube-slide ref="slide" :loop="false"
+                    :auto-play="false"
+                    :show-dots="false"
+                    :initial-index="index"
+                    @change="onChange"
+                    :options="slideOptons"
+        >
+          <cube-slide-item>
+            <first-page></first-page>
+          </cube-slide-item>
+          <cube-slide-item>
+            <search-page></search-page>
+          </cube-slide-item>
+          <cube-slide-item>
+            <msg-page></msg-page>
+          </cube-slide-item>
+          <cube-slide-item>
+            <my-page></my-page>
+          </cube-slide-item>
+        </cube-slide>
+      </div>
     </div>
     <div class="footer">
       <cube-tab-bar v-model="selectedLabelDefault"
                     :data="tabs"
+                    :use-transition="false"
                     @click="clickHandler"
-                    @change="changeHandler">
-
+                    @change="changeHandler"
+                    ref="tarBar"
+      >
       </cube-tab-bar>
+
     </div>
   </div>
 </template>
 
 <script type='text/ecmascript-6'>
-  // import Navigation from '../navigation/navigation'
-  import ProRec from '../problem-recommend/problem-recommend.vue'
+  import FirstPage from '../firstPage/firstPage.vue'
+  import SearchPage from '../searchPage/searchPage'
+  import MsgPage from '../msgPage/msgPage'
+  import MyPage from '../myPage/myPage'
 
   export default {
     name: 'mainApp',
     data () {
       return {
-        selectedLabelDefault: '首页',
+        index: 0,
         tabs: [
           {
             label: '首页',
@@ -43,7 +69,26 @@
             label: '我的',
             icon: 'cubeic-person'
           }
-        ]
+        ],
+        slideOptons: {
+          directionLockThreshold: 0
+        },
+        scrollOptions: {
+          directionLockThreshold: 0
+        }
+
+      }
+    },
+    computed: {
+      selectedLabelDefault: {
+        get () {
+          return this.tabs[this.index].label
+        },
+        set (newVal) {
+          this.index = this.tabs.findIndex(value => {
+            return value.label === newVal
+          })
+        }
       }
     },
     methods: {
@@ -60,11 +105,16 @@
       },
       changeHandler (label) {
 
+      },
+      onChange (current) {
+        this.index = current
       }
     },
     components: {
-      // 'v-navigation': Navigation,
-      'ProRec': ProRec
+      MyPage,
+      MsgPage,
+      SearchPage,
+      FirstPage
     },
     mounted () {
       // 获取浏览器可视区域高度
@@ -83,7 +133,8 @@
       height 40px
 
     .content
-      height 100%
+      .slide-wrapper
+        height 100%
 
     .footer
       position absolute
