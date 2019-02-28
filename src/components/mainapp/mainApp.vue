@@ -51,7 +51,7 @@
     name: 'mainApp',
     data () {
       return {
-        index: 0,
+        index: this.$store.state.count,
         tabs: [
           {
             label: '首页',

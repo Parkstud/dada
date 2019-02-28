@@ -48,12 +48,17 @@
 </template>
 
 <script type='text/ecmascript-6'>
+
+  // 主界面显示我的
+  const MAIN_MY = 3
   export default {
     name: 'myContent',
     methods: {
       myProblem () {
         this.$store.commit('setTransition', 'turn-on')
+        this.$store.commit('updateCount', MAIN_MY)
         this.$router.push('/myProblem')
+
       }
     },
     mounted () {

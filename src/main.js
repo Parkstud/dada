@@ -66,7 +66,9 @@ const store = new Vuex.Store({
       portrait: null
     },
     // 页面切换 on 入栈 off 出站
-    states: 'turn-on'
+    states: 'turn-on',
+    // 主界面显示的状态
+    count: 0
   },
   mutations: {
     // 更新用户信息
@@ -76,6 +78,10 @@ const store = new Vuex.Store({
     // 页面转场动画
     setTransition (state, states) {
       state.states = states
+    },
+    // 更新状态信息
+    updateCount (state, count) {
+      state.count = count
     }
   }
 })
