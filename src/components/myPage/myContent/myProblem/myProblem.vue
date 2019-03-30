@@ -13,7 +13,6 @@
       back () {
         this.$store.commit('setTransition', 'turn-off')
         this.$router.go(BACK_FLAG)
-
       }
     }
   }

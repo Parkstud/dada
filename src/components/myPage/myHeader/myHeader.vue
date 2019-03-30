@@ -2,7 +2,8 @@
   <div class="my-header">
     <div class="header-content">
       <div class="avatar">
-        <img src="./avatar.jpg" width="64" height="64">
+        <img src="http://148.70.8.85/group1/M00/00/00/rBsAAlycfB-AA9jFAACjZJqjeEQ581_big.jpg"
+             width="64" height="64">
       </div>
       <div class="info-wrapper">
         <div class="name">毛毛0.0</div>
@@ -23,7 +24,11 @@
 
 <script type='text/ecmascript-6'>
   export default {
-    name: 'myHeader'
+    name: 'myHeader',
+    mounted () {
+      // let userAccount = JSON.parse(window.localStorage.getItem('token'))
+      // this.$http.get("/")
+    }
   }
 </script>
 
@@ -37,9 +42,11 @@
     width 100%
     font-size 20px
     box-shadow 1px 1px 1px 1px 3px #e2e2e2
+
     .header-content
       .avatar
         display inline-block
+
         img
           border-radius 50%
           border 1px solid #f3f3f3

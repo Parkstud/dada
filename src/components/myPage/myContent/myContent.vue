@@ -30,15 +30,15 @@
         <span class="myicon cubeic-time"></span>
         <span class="text">浏览历史</span>
         <span class="wrapper">
-             <span class="num">0</span>
+             <span class="num">158</span>
               <span class="cubeic-arrow"></span>
           </span>
       </li>
-      <li class="item">
+      <li class="item" @click="person_setting">
         <span class="myicon cubeic-setting"></span>
         <span class="text">个人设置</span>
         <span class="wrapper">
-             <span class="num">0</span>
+             <span class="num"></span>
              <span class="cubeic-arrow"></span>
           </span>
       </li>
@@ -54,11 +54,15 @@
   export default {
     name: 'myContent',
     methods: {
+      // 跳转myProblem组件界面
       myProblem () {
         this.$store.commit('setTransition', 'turn-on')
         this.$store.commit('updateCount', MAIN_MY)
         this.$router.push('/myProblem')
-
+      },
+      person_setting () {
+        this.$store.commit('updateCount', MAIN_MY)
+        this.$router.push('/personSet')
       }
     },
     mounted () {
@@ -105,11 +109,12 @@
         .wrapper
           position absolute
           right 0
-          display inline-block
-          width 40px
           color: #888888
 
           .num
             margin-right 5px
+
+          .cubeic-arrow
+            margin-right 10px
 
 </style>

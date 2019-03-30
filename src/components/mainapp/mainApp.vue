@@ -1,9 +1,6 @@
 <template>
   <div class="main-app">
-    <div class="header">
-    </div>
     <div class="content" ref="containerPage">
-      <cube-button @click="logout">删除session</cube-button>
       <div class="slide-wrapper">
         <cube-slide ref="slide" :loop="false"
                     :auto-play="false"
@@ -58,7 +55,7 @@
             icon: 'cubeic-home'
           },
           {
-            label: '搜索',
+            label: '提问',
             icon: 'cubeic-search'
           },
           {
@@ -92,14 +89,6 @@
       }
     },
     methods: {
-      // 注销
-      logout () {
-        // 删除cookie 跳转登录页
-        this.delCookie('session')
-        setTimeout(() => {
-          this.$router.push('/login')
-        }, 1000)
-      },
       clickHandler (label) {
         console.log(label)
       },
@@ -119,8 +108,8 @@
     mounted () {
       // 获取浏览器可视区域高度
       this.clientHeight = `${document.documentElement.clientHeight}`
-      console.log(this.clientHeight - 134)
-      this.$refs.containerPage.style.height = (this.clientHeight - 134) + 'px'
+      console.log(this.clientHeight - 84)
+      this.$refs.containerPage.style.height = (this.clientHeight - 44) + 'px'
     }
 
   }
@@ -128,10 +117,6 @@
 
 <style lang='stylus' rel='stylesheet/stylus'>
   .main-app
-    .header
-      background gray
-      height 40px
-
     .content
       .slide-wrapper
         height 100%

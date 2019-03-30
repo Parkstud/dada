@@ -7,15 +7,54 @@ import Login from './components/login/login'
 import Main from './components/mainapp/mainApp'
 import Register from './components/register/register'
 import Forget from './components/forget/forget'
-
+import axios from 'axios'
+import Qs from 'qs'
+import VConsole from 'vconsole'
 import './common/stylus/index.styl'
 import myProblem from './components/myPage/myContent/myProblem/myProblem'
+import personSet from './components/myPage/myContent/personSet/personSet'
+import problemDetails from './components/firstPage/problemDetails'
+import inviteAnswer from './components/firstPage/inviteanswer'
+import './common/icon/iconfont.styl'
+import quesion from './components/common/quesion'
+import onlySearchPage from './components/firstPage/onlySearchPage'
+import putQuestionPage from './components/firstPage/putQuestionPage'
+import chatPage from './components/msgPage/chatPage'
+import writeAnswer from './components/firstPage/writeAnswer'
 
 Vue.config.productionTip = false
+
+Vue.prototype.imgURL = 'http://148.70.8.85/'
+
+Vue.prototype.$http = axios
+// http://106.14.4.232:8080/dsqas-0.0.1-SNAPSHOT
+axios.defaults.baseURL = 'http://192.168.0.8:8080'
+axios.defaults.headers.common['Authorization'] = ''
+axios.interceptors.request.use(
+  config => {
+    // 这里写死一个token，你需要在这里取到你设置好的token的值
+    let token = window.localStorage.getItem('token')
+    if (token) {
+      // 这里将token设置到headers中，header的key是Authorization，这个key值根据你的需要进行修改即可
+      config.headers.Authorization = token
+    }
+    return config
+  },
+  error => {
+    return Promise.reject(error)
+  })
+
+Vue.prototype.$qs = Qs
+const vConsole = new VConsole()
+export default vConsole
 Vue.use(VueRouter)
 Vue.use(Vuex)
 const router = new VueRouter({
   routes: [
+    {
+      path: '/',
+      component: Main
+    },
     {
       path: '/login',
       component: Login
@@ -37,20 +76,37 @@ const router = new VueRouter({
       component: myProblem
     },
     {
-      path: '/myProblem',
-      component: myProblem
+      name: 'putQuestionPage',
+      path: '/putQuestionPage',
+      component: putQuestionPage
     },
     {
-      path: '/myProblem',
-      component: myProblem
+      path: '/onlySearchPage',
+      component: onlySearchPage
     },
     {
-      path: '/myProblem',
-      component: myProblem
+      path: '/problemDetails',
+      component: problemDetails
     },
     {
-      path: '/myProblem',
-      component: myProblem
+      path: '/personSet',
+      component: personSet
+    },
+    {
+      path: '/inviteAnswer',
+      component: inviteAnswer
+    },
+    {
+      path: '/quesion',
+      component: quesion
+    },
+    {
+      path: '/chatPage',
+      component: chatPage
+    },
+    {
+      path: '/writeAnswer',
+      component: writeAnswer
     }
 
   ]
@@ -68,7 +124,9 @@ const store = new Vuex.Store({
     // 页面切换 on 入栈 off 出站
     states: 'turn-on',
     // 主界面显示的状态
-    count: 0
+    count: 0,
+    // 显示消息界面的内容
+    message: '通知'
   },
   mutations: {
     // 更新用户信息
@@ -82,7 +140,12 @@ const store = new Vuex.Store({
     // 更新状态信息
     updateCount (state, count) {
       state.count = count
+    },
+    // 更新信息状态
+    updateMessage (state, msg) {
+      state.message = msg
     }
+
   }
 })
 // 设置cookie,增加到vue实例方便全局调用
@@ -94,28 +157,6 @@ Vue.prototype.setCookie = (cookieName, value, expiredays) => {
   document.cookie = cookieName + '=' + escape(value) + ((expiredays == null) ? '' : ';expires=' + exdate.toGMTString())
 }
 
-// 获取cookie、
-function getCookie (name) {
-  let reg = new RegExp('(^| )' + name + '=([^;]*)(;|$)')
-  let arr = document.cookie.match(reg)
-  if (arr) {
-    return (arr[2])
-  } else {
-    return null
-  }
-}
-
-Vue.prototype.getCookie = getCookie
-
-// 删除cookie
-Vue.prototype.delCookie = (name) => {
-  var exp = new Date()
-  exp.setTime(exp.getTime() - 1)
-  var cval = getCookie(name)
-  if (cval != null) {
-    document.cookie = name + '=' + cval + ';expires=' + exp.toGMTString()
-  }
-}
 new Vue({
   render: h => h(App),
   router,
@@ -130,11 +171,11 @@ new Vue({
     checkLogin () {
       // 检查是否存在session
       console.log(this.$router.currentRoute.fullPath)
-
       if (this.$router.currentRoute.fullPath === '/register' || this.$router.currentRoute.fullPath === '/forgetPwd') {
         return
       }
-      if (!this.getCookie('session')) {
+      let token = window.localStorage.getItem('token')
+      if (token === '') {
         this.$router.push('/login')
       }
     }

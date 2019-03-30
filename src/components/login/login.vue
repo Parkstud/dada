@@ -1,7 +1,8 @@
 <template>
   <div class="login">
     <div class="name">
-      <img src="../../assets/name1.png" alt="达达问答">
+      <img src="http://148.70.8.85/group1/M00/00/00/rBsAAlycfLuACLeuAAAQZ_P027g063_big.png"
+           alt="达达问答">
     </div>
     <div class="content-wrapper">
       <div class="phone-wrapper">
@@ -30,17 +31,18 @@
 </template>
 
 <script type='text/ecmascript-6'>
+
   export default {
     name: 'login',
     data () {
       return {
-        isLoging: false,
         phone: '',
         pwd: '',
         phoneplaceholder: '手机号',
         pwdplaceholder: '密码',
         typePhone: 'number',
         typePwd: 'password',
+        stopLogin: false,
         eye: {
           open: false,
           reverse: false
@@ -49,44 +51,45 @@
     },
     methods: {
       // 登录验证 :type="typePwd"
-
       loginVai () {
         if (this.phone !== '' && this.pwd !== '') {
           this.toLogin()
         }
       },
       // 登录请求
+
       toLogin () {
-        // 请求参数
-        // let loginParam = {
-        //   phone: this.phone,
-        //   pwd: this.pwd
-        // }
-        // 请求后端,比如:
-        // this.$http.post( 'example.com/login.php', {
-        //   param: loginParam).then((response) => {
-        //   if(response.data.code == 1){
-        //     let expireDays = 1000 * 60 * 60 * 24 * 15;
-        //     this.setCookie('session', response.data.session, expireDays);
-        //     //登录成功后
-        //     this.$router.push('/user_info');
-        //   }
-        // }, (response) => {
-        //   //Error
-        // });
+        // 登录 toast
+        const logintToast = this.$createToast({
+          txt: '登录中...',
+          time: 0,
+          mask: true
+        })
+        logintToast.show()
 
-        // 设置登录状态
-        this.isLoging = true
-
-        setTimeout(() => {
-          // 登录状态15天后过期
-          let expireDays = 1000 * 60 * 60 * 24 * 15
-          this.setCookie('session', 'blablablablabla...', expireDays)
-          // 登录成功后
-          this.$router.push('/mainApp')
-        }, 1000)
+        let param = new URLSearchParams()
+        param.append('username', this.phone)
+        param.append('password', this.pwd)
+        let url = '/userAccount/login'
+        this.$http.post(url, param)
+          .then((response) => {
+            if (response.data.head.stateCode === 200) {
+              logintToast.hide()
+              window.localStorage.setItem('token', JSON.stringify(response.data.body.data))
+              this.$router.push('/mainApp')
+            } else {
+              const failToast = this.$createToast({
+                txt: response.data.head.msg,
+                time: 2000,
+                type: 'txt'
+              })
+              failToast.show()
+            }
+          })
+          .catch((error) => {
+            console.log(error)
+          })
       }
-
     }
   }
 </script>

@@ -1,12 +1,25 @@
 <template>
   <div class="first-page">
+    <div class="search-wrapper">
+      <span class="cubeic-search"></span>
+      <span class="input-wrapper" @click="showSearch">
+          <cube-input :placeholder="placeholder" :readonly="readonly"></cube-input>
+      </span>
+
+      <span class="submit-wrapper" @click="putQuestion">
+          <span class="cubeic-edit"></span>
+          <span class="text">提问</span>
+      </span>
+    </div>
     <cube-scroll ref="scroll" :data="items"
                  :options="scrollOptions"
                  @pulling-down="onPullingDown"
                  @pulling-up="onPullingUp">
       <ul>
         <li v-for="(item,index) in items" :key="index">
-          {{item.url}}<br>
+          <question-item></question-item>
+          <hr class="hr-sty" style="filter: alpha(opacity=100,finishopacity=0,style=2)"
+              color=#f4f6f9 SIZE=10/>
         </li>
       </ul>
     </cube-scroll>
@@ -14,46 +27,10 @@
 </template>
 
 <script type='text/ecmascript-6'>
+  import QuestionItem from '../common/questionItem'
+
+  const FIRST_PAGE = 0
   const texts = [
-    {
-      url: 'asasda'
-    },
-    {
-      url: 'asdasdad'
-    },
-    {
-      url: 'asdasdad'
-    },
-    {
-      url: 'asdasdad'
-    },
-    {
-      url: 'asdasdad'
-    },
-    {
-      url: 'qeqwe'
-    },
-    {
-      url: 'qeqwe'
-    },
-    {
-      url: 'qeqwe'
-    },
-    {
-      url: 'qeqwe'
-    },
-    {
-      url: 'qeqwe'
-    },
-    {
-      url: 'qeqwe'
-    },
-    {
-      url: 'qeqwe'
-    },
-    {
-      url: 'qeqwe'
-    },
     {
       url: 'asasda'
     },
@@ -136,8 +113,12 @@
   let cnt = 1
   export default {
     name: 'recommend',
+    components: { QuestionItem },
     data () {
       return {
+        placeholder: '搜索',
+        search: 'search',
+        readonly: true,
         items: texts.slice(),
         scrollOptions: {
           pullDownRefresh: {
@@ -151,6 +132,16 @@
       }
     },
     methods: {
+      // 提问
+      putQuestion () {
+        this.$store.commit('updateCount', FIRST_PAGE)
+        this.$router.push('/putQuestionPage')
+      },
+      // 打开搜索界面
+      showSearch () {
+        this.$store.commit('updateCount', FIRST_PAGE)
+        this.$router.push('/onlySearchPage')
+      },
       onPullingDown () {
         // 模拟更新数据
         setTimeout(() => {
@@ -180,6 +171,18 @@
           }
         }, 1000)
       }
+    },
+    mounted () {
+      let url = '/problem/get/news'
+      let params = new URLSearchParams()
+      params.append('currentPage', '1')
+      params.append('pageSize', '1')
+      this.$http.get(url, params)
+        .then((response) => {
+          console.log(response)
+        }).catch((error) => {
+        console.log(error)
+      })
     }
   }
 </script>
@@ -187,4 +190,49 @@
 <style lang='stylus' rel='stylesheet/stylus'>
   .first-page
     height: 100%
+    width 100%
+
+    .search-wrapper
+      background-color #f1f1f1
+      border-radius 8px
+      margin 2px
+      height: 38px
+      display flex
+      justify-content space-between
+      align-items: center;
+
+      .cubeic-search
+        flex 1
+        align-self: center;
+        display inline-block
+        text-align center
+
+      .input-wrapper
+        flex 5
+
+        .cube-input
+          background-color #f1f1f1
+          border 0
+          padding-right 8px
+
+          .cube-input-field
+            padding 0
+
+          &:active
+            background-color #f5f5f5
+
+        .cube-input::after
+          content: none;
+
+      .submit-wrapper
+        flex: 2;
+
+        .cubeic-edit
+          text-align right
+          padding-left 6px
+          border-left 1px solid gray
+
+        .text
+          padding-left 6px
+          text-align center
 </style>
