@@ -170,7 +170,16 @@
       })
 
       // 获取详细信息数据
-
+      url = '/problemInfo/problem/detail'
+      param = new URLSearchParams()
+      param.append('problem', this.problem)
+      this.$http.get(url, param)
+        .then((response) => {
+          let data = response.data.body.data
+          console.log(data)
+        }).catch((error) => {
+        console.log(error)
+      })
     }
   }
 </script>
