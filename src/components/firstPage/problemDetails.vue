@@ -8,10 +8,9 @@
         <p class="question">这个问题怎么回答?这个问题怎么回答?这个问题怎么回答?</p>
         <div class="question-more">
           <span class="answer-num">12</span>
-          <span>个回答</span>
-          <span class="split">·</span>
+          <span>条回答</span>
           <span class="collection-num">1</span>
-          <span>收藏</span>
+          <span>个收藏</span>
         </div>
         <div class="btn-wrapper">
           <cube-button icon="cubeic-person" :light="true" @click="invite">邀请回答</cube-button>
@@ -131,10 +130,12 @@
     data () {
       return {
         backText: '首页',
+        problem: this.$route.params.problem,
         scrollOptions: {
           pullUpLoad: true,
           directionLockThreshold: 0
         }
+
       }
     },
     methods: {
@@ -144,7 +145,7 @@
       },
       // 写回答
       writeaswer () {
-       this.$router.push('/writeAnswer')
+        this.$router.push('/writeAnswer')
       },
       // 上拉
       onPullingUp () {
@@ -154,7 +155,23 @@
         }, 500)
       }
     },
-    components: { probackHeader }
+    components: { probackHeader },
+    mounted () {
+      // 更新浏览记录
+      let url = '/problemInfo/problem/history'
+      let param = new URLSearchParams()
+      param.append('problemId', this.problem.id)
+      this.$http.post(url, param)
+        .then((response) => {
+          let data = response.data.body.data
+          console.log(data)
+        }).then((error) => {
+        console.log(error)
+      })
+
+      // 获取详细信息数据
+
+    }
   }
 </script>
 
@@ -173,12 +190,20 @@
           margin-left 20px
           color: #999999
 
+          .answer-num
+            margin-right 4px
+
+          .collection-num
+            margin-left 10px
+            margin-right 4px
+
         .btn-wrapper
           margin-top 10px
           display flex
 
           .cube-btn-light
             background-color white;
+            color #0084ff
 
       .answer-wrapper
         margin-top 30px

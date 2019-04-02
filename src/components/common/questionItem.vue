@@ -6,25 +6,25 @@
         <div class="questioner-info">
           <span>提问:</span>
           <span class="questioner-avatar"></span>
-          <span class="questioner-name">陈苗</span>
+          <span class="questioner-name">{{this.questionPerson}}</span>
         </div>
       </div>
-      <div class="question-header">10年后的蚂蚁金服,有多大想象空间10年后的蚂蚁金服,有多大想象空间!10年后的蚂蚁金服,有多大想象空间!</div>
+      <div class="question-header">{{problemItem.title}}</div>
       <div class="content">
         <div class="answer-wrapper">
           <p class="answer-content">
-            <span class="answer-name">陈秒:</span>
-            歌曲以朝鲜战争中志愿军战士对祖国对家乡的无限热爱之情为主题歌曲以朝鲜战争中志愿军战士对祖国对家乡的歌曲以朝鲜战争中志愿军战士对祖国对家乡的.在描写朝鲜战争的影片《上甘岭》上映后
+            <span class="answer-name">{{this.answerPerson}}:</span>
+            {{this.answerContent}}
           </p>
         </div>
         <div class="bottom-wrapper">
         <span class="approval-wrapper">
           <span class="cubeic-good"></span>
-          <span class="good-number">200</span>
+          <span class="good-number">{{this.awesomeCount}}</span>
         </span>
           <span class="comment-wrapper">
            <span class="cubeic-message"></span>
-          <span class="comment-number">5</span>
+          <span class="comment-number">{{this.commentCount}}</span>
         </span>
         </div>
       </div>
@@ -36,11 +36,62 @@
 <script type='text/ecmascript-6'>
   export default {
     name: 'questionItem',
+    data () {
+      return {
+        // 提问人
+        questionPerson: '',
+        // 回答人
+        answerPerson: '系统回答',
+        // 回复内容
+        answerContent: '',
+        // 评论数
+        commentCount: 0,
+        // 赞数
+        awesomeCount: 0
+      }
+    },
+    props: {
+      problemItem: {
+        type: Object,
+        required: true
+      }
+    },
     methods: {
       // 跳转问题详情页
       toProblemDetails () {
-        this.$router.push('/problemDetails')
+        this.$router.push({
+          name: 'problemDetails',
+          params: { problem: this.problemItem }
+        })
+      },
+      // 遍历 计算赞数
+      computedAwesome (comments) {
+        let sum = 0
+        for (let i = 0; i < comments.length; i++) {
+          sum += comments[i].awesome
+        }
+        return sum
       }
+    },
+
+    mounted () {
+      // 查询提问人信息 , 评论 回复 点赞信息
+      let url = '/problemInfo/problem/' + this.problemItem.id
+      this.$http.get(url, null)
+        .then((response) => {
+          let data = response.data.body.data
+          this.questionPerson = data.username
+          if (data.comments.length === 0) {
+            // 没有回复 显示默认回复
+            this.answerContent = this.problemItem.answerContent
+          } else {
+            this.answerPerson = data.comments[0].username
+            this.answerContent = data.comments[0].comments
+            this.commentCount = data.comments.length
+            // 计算赞数
+            this.awesomeCount = this.computedAwesome(data.comments)
+          }
+        })
     }
   }
 </script>
@@ -98,13 +149,17 @@
 
         .bottom-wrapper
           color: rgb(169, 181, 192)
+
           .approval-wrapper
             margin-right 20px
+
             .cubeic-good
               margin-right 5px
+
           .comment-wrapper
             .cubeic-message
               margin-right 5px
+
     .right-blank
       width 20px
       height 20px

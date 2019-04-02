@@ -54,9 +54,32 @@
     methods: {
       // 保存新密码
       save () {
-        let url="/"
+        let url = '/userAccount/change/password'
         let params = new URLSearchParams()
-
+        params.append('telephone', this.phone)
+        params.append('code', this.code)
+        params.append('newPassword', this.newpwd)
+        this.$http.post(url, params)
+          .then((response) => {
+            if (response.data.head.stateCode === 200) {
+              const failToast = this.$createToast({
+                txt: '修改成功',
+                time: 2000,
+                type: 'txt'
+              })
+              failToast.show()
+              setTimeout(() => {
+                this.$router.push('/login')
+              }, 2000)
+            } else {
+              const failToast = this.$createToast({
+                txt: response.data.head.msg,
+                time: 2000,
+                type: 'txt'
+              })
+              failToast.show()
+            }
+          })
       },
       countDown () {
         if (!this.canClick) {

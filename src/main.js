@@ -28,7 +28,7 @@ Vue.prototype.imgURL = 'http://148.70.8.85/'
 
 Vue.prototype.$http = axios
 // http://106.14.4.232:8080/dsqas-0.0.1-SNAPSHOT
-axios.defaults.baseURL = 'http://192.168.0.8:8080'
+axios.defaults.baseURL = 'http://192.168.43.106:8080'
 axios.defaults.headers.common['Authorization'] = ''
 axios.interceptors.request.use(
   config => {
@@ -51,63 +51,20 @@ Vue.use(VueRouter)
 Vue.use(Vuex)
 const router = new VueRouter({
   routes: [
-    {
-      path: '/',
-      component: Main
-    },
-    {
-      path: '/login',
-      component: Login
-    },
-    {
-      path: '/mainApp',
-      component: Main
-    },
-    {
-      path: '/register',
-      component: Register
-    },
-    {
-      path: '/forgetPwd',
-      component: Forget
-    },
-    {
-      path: '/myProblem',
-      component: myProblem
-    },
-    {
-      name: 'putQuestionPage',
-      path: '/putQuestionPage',
-      component: putQuestionPage
-    },
-    {
-      path: '/onlySearchPage',
-      component: onlySearchPage
-    },
-    {
-      path: '/problemDetails',
-      component: problemDetails
-    },
-    {
-      path: '/personSet',
-      component: personSet
-    },
-    {
-      path: '/inviteAnswer',
-      component: inviteAnswer
-    },
-    {
-      path: '/quesion',
-      component: quesion
-    },
-    {
-      path: '/chatPage',
-      component: chatPage
-    },
-    {
-      path: '/writeAnswer',
-      component: writeAnswer
-    }
+    { path: '/', component: Main },
+    { path: '/login', component: Login },
+    { path: '/mainApp', component: Main },
+    { path: '/register', component: Register },
+    { path: '/forgetPwd', component: Forget },
+    { path: '/myProblem', component: myProblem },
+    { name: 'putQuestionPage', path: '/putQuestionPage', component: putQuestionPage },
+    { path: '/onlySearchPage', component: onlySearchPage },
+    { name: 'problemDetails', path: '/problemDetails', component: problemDetails },
+    { path: '/personSet', component: personSet },
+    { path: '/inviteAnswer', component: inviteAnswer },
+    { path: '/quesion', component: quesion },
+    { path: '/chatPage', component: chatPage },
+    { path: '/writeAnswer', component: writeAnswer }
 
   ]
 })
@@ -126,9 +83,15 @@ const store = new Vuex.Store({
     // 主界面显示的状态
     count: 0,
     // 显示消息界面的内容
-    message: '通知'
+    message: '通知',
+    // 是否更新主界面问题列表
+    problemList: []
   },
   mutations: {
+    // 更新主页问题列表
+    updateProblemList (state, change) {
+      state.problemList = change
+    },
     // 更新用户信息
     updateUserInfo (state, newUserInfo) {
       state.userInfo = newUserInfo
@@ -155,6 +118,15 @@ Vue.prototype.setCookie = (cookieName, value, expiredays) => {
   var exdate = new Date()
   exdate.setDate(exdate.getDate() + expiredays)
   document.cookie = cookieName + '=' + escape(value) + ((expiredays == null) ? '' : ';expires=' + exdate.toGMTString())
+}
+Vue.prototype.change = (oldParam, newParam) => {
+  if (!newParam || newParam.length === 0) {
+    return false
+  }
+  if (oldParam === newParam) {
+    return false
+  }
+  return true
 }
 
 new Vue({

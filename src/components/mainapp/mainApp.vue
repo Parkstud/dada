@@ -109,6 +109,7 @@
       // 获取浏览器可视区域高度
       this.clientHeight = `${document.documentElement.clientHeight}`
       console.log(this.clientHeight - 84)
+      // this.$refs.containerPage.style.height = (this.clientHeight - 44) + 'px'
       this.$refs.containerPage.style.height = (this.clientHeight - 44) + 'px'
     }
 

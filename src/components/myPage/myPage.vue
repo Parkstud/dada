@@ -11,6 +11,10 @@
 
   export default {
     name: 'myPage',
+    mounted () {
+      // 获取自己的信息
+
+    },
     components: {
       MyContent,
       MyHeader

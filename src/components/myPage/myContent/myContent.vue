@@ -5,7 +5,7 @@
         <span class="myicon cubeic-alert"></span>
         <span class="text">我的问题</span>
         <span class="wrapper">
-             <span class="num">0</span>
+             <span class="num">{{myQuestionCount}}</span>
               <span class="cubeic-arrow"></span>
           </span>
 
@@ -14,7 +14,7 @@
         <span class="myicon cubeic-star"></span>
         <span class="text">我收藏的</span>
         <span class="wrapper">
-             <span class="num">0</span>
+             <span class="num">{{collectProblemCount}}</span>
               <span class="cubeic-arrow"></span>
           </span>
       </li>
@@ -22,7 +22,7 @@
         <span class="myicon cubeic-good"></span>
         <span class="text">我赞过的</span>
         <span class="wrapper">
-             <span class="num">0</span>
+             <span class="num">{{awesomeCount}}</span>
               <span class="cubeic-arrow"></span>
           </span>
       </li>
@@ -30,7 +30,7 @@
         <span class="myicon cubeic-time"></span>
         <span class="text">浏览历史</span>
         <span class="wrapper">
-             <span class="num">158</span>
+             <span class="num">{{browseCount}}</span>
               <span class="cubeic-arrow"></span>
           </span>
       </li>
@@ -53,6 +53,18 @@
   const MAIN_MY = 3
   export default {
     name: 'myContent',
+    data () {
+      return {
+        // 收藏问题数
+        collectProblemCount: '0',
+        // 点赞问题数
+        awesomeCount: '0',
+        // 我的问题数
+        myQuestionCount: '0',
+        // 浏览数
+        browseCount: '0'
+      }
+    },
     methods: {
       // 跳转myProblem组件界面
       myProblem () {
@@ -69,6 +81,27 @@
       window.addEventListener('popstate', () => {
         this.$store.commit('setTransition', 'turn-off')
       }, false)
+
+      // 获取 我的问题\收藏\赞\浏览历史的数量
+      this.$http.get('/myPage/content/information/count', null)
+        .then((response) => {
+          let data = response.data.body.data
+          if (this.change(this.collectProblemCount, data.collectProblemCount)) {
+            this.collectProblemCount = data.collectProblemCount
+          }
+          if (this.change(this.awesomeCount, data.awesomeCount)) {
+            this.awesomeCount = data.awesomeCount
+          }
+          if (this.change(this.myQuestionCount, data.myQuestionCount)) {
+            this.myQuestionCount = data.myQuestionCount
+          }
+          if (this.change(this.browseCount, data.browseCount)) {
+            this.browseCount = data.browseCount
+          }
+          console.log(response)
+        }).catch((error) => {
+        console.log(error)
+      })
     }
   }
 </script>

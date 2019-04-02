@@ -2,20 +2,20 @@
   <div class="my-header">
     <div class="header-content">
       <div class="avatar">
-        <img src="http://148.70.8.85/group1/M00/00/00/rBsAAlycfB-AA9jFAACjZJqjeEQ581_big.jpg"
+        <img :src="this.imgURL+avatar"
              width="64" height="64">
       </div>
       <div class="info-wrapper">
-        <div class="name">毛毛0.0</div>
+        <div class="name">{{nickName}}</div>
         <div class="attention-wrapper">
               <span class="attention-wrapper">
                 <span class="attention">关注</span>
-                <span class="attention-num">19</span>
+                <span class="attention-num">{{cares}}</span>
               </span>
         </div>
         <div class="fan-wrapper">
-          <span class="fan">关注</span>
-          <span class="fan-num">1</span>
+          <span class="fan">粉丝</span>
+          <span class="fan-num">{{fans}}</span>
         </div>
       </div>
     </div>
@@ -25,9 +25,48 @@
 <script type='text/ecmascript-6'>
   export default {
     name: 'myHeader',
+    data () {
+      return {
+        avatar: '',
+        nickName: '',
+        fans: '',
+        cares: ''
+      }
+    },
+    methods: {
+      updateResource (oldResouce, newResource) {
+        if (oldResouce.length !== newResource.length) {
+          return null
+        }
+        for (let i = 0; i < oldResouce.length; i++) {
+          if (oldResouce[i] !== newResource[i]) {
+            oldResouce[i] = newResource[i]
+          }
+        }
+      }
+    },
     mounted () {
-      // let userAccount = JSON.parse(window.localStorage.getItem('token'))
-      // this.$http.get("/")
+      // 获取 头像 关注数 粉丝数
+      this.$http.get('/myPage/header/information', null)
+        .then((response) => {
+          if (response.data.head.stateCode === 200) {
+            let data = response.data.body.data
+            if (this.change(this.avatar, data.avatar)) {
+              this.avatar = data.avatar
+            }
+            if (this.change(this.nickName, data.nickName)) {
+              this.nickName = data.nickName
+            }
+            if (this.change(this.fans, data.fans)) {
+              this.fans = data.fans
+            }
+            if (this.change(this.cares, data.cares)) {
+              this.cares = data.cares
+            }
+          }
+        }).catch((error) => {
+        console.log(error)
+      })
     }
   }
 </script>
