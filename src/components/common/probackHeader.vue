@@ -1,13 +1,13 @@
 <template>
   <div class="back-header">
-      <span class="cubeic-back" @click="back">
+      <span class="cubeic-back" @click="back" >
       </span>
     <i class="cubeic-more" @click="showMoreAction"></i>
     <transition name="fade">
       <div class="moreAction" v-show="show">
         <ul>
           <li @click="collect">
-            <i class="cubeic-star" :class="{'cubeic-star-collect':collectProblem}"></i>
+            <i class="cubeic-star" :class="{'cubeic-star-collect':hasCollection}"></i>
             <span>{{collectText}}</span>
           </li>
           <li>
@@ -34,19 +34,21 @@
     name: 'backHeader',
     data () {
       return {
-        show: false,
-        collectProblem: false
+        show: false
       }
     },
     props: {
       backText: {
         type: String
+      },
+      hasCollection: {
+        type: Boolean,
+        default: false
       }
     },
     computed: {
       collectText () {
-
-        if (this.collectProblem) {
+        if (this.hasCollection) {
           return '已收藏'
         }
         return '收藏'
@@ -57,11 +59,10 @@
         this.$router.go(BACK_FLAG)
       },
       showMoreAction () {
-        console.log(this.show)
         this.show = !this.show
       },
       collect () {
-        this.collectProblem = !this.collectProblem
+        this.$emit('changeHasCollection', !this.hasCollection)
         this.show = false
       }
     }
