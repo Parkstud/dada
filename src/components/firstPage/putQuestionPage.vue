@@ -37,8 +37,24 @@
       back () {
         this.$router.go(BACK_FLAG)
       },
+      // 发布问题按钮点击
       release () {
-        this.$router.push('/quesion')
+        let url = '/control/problem/info'
+        let param = new URLSearchParams()
+        param.append('title', this.value)
+        this.$http.post(url, param)
+          .then((response) => {
+            console.log(response)
+            if (response.data.head.stateCode === 200) {
+              let data = response.data.body.data
+              this.$router.push({
+                name: 'question',
+                params: { question: data }
+              })
+            }
+          }).catch((error) => {
+          console.log(error)
+        })
       }
     },
     computed: {

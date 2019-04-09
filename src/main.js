@@ -21,6 +21,8 @@ import onlySearchPage from './components/firstPage/onlySearchPage'
 import putQuestionPage from './components/firstPage/putQuestionPage'
 import chatPage from './components/msgPage/chatPage'
 import writeAnswer from './components/firstPage/writeAnswer'
+import editPersonalInformation from './components/myPage/myHeader/editPersonalInformation'
+import avatarDemo from './components/demo/avatarDemo'
 
 Vue.config.productionTip = false
 
@@ -62,9 +64,11 @@ const router = new VueRouter({
     { name: 'problemDetails', path: '/problemDetails', component: problemDetails },
     { path: '/personSet', component: personSet },
     { path: '/inviteAnswer', component: inviteAnswer },
-    { path: '/quesion', component: quesion },
+    { path: '/question', name: 'question', component: quesion },
     { path: '/chatPage', component: chatPage },
-    { path: '/writeAnswer', component: writeAnswer }
+    { path: '/writeAnswer', name: 'writeAnswer', component: writeAnswer },
+    { path: '/editPersonalInformation', component: editPersonalInformation },
+    { path: '/avatarDemo', component: avatarDemo }
 
   ]
 })

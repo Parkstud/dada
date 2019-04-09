@@ -2,8 +2,9 @@
   <div class="write-answer">
     <div class="write-header">
       <span class="cubeic-close" @click="back"></span>
-      <span class=header-question>问题开头问题开头问题开头啊实打实大所大所多</span>
-      <span class="cubeic-navigation"></span>
+      <span class=header-question>{{problem.title}}</span>
+      <span class="cubeic-navigation" :class="[clickSend ? 'not-active':'active']"
+            @click="writeAnswer"></span>
     </div>
     <div class="write-content">
       <cube-textarea v-model="value" :placeholder="placeholder" :maxlength="maxlength"
@@ -13,7 +14,6 @@
 </template>
 
 <script type='text/ecmascript-6'>
-  const BACK_FLAG = -1
   export default {
     name: 'writeAnswer',
     data () {
@@ -24,13 +24,39 @@
         },
         maxlength: 1000,
         value: '',
-        placeholder: '写回答......'
+        problem: this.$route.params.problem,
+        placeholder: '写回答......',
+        clickSend: false
       }
     },
     methods: {
       back () {
-        this.$router.go(BACK_FLAG)
+        this.$router.push({
+          name: 'problemDetails',
+          params: { problem: this.problem }
+        })
+      },
+      writeAnswer () {
+        this.clickSend = true
+        let url = '/control/problem/answer'
+        let param = new URLSearchParams()
+        param.append('questionId', this.problem.id)
+        param.append('comments', this.value)
+
+        this.$http.post(url, param)
+          .then((response) => {
+            console.log(response)
+            this.$router.push({
+              name: 'problemDetails',
+              params: { problem: this.problem }
+            })
+          }).catch((error) => {
+          console.log(error)
+        })
       }
+    },
+    mounted () {
+      console.log(this.problem)
     }
   }
 </script>
@@ -59,8 +85,13 @@
 
       .cubeic-navigation
         width 40px
-        color: #808080
         text-align center
+
+        &.not-active
+          color: #808080
+
+        &.active
+          color: #007efe
 
     .write-content
       height 100%

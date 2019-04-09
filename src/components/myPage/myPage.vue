@@ -11,6 +11,9 @@
 
   export default {
     name: 'myPage',
+    methods: {
+
+    },
     mounted () {
       // 获取自己的信息
 

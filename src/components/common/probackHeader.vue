@@ -1,6 +1,6 @@
 <template>
   <div class="back-header">
-      <span class="cubeic-back" @click="back" >
+      <span class="cubeic-back" @click="back">
       </span>
     <i class="cubeic-more" @click="showMoreAction"></i>
     <transition name="fade">
@@ -44,6 +44,10 @@
       hasCollection: {
         type: Boolean,
         default: false
+      },
+      backComponent: {
+        type: String,
+        default: ''
       }
     },
     computed: {
@@ -56,7 +60,11 @@
     },
     methods: {
       back () {
-        this.$router.go(BACK_FLAG)
+        if (this.backComponent === '') {
+          this.$router.go(BACK_FLAG)
+        } else {
+          this.$router.push(this.backComponent)
+        }
       },
       showMoreAction () {
         this.show = !this.show

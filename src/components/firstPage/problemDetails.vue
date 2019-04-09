@@ -1,13 +1,14 @@
 <template>
   <div class="proble-details">
-    <proback-header :back-text="backText" :has-collection="hasCollection"
+    <proback-header :back-text="backText" :back-component="backComponent"
+                    :has-collection="hasCollection"
                     v-on:changeHasCollection="changeHasCollection"></proback-header>
     <cube-scroll ref="answer"
                  :options="scrollOptions"
                  :data="comments"
                  @pulling-up="onPullingUp">
       <div class="question-wrapper">
-        <p class="question">{{problem.answerContent}}</p>
+        <p class="question">{{problem.title}}</p>
         <div class="question-more">
           <span class="answer-num">{{commentCount}}</span>
           <span>条回答</span>
@@ -33,21 +34,22 @@
           <span class="avatar">
             <img :src="imgURL+item.path" width="40" height="40">
           </span>
-              <span class="author-name">{{item.username}}</span>
-              <span class="answer-time">{{item.time}}</span>
-              <span class="info-left">
+          <span class="author-name">{{item.username}}</span>
+          <span class="answer-time">{{item.time}}</span>
+          <span class="info-left">
               <span class="cubeic-message"></span>
               <span class="comment">{{item.replyCount}}</span>
               <span class="cubeic-good"></span>
               <span class="approve">{{item.awesome}}</span>
           </span>
         </div>
-          <p class="answer-content">
-            {{item.comments}}
-          </p>
-        <hr style="margin-top:10px;filter: progid:DXImageTransform.Microsoft.Glow(color=#ccc,strength=10)"
-            v-show="index===comments.length-1"
-            color=#ccc SIZE=1/>
+        <p class="answer-content">
+          {{item.comments}}
+        </p>
+        <hr
+          style="margin-top:10px;filter: progid:DXImageTransform.Microsoft.Glow(color=#ccc,strength=10)"
+          v-show="index===comments.length-1"
+          color=#ccc SIZE=1/>
       </div>
     </cube-scroll>
   </div>
@@ -60,6 +62,8 @@
     name: 'problemDetails',
     data () {
       return {
+        // 返回页面
+        backComponent: '/mainApp',
         backText: '首页',
         // 收藏数
         collectCount: 0,
@@ -91,7 +95,10 @@
       },
       // 写回答
       writeaswer () {
-        this.$router.push('/writeAnswer')
+        this.$router.push({
+          name: 'writeAnswer',
+          params: { problem: this.problem }
+        })
       },
       // 上拉获取更多评论信息,传入 问题 id  已经显示的三条信息(或者没有)
       onPullingUp () {
@@ -140,6 +147,7 @@
     },
     components: { probackHeader },
     mounted () {
+      console.log(this.problem)
       // 更新浏览记录
       let url = '/problemInfo/problem/history'
       let param = new URLSearchParams()

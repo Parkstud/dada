@@ -1,7 +1,7 @@
 <template>
-  <div class="my-header">
+  <div class="my-header" @click="editPerson">
     <div class="header-content">
-      <div class="avatar">
+      <div class="myavatar">
         <img :src="this.imgURL+avatar"
              width="64" height="64">
       </div>
@@ -34,6 +34,10 @@
       }
     },
     methods: {
+      // 编辑个人资料
+      editPerson () {
+        this.$router.push('/editPersonalInformation')
+      },
       updateResource (oldResouce, newResource) {
         if (oldResouce.length !== newResource.length) {
           return null
@@ -83,7 +87,7 @@
     box-shadow 1px 1px 1px 1px 3px #e2e2e2
 
     .header-content
-      .avatar
+      .myavatar
         display inline-block
 
         img

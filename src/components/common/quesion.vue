@@ -5,11 +5,11 @@
       <cube-scroll>
         <div class="question-wrapper">
           <span class="cubeic-question"></span>
-          <span class="question">这是问题这是问题这是问题这是问题这是问题这是问题这是问题这是问题这是问题这是问题这是问题这是问题这是问题这是问题这是问题这是问题这是问题这是问题</span>
+          <span class="question">{{question.title}}</span>
         </div>
         <div class="topic-wrapper">
           <div class="title">
-            <span class="title-content">题目解答</span>
+            <span class="title-content">匹配题目</span>
           </div>
           <div class="topic-content">
             <div class="split-line"></div>
@@ -69,7 +69,8 @@
     name: 'quesion',
     data () {
       return {
-        backText: '首页'
+        backText: '返回',
+        question: this.$route.params.question
       }
     },
     mounted () {
