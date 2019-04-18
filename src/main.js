@@ -23,6 +23,8 @@ import chatPage from './components/msgPage/chatPage'
 import writeAnswer from './components/firstPage/writeAnswer'
 import editPersonalInformation from './components/myPage/myHeader/editPersonalInformation'
 import avatarDemo from './components/demo/avatarDemo'
+import homePage from './components/firstPage/homePage'
+import commentDetail from './components/msgPage/commentDetail'
 
 Vue.config.productionTip = false
 
@@ -65,10 +67,12 @@ const router = new VueRouter({
     { path: '/personSet', component: personSet },
     { path: '/inviteAnswer', component: inviteAnswer },
     { path: '/question', name: 'question', component: quesion },
-    { path: '/chatPage', component: chatPage },
+    { path: '/chatPage', name: 'chatPage', component: chatPage },
     { path: '/writeAnswer', name: 'writeAnswer', component: writeAnswer },
     { path: '/editPersonalInformation', component: editPersonalInformation },
-    { path: '/avatarDemo', component: avatarDemo }
+    { path: '/avatarDemo', component: avatarDemo },
+    { path: '/homePage', name: 'homePage', component: homePage },
+    { path: '/commentDetail', name: 'commentDetail', component: commentDetail }
 
   ]
 })
@@ -123,6 +127,31 @@ Vue.prototype.setCookie = (cookieName, value, expiredays) => {
   exdate.setDate(exdate.getDate() + expiredays)
   document.cookie = cookieName + '=' + escape(value) + ((expiredays == null) ? '' : ';expires=' + exdate.toGMTString())
 }
+//  获取时间搓
+Vue.prototype.getTime = function (strTime) {
+  let date = new Date(strTime.replace(/-/g, '/'))
+  return date.getTime()
+}
+
+// 转换时间格式
+Vue.prototype.formatData = function (data, model) {
+  if (!data) {
+    return data
+  }
+  let date = new Date(data)
+  let Y = date.getFullYear() + '-'
+  let M = (date.getMonth() + 1 < 10 ? '0' + (date.getMonth() + 1) : date.getMonth() + 1) + '-'
+  let D = (date.getDate() < 10 ? '0' + date.getDate() : date.getDate()) + ' '
+  let h = (date.getHours() < 10 ? '0' + date.getHours() : date.getHours()) + ':'
+  let m = (date.getMinutes() < 10 ? '0' + date.getMinutes() : date.getMinutes()) + ':'
+  let s = (date.getSeconds() < 10 ? '0' + date.getSeconds() : date.getSeconds())
+  if (model === 1) {
+    return Y + M + D + h + m + s
+  }
+  if (model === 2) {
+    return Y + M + D
+  }
+}
 Vue.prototype.change = (oldParam, newParam) => {
   if (!newParam || newParam.length === 0) {
     return false
@@ -145,8 +174,7 @@ new Vue({
   },
   methods: {
     checkLogin () {
-      // 检查是否存在session
-      console.log(this.$router.currentRoute.fullPath)
+      // 检查是否存在token
       if (this.$router.currentRoute.fullPath === '/register' || this.$router.currentRoute.fullPath === '/forgetPwd') {
         return
       }

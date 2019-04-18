@@ -2,27 +2,29 @@
   <div class="chatpage">
     <div class="chat-header">
       <span class="cubeic-back" @click="back"></span>
-      <span class="name">陈苗</span>
+      <span class="name">{{letterUser.userNickName}}</span>
       <span></span>
     </div>
-    <div class="chat-content-wrapper">
+    <div class="chat-content-wrapper" ref="contentWrapper">
 
       <cube-scroll ref="scrollChat" :data="msgs" :options="options">
         <ul>
           <li v-for="(msg,index) in msgs" :key="index">
             <div class="msg-wrapper">
-              <div class="time" v-show="msg.show_time">{{msg.timestamp}}</div>
-              <div class="msg-style1" v-if="msg.current_person">
-                <img class="image1" :src="msg.from_avatar" height="40" width="40">
+              <div class="time" v-show="showTime(index)">
+                {{formatData(msg.time,1)}}
+              </div>
+              <div class="msg-style1" v-if="msg.receiveUserId === nowUser.userId">
+                <img class="image1" :src="imgURL+letterUser.userAvatar" height="40" width="40">
                 <p class="info1">
-                  {{msg.msg_content}}
+                  {{msg.msg}}
                 </p>
               </div>
               <div class="msg-style2" v-else>
                 <p class="info2">
-                  {{msg.msg_content}}
+                  {{msg.msg}}
                 </p>
-                <img class="image2" :src="msg.to_avatar" height="40" width="40">
+                <img class="image2" :src="imgURL+nowUser.userAvatar" height="40" width="40">
               </div>
             </div>
           </li>
@@ -31,8 +33,13 @@
 
     </div>
     <div class="chat-footer">
+
       <cube-input v-model="value" @keyup.enter.native="sendMessage">
+        <span slot="prepend" class="cubeic-picture"></span>
+        <span slot="append" @click="sendMessageClick" class="cubeic-navigation"
+              :class="value.length>0?'sending':'not-send'"></span>
       </cube-input>
+
     </div>
   </div>
 </template>
@@ -42,161 +49,150 @@
     name: 'chatpage',
     data () {
       return {
+        // 问题跳转获取的problem
+        problem: this.$route.params.problem,
         value: '',
+        websock: null,
         msgs: [
           {
-            msg_id: 'aaaa',
-            timestamp: '2019/03/14 14:35',
-            current_person: true,
-            show_time: true,
-            from: '陈苗',
-            from_avatar: './avatar.jpg',
-            to: '小胖',
-            to_avatar: './avatar1.jpg',
-            msg_content: 'hello'
-          },
-          {
-            msg_id: 'aaaa',
-            timestamp: '2019/03/14 14:35',
-            current_person: false,
-            show_time: true,
-            from: '陈苗',
-            from_avatar: './avatar.jpg',
-            to: '小胖',
-            to_avatar: './avatar1.jpg',
-            msg_content: 'hello'
-          },
-          {
-            msg_id: 'aaaa',
-            timestamp: '2019/03/14 14:35',
-            current_person: false,
-            show_time: false,
-            from: '陈苗',
-            from_avatar: './avatar.jpg',
-            to: '小胖',
-            to_avatar: './avatar1.jpg',
-            msg_content: 'hello'
-          }, {
-            msg_id: 'aaaa',
-            timestamp: '2019/03/14 14:35',
-            current_person: true,
-            show_time: true,
-            from: '陈苗',
-            from_avatar: './avatar.jpg',
-            to: '小胖',
-            to_avatar: './avatar1.jpg',
-            msg_content: 'hello'
-          },
-          {
-            msg_id: 'aaaa',
-            timestamp: '2019/03/14 14:35',
-            current_person: false,
-            show_time: true,
-            from: '陈苗',
-            from_avatar: './avatar.jpg',
-            to: '小胖',
-            to_avatar: './avatar1.jpg',
-            msg_content: 'hello'
-          },
-          {
-            msg_id: 'aaaa',
-            timestamp: '2019/03/14 14:35',
-            current_person: false,
-            show_time: false,
-            from: '陈苗',
-            from_avatar: './avatar.jpg',
-            to: '小胖',
-            to_avatar: './avatar1.jpg',
-            msg_content: 'hello'
-          }, {
-            msg_id: 'aaaa',
-            timestamp: '2019/03/14 14:35',
-            current_person: true,
-            show_time: true,
-            from: '陈苗',
-            from_avatar: './avatar.jpg',
-            to: '小胖',
-            to_avatar: './avatar1.jpg',
-            msg_content: 'hello'
-          },
-          {
-            msg_id: 'aaaa',
-            timestamp: '2019/03/14 14:35',
-            current_person: false,
-            show_time: true,
-            from: '陈苗',
-            from_avatar: './avatar.jpg',
-            to: '小胖',
-            to_avatar: './avatar1.jpg',
-            msg_content: 'hello'
-          },
-          {
-            msg_id: 'aaaa',
-            timestamp: '2019/03/14 14:35',
-            current_person: false,
-            show_time: false,
-            from: '陈苗',
-            from_avatar: './avatar.jpg',
-            to: '小胖',
-            to_avatar: './avatar1.jpg',
-            msg_content: 'hello'
-          }, {
-            msg_id: 'aaaa',
-            timestamp: '2019/03/14 14:35',
-            current_person: true,
-            show_time: true,
-            from: '陈苗',
-            from_avatar: './avatar.jpg',
-            to: '小胖',
-            to_avatar: './avatar1.jpg',
-            msg_content: 'hello'
-          },
-          {
-            msg_id: 'aaaa',
-            timestamp: '2019/03/14 14:35',
-            current_person: false,
-            show_time: true,
-            from: '陈苗',
-            from_avatar: './avatar.jpg',
-            to: '小胖',
-            to_avatar: './avatar1.jpg',
-            msg_content: 'hello'
-          },
-          {
-            msg_id: 'aaaa',
-            timestamp: '2019/03/14 14:35',
-            current_person: false,
-            show_time: false,
-            from: '陈苗',
-            from_avatar: './avatar.jpg',
-            to: '小胖',
-            to_avatar: './avatar1.jpg',
-            msg_content: 'hello'
+            id: 1,
+            sendUserId: 1,
+            receiveUserId: 1,
+            time: 1554953244000,
+            msg: '测试',
+            hasRead: 0
           }
         ],
+        letterUser: this.$route.params.letterUser,
+        nowUser: {},
         options: {
           startY: 0,
           observeDOM: true
         }
       }
     },
+    destroyed () {
+      console.log('客户端断开连接')
+      this.websock.close()
+    },
+    created () {
+      this.initWebSocket()
+    },
     methods: {
-      back () {
-        this.$router.go(-1)
-      },
-      sendMessage () {
-        event.preventDefault() // 禁止默认事件（默认是换行）
+      sendMessageClick () {
+        if (this.value.length === 0) {
+          return
+        }
         let newMsg = {}
-        newMsg.timestamp = '2019/03/14 17:35'
-        newMsg.current_person = false
-        newMsg.show_time = true
-        newMsg.from = '陈苗'
-        newMsg.from_avatar = './avatar.jpg'
-        newMsg.to = '小胖'
-        newMsg.to_avatar = './avatar1.jpg'
-        newMsg.msg_content = this.value
+        newMsg.sendUserId = this.nowUser.userId
+        newMsg.receiveUserId = this.letterUser.userId
+        newMsg.msg = this.value
+        newMsg.time = new Date().getTime()
+        newMsg.hasRead = 0
         this.msgs.push(newMsg)
         this.value = ''
+        // 设置websocket
+        this.webSocketSend(JSON.stringify(newMsg))
+        // 保存信息
+
+        this.saveMessage(newMsg)
+      },
+      // websocket初始化
+      initWebSocket () {
+        const wsuri = 'ws://192.168.43.106:8080/websocket/' + JSON.parse(window.localStorage.getItem('token')).id
+        // const wsuri = 'ws://106.14.4.232:8080/dsqas-0.0.1-SNAPSHOT/websocket/' + JSON.parse(window.localStorage.getItem('token')).id
+        this.websock = new WebSocket(wsuri)
+        this.websock.onmessage = this.webSocketOnMessage
+        this.websock.onopen = this.webSocketOnOpen
+        this.websock.onerror = this.webSocketOnError
+        this.websock.onclose = this.webSocketClose
+      },
+      // 连接建立之后执行send方法发送数据
+      webSocketOnOpen () {
+        this.sendFirstMsg()
+        console.log('建立连接')
+      },
+      // 第一次建立连接发送信息
+      sendFirstMsg () {
+        let temp = JSON.parse(window.localStorage.getItem('token'))
+        this.nowUser.userNickName = temp.nickName
+        this.nowUser.userId = temp.id
+        let firstMsg = {}
+        firstMsg.sendUserId = this.nowUser.userId
+        firstMsg.receiveUserId = this.letterUser.userId
+        this.webSocketSend(JSON.stringify(firstMsg))
+      },
+      // 连接建立失败重连
+      webSocketOnError () {
+        this.initWebSocket()
+      },
+      // 数据接收
+      webSocketOnMessage (e) {
+        this.msgs.push(JSON.parse(e.data))
+        console.log(e.data)
+      },
+      // 数据发送
+      webSocketSend (data) {
+        this.websock.send(data)
+      },
+      // 关闭
+      webSocketClose (e) {
+        console.log('断开连接', e)
+      },
+      back () {
+        // 通过评论信息 获取用户id
+        if (this.problem) {
+          this.$router.push({
+            name: 'homePage',
+            params: {
+              problem: this.problem,
+              userId: this.letterUser.userId
+            }
+          })
+        } else {
+          this.$router.go(-1)
+        }
+      },
+      // 计算是否显示时间
+      showTime (nowIndex) {
+        if (nowIndex === 0) {
+          return true
+        }
+        // 上一个时间减下一个时间 300000
+        if (this.msgs[nowIndex].time - this.msgs[nowIndex - 1].time < 300000) {
+          return false
+        }
+        return true
+      },
+      // 发送消息
+      sendMessage () {
+        event.preventDefault() // 禁止默认事件（默认是换行）
+        if (this.value.length === 0) {
+          return
+        }
+        let newMsg = {}
+        newMsg.sendUserId = this.nowUser.userId
+        newMsg.receiveUserId = this.letterUser.userId
+        newMsg.msg = this.value
+        newMsg.time = new Date().getTime()
+        newMsg.hasRead = 0
+        this.msgs.push(newMsg)
+        this.value = ''
+        // 设置websocket
+        this.webSocketSend(JSON.stringify(newMsg))
+        // 保存信息
+
+        this.saveMessage(newMsg)
+      },
+      //  存储消息
+      saveMessage (msg) {
+        let url = '/message/newmsg'
+        this.$http.post(url, msg)
+          .then((response) => {
+            console.log(response)
+          }).catch((error) => {
+          console.log(error)
+        })
       }
     },
     watch: {
@@ -208,6 +204,38 @@
     },
     mounted () {
       this.options.startY = document.documentElement.clientHeight - this.$refs.scrollChat.$refs.listWrapper.scrollHeight - 70
+      // contentWrapper
+      this.$refs.contentWrapper.style.height = document.documentElement.clientHeight - 80 + 'px'
+
+      this.$nextTick(() => {
+        // 高度刷新一次，滚动区域滚到最末尾
+        this.$refs.scrollChat.refresh()
+        this.$refs.scrollChat.scroll.scrollTo(0, this.$refs.scrollChat.scroll.maxScrollY)
+      })
+
+      // 通过letter 和当前用户信息查询聊天记录
+      // 查询当前的用户信息
+      let url = '/myPage/user/userInformation'
+      this.$http.get(url, null)
+        .then((response) => {
+          if (response.data.head.stateCode === 200) {
+            this.nowUser.userAvatar = response.data.body.data.path
+            // 获取历史消息
+            let url = '/message/news/history/list'
+            this.$http.get(url, {
+              params: {
+                receiveId: this.nowUser.userId,
+                sendId: this.letterUser.userId
+              }
+            }).then((response) => {
+              if (response.data.head.stateCode === 200) {
+                this.msgs = response.data.body.data
+              }
+            })
+          }
+        }).catch((error) => {
+        console.log(error)
+      })
     }
   }
 </script>
@@ -243,10 +271,12 @@
           padding-right 40px
 
       .chat-content-wrapper
-        height 600px
+        height 650px
         background-color #f7f7f7
 
         .msg-wrapper
+          margin 0 10px
+
           .time
             text-align center
             padding 10px
@@ -317,4 +347,18 @@
       .chat-footer
         height: 40px
         background-color gray
+
+        .cubeic-picture
+          color #0a89ff
+          font-size 30px
+
+        .cubeic-navigation
+          font-size 20px
+          margin 0 5px
+
+        .not-send
+          color #d1d1d1
+
+        .sending
+          color #0a89ff
 </style>

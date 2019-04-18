@@ -117,7 +117,6 @@
         let url = '/userAccount/code'
         this.$http.post(url, param)
           .then((response) => {
-            console.log(response)
           }).catch((error) => {
           console.log(error)
         })

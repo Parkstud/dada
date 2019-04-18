@@ -31,11 +31,11 @@
           <span class="author-type" v-show="item.type==='TEACHER'">教师回答</span>
         </div>
         <div class="author-info">
-          <span class="avatar">
+          <span class="avatar" @click="toHomepage(item.id)">
             <img :src="imgURL+item.path" width="40" height="40">
           </span>
           <span class="author-name">{{item.username}}</span>
-          <span class="answer-time">{{item.time}}</span>
+          <span class="answer-time">{{formatData(item.time,1)}}</span>
           <span class="info-left">
               <span class="cubeic-message"></span>
               <span class="comment">{{item.replyCount}}</span>
@@ -89,6 +89,25 @@
       }
     },
     methods: {
+      // 点击头像跳转界面
+      toHomepage (commentId) {
+        // 通过评论信息 获取用户id
+        let url = '/problemInfo/comment/info'
+        this.$http.get(url, {
+          params: {
+            id: commentId
+          }
+        }).then((response) => {
+          let data = response.data.body.data
+          this.$router.push({
+            name: 'homePage',
+            params: {
+              problem: this.problem,
+              userId: data.userId
+            }
+          })
+        })
+      },
       // 邀请
       invite () {
         this.$router.push('/inviteAnswer')
@@ -116,7 +135,6 @@
           }
         }).then((response) => {
           let data = response.data.body.data
-          console.log(this.comments)
           if (data.records.length === 10) { // 下次请求下一页
             this.current++
             this.comments = this.comments.concat(data.records.slice(this.dataLess))
@@ -124,15 +142,18 @@
           } else {
             // 请求本页 记录下次需要添加的数据
             this.comments = this.comments.concat(data.records.slice(this.dataLess))
-            console.log(this.comments)
             this.dataLess = data.records.length
           }
         })
       },
       // 接收子组件修改的收藏信息
       changeHasCollection (value) {
-        console.log(value)
         this.hasCollection = value
+        if (value) {
+          this.collectCount++
+        } else {
+          this.collectCount--
+        }
         // 修改收藏信息
         let url = '/problemInfo/problem/collection'
         let param = new URLSearchParams()
@@ -147,7 +168,6 @@
     },
     components: { probackHeader },
     mounted () {
-      console.log(this.problem)
       // 更新浏览记录
       let url = '/problemInfo/problem/history'
       let param = new URLSearchParams()
@@ -167,7 +187,6 @@
         }
       })
         .then((response) => {
-          console.log(this.imgURL)
           let data = response.data.body.data
           this.hasCollection = data.hasCollection
           this.collectCount = data.collectCount
@@ -176,7 +195,6 @@
           for (let i = 0; i < data.comments.length; i++) {
             this.threeComments.push(data.comments[i].id)
           }
-          console.log(this.threeComments)
         }).catch((error) => {
         console.log(error)
       })
@@ -263,6 +281,7 @@
             position absolute
             right 0
             margin-right 20px
+            top 20px
 
             .comment, .approve
               display inline-block
@@ -272,5 +291,6 @@
         .answer-content
           margin 0 10px 0 10px
           line-height 20px
+          letter-spacing 1px
 
 </style>

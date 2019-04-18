@@ -11,7 +11,7 @@
           <span class="text">提问</span>
       </span>
     </div>
-    <cube-tab-bar v-model="selectedLabel" :show-slider="showSlider"  ref="tabNav">
+    <cube-tab-bar v-model="selectedLabel" :show-slider="showSlider" ref="tabNav">
       <cube-tab v-for="(item, index) in tabs" :icon="item.icon" :label="item.label"
                 :key="index">
       </cube-tab>
@@ -26,17 +26,19 @@
             <li class="tab-panel-li" v-for="(contentItem, index) in tabs[0].content" :key="index">
               <hr class="hr-sty" style="filter: alpha(opacity=100,finishopacity=0,style=2)"
                   color=#fff SIZE=5/>
-              <div class="item-panl1">
+              <div class="item-panl1"
+                   @click="clickNotice(contentItem.commentId,contentItem.commentInfo)">
                 <div class="item-top">
-                  <span class="name">{{contentItem.user}}</span>
-                  <span class="type">{{translateType(contentItem.type)}}</span>
-                  <span class="time">{{contentItem.time}}</span>
+                  <span class="name" :style="{'color':setChangeColor()}">{{contentItem.commentInfo.commentUserNickName || ''}}</span>
+                  <span class="type">{{contentItem.title}}</span>
+                  <span class="time">{{formatData(contentItem.createTime,1)}}</span>
                 </div>
                 <div class="item-center">
-                  {{contentItem.answers}}
+                  {{contentItem.commentInfo.commentComments}}
+
                 </div>
                 <div class="item-bttom">
-                  {{contentItem.question}}
+                  {{contentItem.content}}
                 </div>
               </div>
               <hr class="hr-sty" style="filter: alpha(opacity=100,finishopacity=0,style=2)"
@@ -60,15 +62,16 @@
               <div class="item-panl2">
                 <div class="letter-wrapper">
                   <div class="left">
-                    <img :src="personItem.avatar" width="64" height="64">
+                    <img :src="imgURL+(personItem.userInfo?personItem.userInfo.userAvatar:'')"
+                         width="64" height="64">
                   </div>
-                  <div class="right" @click="chatWith">
+                  <div class="right" @click="chatWith(personItem.userInfo)">
                     <div class="right-top">
-                      <span class="letter-name">{{personItem.name}}</span>
-                      <span class="letter-time">{{personItem.time}}</span>
+                      <span class="letter-name">{{personItem.userInfo?personItem.userInfo.userNickName:''}}</span>
+                      <span class="letter-time">{{formatData(personItem.msg[0].time,1)}}</span>
                     </div>
                     <div class="right-content">
-                      <span class="letter-main">{{personItem.content}}</span>
+                      <span class="letter-main">{{personItem.msg[0].msg}}</span>
                     </div>
                   </div>
                 </div>
@@ -93,137 +96,66 @@
         search: 'search',
         readonly: true,
         showSlider: true,
-        // selectedLabel: this.$store.state.message,
-        selectedLabel: '私信',
+        selectedLabel: this.$store.state.message,
+        evTimeStamp: 0, // 阻止多次触发
+        // 设置当前current
+        current: 1,
+        size: 20,
         tabs: [{
           label: '通知',
-          content: [
-            {
-              questionid: 'asdasd',
-              user: '陈苗',
-              time: '03-12 17:55',
-              type: '1',
-              answers: '回答的信息',
-              question: '问题信息'
-            }, {
-              questionid: 'asdasd',
-              user: '陈苗',
-              answers: '回答的信息',
-              time: '03-12 17:55',
-              question: '问题信息',
-              type: '1'
-            }, {
-              questionid: 'asdasd',
-              user: '陈苗',
-              answers: '回答的信息',
-              type: '1',
-              time: '03-12 17:55',
-              question: '问题信息'
-            }, {
-              questionid: 'asdasd',
-              user: '陈苗',
-              answers: '回答的信息',
-              type: '1',
-              time: '03-12 17:55',
-              question: '问题信息'
-            }, {
-              questionid: 'asdasd',
-              user: '陈苗',
-              answers: '回答的信息',
-              time: '03-12 17:55',
-              question: '问题信息',
-              type: '1'
-            }, {
-              questionid: 'asdasd',
-              user: '陈苗',
-              answers: '回答的信息',
-              type: '1',
-              time: '03-12 17:55',
-              question: '问题信息'
-            }, {
-              questionid: 'asdasd',
-              user: '陈苗',
-              answers: '回答的信息',
-              type: '1',
-              time: '03-12 17:55',
-              question: '问题信息'
-            }, {
-              questionid: 'asdasd',
-              user: '陈苗',
-              answers: '回答的信息',
-              time: '03-12 17:55',
-              question: '问题信息',
-              type: '1'
-            }, {
-              questionid: 'asdasd',
-              user: '陈苗',
-              answers: '回答的信息',
-              type: '1',
-              time: '03-12 17:55',
-              question: '问题信息'
-            }, {
-              questionid: 'asdasd',
-              user: '陈苗',
-              answers: '回答的信息',
-              type: '1',
-              time: '03-12 17:55',
-              question: '问题信息'
-            }, {
-              questionid: 'asdasd',
-              user: '陈苗',
-              answers: '回答的信息',
-              time: '03-12 17:55',
-              question: '问题信息',
-              type: '1'
-            }, {
-              questionid: 'asdasd',
-              user: '陈苗',
-              answers: '回答的信息',
-              type: '1',
-              time: '03-12 17:55',
-              question: '问题信息'
-            }, {
-              questionid: 'asdasd',
-              user: '陈苗',
-              answers: '回答的信息',
-              type: '1',
-              time: '03-12 17:55',
-              question: '问题信息'
-            }
-          ]
+          content: []
         }, {
           label: '私信',
-          personCall: [
-            {
-              avatar: './avatar.jpg',
-              name: 'asadasd',
-              content: '内容',
-              time: '刚刚'
-            }, {
-              avatar: './avatar.jpg',
-              name: 'asadasd',
-              content: '内容',
-              time: '刚刚'
-            }, {
-              avatar: './avatar.jpg',
-              name: 'asadasd',
-              content: '内容',
-              time: '刚刚'
-            }
-          ]
+          personCall: []
         }],
         scrollOptions: {
           pullUpLoad: true,
           directionLockThreshold: 0
-        }
+        },
+        // 字体颜色
+        colorGroups: ['#fedcbd', '#f47920', '#ef5b9c',
+          '#d93a49', '#ae6642', '#6f60aa', '#694d9f',
+          '#b76f40', '#dea32c', '#853f04', '#00a6ac']
       }
     },
     methods: {
       // 聊天界面
-      chatWith () {
+      chatWith (user) {
         this.$store.commit('updateCount', 2)
         this.$store.commit('updateMessage', '私信')
-        this.$router.push('/chatPage')
+
+        this.$router.push({
+          name: 'chatPage',
+          params: {
+            letterUser: user
+          }
+        })
+      },
+      // 点击notice
+      clickNotice (commentId, commentInfo) {
+        // 处理多次点击
+        let now = new Date()
+        if (now - this.evTimeStamp < 100) {
+          return
+        }
+        this.evTimeStamp = now
+        // 设置评论信息
+        commentInfo.commentId = commentId
+        this.$store.commit('updateCount', 2)
+        this.$store.commit('updateMessage', '通知')
+        // 跳转界面 阅读评论界面
+        this.$router.push({
+            name: 'commentDetail',
+            params: {
+              commentInfo: commentInfo
+            }
+          }
+        )
+      },
+      // 随机修改的字体颜色
+      setChangeColor () {
+        let x = Math.round(Math.random() * (this.colorGroups.length - 1))
+        return this.colorGroups[x]
       },
       // 提问
       putQuestion () {
@@ -235,7 +167,6 @@
       },
       // 上拉
       onPullingUp () {
-        console.log('asdasd')
         setTimeout(() => {
           // 如果没有新数据
           this.$refs.panelContatiner.forceUpdate()
@@ -253,6 +184,62 @@
       // 获取浏览器可视区域高度
       this.clientHeight = `${document.documentElement.clientHeight}`
       this.$refs.panelContatiner.$refs.wrapper.style.height = this.clientHeight - 117 + 'px'
+      let url = '/message/news/groups'
+      // 获取私信消息
+      this.$http.get(url, null).then((response) => {
+        if (response.data.head.stateCode === 200) {
+          let map = response.data.body.data
+          for (let key in map) {
+            let letters = {}
+            letters.msg = map[key]
+            // 通过key 获取information信息
+            url = '/myPage/user/userInformation/' + key
+            this.$http.get(url, null).then((response) => {
+              letters.userInfo = response.data.body.data
+              // 放到数组中
+              this.tabs[1].personCall.push(letters)
+            })
+          }
+        }
+      }).catch((error) => {
+        console.log(error)
+      })
+
+      // 获取通知信息
+      url = '/message/notices/page'
+      let param = {
+        current: this.current,
+        size: this.size
+      }
+      this.$http.get(url, {
+        params: param
+      }).then((response) => {
+        if (response.data.head.stateCode === 200) {
+          let data = response.data.body.data
+          if (data.records.length === this.size) {
+            this.current++
+          }
+
+          this.tabs[0].content = data.records
+          console.log(this.tabs[0].content)
+        }
+      }).catch((error) => {
+        console.log(error)
+      })
+
+      this.$nextTick(() => {
+        if (this.$store.state.message === '私信') {
+          this.$refs.tabNav.$refs.slider.style.width = '50%'
+          this.$refs.tabNav.setSliderTransform(document.documentElement.clientWidth / 2)
+          this.$refs.tabNav.$refs.slider.style.transition = null
+        } else {
+          this.$refs.tabNav.$refs.slider.style.width = '50%'
+          this.$refs.tabNav.setSliderTransform(0)
+          this.$refs.tabNav.$refs.slider.style.transition = null
+        }
+      })
+    },
+    beforeUpdate () {
     }
   }
 </script>
@@ -339,6 +326,9 @@
 
               .item-center
                 margin 10px
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap
 
               .item-bttom
                 margin 10px
@@ -367,7 +357,4 @@
 
                   .right-content
                     margin-top 10px
-
-    .cube-tab-bar-slider
-      width 50%
 </style>

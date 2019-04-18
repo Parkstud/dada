@@ -58,7 +58,6 @@
       },
       showSearch () {
         this.show = true
-        console.log('asdasd')
       },
       backLast () {
         this.show = false

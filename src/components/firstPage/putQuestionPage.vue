@@ -44,7 +44,6 @@
         param.append('title', this.value)
         this.$http.post(url, param)
           .then((response) => {
-            console.log(response)
             if (response.data.head.stateCode === 200) {
               let data = response.data.body.data
               this.$router.push({

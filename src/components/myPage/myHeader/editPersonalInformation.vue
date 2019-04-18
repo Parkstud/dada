@@ -40,7 +40,7 @@
       </div>
       <div class="information-item" @click="showDatePicker">
         <span class="info-title">出生日期</span>
-        <span class="info-real" :class="{'hint-text':!personInfo.birthday}">{{personInfo.birthday || '请选择出生日期'}}</span>
+        <span class="info-real" :class="{'hint-text':!personInfo.birthday}">{{showBirthday || '请选择出生日期'}}</span>
       </div>
       <div class="split">
         学校信息
@@ -77,11 +77,16 @@
         personInfo: {
           name: '陈苗',
           sex: '男',
-          birthday: '2018-06-17',
+          birthday: '20180617',
           school: '西华大学',
           schoolNumber: '3120150905308',
           path: 'group1/M00/00/00/rBsAAlyd2OqAfMy_AAAGveq-234459.jpg'
         }
+      }
+    },
+    computed: {
+      showBirthday () {
+        return this.formatData(this.personInfo.birthday, 2)
       }
     },
     methods: {
@@ -100,7 +105,7 @@
             format: {
               year: 'YYYY',
               month: 'MM',
-              date: 'DD'
+              date: 'D'
             },
             onSelect: this.selectDateHandle
           })
@@ -109,7 +114,8 @@
         this.datePicker.show()
       },
       selectDateHandle (date, selectedVal, selectedText) {
-        this.personInfo.birthday = selectedText.join('-')
+        this.personInfo.birthday = this.getTime(selectedText.join('-'))
+        this.updatePersonInfo()
       },
       showActiveSex () {
         this.$createActionSheet({
@@ -146,7 +152,6 @@
       updatePersonInfo () {
         let url = '/myPage/user/userInformation'
         this.$http.post(url, this.personInfo).then((respose) => {
-          console.log(respose)
         }).catch((error) => {
           console.log(error)
         })
@@ -161,7 +166,6 @@
           },
           onConfirm: (e, promptValue) => {
             this.personInfo.schoolNumber = promptValue
-            console.log(this.personInfo.schoolNumber)
             this.updatePersonInfo()
           }
         }).show()
@@ -186,8 +190,6 @@
       imageuploading (res) {
       },
       imageuploaded (res) {
-        console.log(res)
-        console.log(this.src)
         this.src = this.imgURL + res.body.data
         // 设置user的path
         this.personInfo.path = res.body.data

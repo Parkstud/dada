@@ -183,7 +183,6 @@
     },
     methods: {
       invite (index) {
-        console.log(index)
         let selectData = followersData[index]
         if (!selectData.invited) {
           selectData.invited = true
@@ -209,7 +208,6 @@
       },
       changePage (current) {
         this.selectedLabel = this.tabLabels[current].label
-        console.log(current)
       },
       scroll (pos) {
         const x = Math.abs(pos.x)
@@ -230,7 +228,6 @@
       initialIndex () {
         let index = 0
         index = this.findIndex(this.tabLabels, item => item.label === this.selectedLabel)
-        console.log(index)
         return index
       }
     }

@@ -45,7 +45,6 @@
 
         this.$http.post(url, param)
           .then((response) => {
-            console.log(response)
             this.$router.push({
               name: 'problemDetails',
               params: { problem: this.problem }
@@ -56,7 +55,7 @@
       }
     },
     mounted () {
-      console.log(this.problem)
+
     }
   }
 </script>

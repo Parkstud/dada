@@ -98,7 +98,6 @@
           if (this.change(this.browseCount, data.browseCount)) {
             this.browseCount = data.browseCount
           }
-          console.log(response)
         }).catch((error) => {
         console.log(error)
       })
