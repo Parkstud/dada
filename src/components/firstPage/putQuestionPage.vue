@@ -5,11 +5,11 @@
       <span>发布问题</span>
       <span class="release-name" @click="release">发布</span>
     </div>
-    <div class="choose-model-wrapper" v-show="this.$route.params.modelName">
+    <div class="choose-model-wrapper" v-show="modelName">
       <span class="">选择的模块</span>
       <div class="choose-model">
-        <span class="iconfont" :class="this.$route.params.modelIcon"></span>
-        <span class="text">{{this.$route.params.modelName}}</span>
+        <span class="iconfont" :class="modelIcon"></span>
+        <span class="text">{{modelArray[modelName]}}</span>
       </div>
     </div>
     <div class="question-content-wrapper">
@@ -30,9 +30,23 @@
           remain: true
         },
         maxlength: 1000,
-        value: ''
+        value: '',
+        modelName: null,
+        modelIcon: null,
+        modelArray: ['', '数据结构理论', '线性表', '栈和对列', '字符串', '树', '图', '算法']
       }
     },
+    mounted () {
+      if (this.$route.params.modelName) {
+        window.localStorage.setItem('modelName', this.$route.params.modelName)
+        window.localStorage.setItem('modelIcon', this.$route.params.modelIcon)
+      }
+      this.modelName = window.localStorage.getItem('modelName')
+      this.modelIcon = window.localStorage.getItem('modelIcon')
+      console.log(this.modelName)
+      console.log(this.modelIcon)
+    },
+
     methods: {
       back () {
         this.$router.go(BACK_FLAG)
@@ -42,6 +56,9 @@
         let url = '/control/problem/info'
         let param = new URLSearchParams()
         param.append('title', this.value)
+        if (this.modelName) {
+          param.append('category', this.modelName)
+        }
         this.$http.post(url, param)
           .then((response) => {
             if (response.data.head.stateCode === 200) {
@@ -58,8 +75,8 @@
     },
     computed: {
       placeholder () {
-        if (this.$route.params.modelName) {
-          return '请输入' + this.$route.params.modelName + '问题'
+        if (this.modelName) {
+          return '请输入' + this.modelArray[this.modelName] + '问题'
         }
         return '请输入问题'
       }

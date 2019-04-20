@@ -9,34 +9,34 @@
           <span class="iconfont icon-shujujiegou-copy"></span>
           <span>数据结构概述</span>
         </div>
-        <div class="item  block-item">
+        <div class="item  block-item" @click="linearTable">
           <span class="iconfont icon-Group- data-struct"></span>
           <span>线性表</span>
         </div>
       </div>
 
       <div class="item-wrapper">
-        <div class="item  block-item">
+        <div class="item  block-item" @click="statckAndQueue">
           <span class="iconfont icon-dashuju"></span>
           <span>栈和队列</span>
         </div>
-        <div class="item  block-item">
+        <div class="item  block-item" @click="stringClick">
           <span class="iconfont icon-zifuchuanshujuji"></span>
           <span>字符串</span>
         </div>
       </div>
       <div class="item-wrapper">
-        <div class="item  block-item">
+        <div class="item  block-item" @click="treeClick">
           <span class="iconfont icon-shuju"></span>
           <span>树</span>
         </div>
-        <div class="item  block-item">
+        <div class="item  block-item" @click="mapClick">
           <span class="iconfont icon-jiyinsuanfa-copy"></span>
           <span>图</span>
         </div>
       </div>
       <div class="item-wrapper">
-        <div class="item block-item">
+        <div class="item block-item" @click="algorithmClick">
           <span class="iconfont icon-zhinengsuanfa"></span>
           <span>常用算法</span>
         </div>
@@ -53,12 +53,58 @@
     name: 'searchPage',
     methods: {
       dataOverview () {
-        this.$store.commit('updateCount', SEARCH)
+        this.updateCommit()
         this.$router.push({
           name: 'putQuestionPage',
-          params: { modelName: '数据结构概述', modelIcon: 'icon-shujujiegou-copy' }
+          params: { modelName: 1, modelIcon: 'icon-shujujiegou-copy' }
         })
+      },
+      linearTable () {
+        this.updateCommit()
+        this.$router.push({
+          name: 'putQuestionPage',
+          params: { modelName: 2, modelIcon: 'icon-Group- data-struct' }
+        })
+      },
+      statckAndQueue () {
+        this.updateCommit()
+        this.$router.push({
+          name: 'putQuestionPage',
+          params: { modelName: 3, modelIcon: 'icon-dashuju' }
+        })
+      },
+      stringClick () {
+        this.updateCommit()
+        this.$router.push({
+          name: 'putQuestionPage',
+          params: { modelName: 4, modelIcon: 'icon-zifuchuanshujuji' }
+        })
+      },
+      treeClick () {
+        this.updateCommit()
+        this.$router.push({
+          name: 'putQuestionPage',
+          params: { modelName: 5, modelIcon: 'icon-shuju' }
+        })
+      },
+      mapClick () {
+        this.updateCommit()
+        this.$router.push({
+          name: 'putQuestionPage',
+          params: { modelName: 6, modelIcon: 'icon-jiyinsuanfa-copy' }
+        })
+      },
+      algorithmClick () {
+        this.updateCommit()
+        this.$router.push({
+          name: 'putQuestionPage',
+          params: { modelName: 7, modelIcon: 'icon-zhinengsuanfa' }
+        })
+      },
+      updateCommit () {
+        this.$store.commit('updateCount', SEARCH)
       }
+
     }
   }
 </script>

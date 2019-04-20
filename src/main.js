@@ -25,6 +25,7 @@ import editPersonalInformation from './components/myPage/myHeader/editPersonalIn
 import avatarDemo from './components/demo/avatarDemo'
 import homePage from './components/firstPage/homePage'
 import commentDetail from './components/msgPage/commentDetail'
+import report from './components/myPage/myContent/report'
 
 Vue.config.productionTip = false
 
@@ -72,7 +73,8 @@ const router = new VueRouter({
     { path: '/editPersonalInformation', component: editPersonalInformation },
     { path: '/avatarDemo', component: avatarDemo },
     { path: '/homePage', name: 'homePage', component: homePage },
-    { path: '/commentDetail', name: 'commentDetail', component: commentDetail }
+    { path: '/commentDetail', name: 'commentDetail', component: commentDetail },
+    { path: '/report', name: 'report', component: report }
 
   ]
 })

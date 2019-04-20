@@ -22,7 +22,7 @@
         <cube-slide-item>
           <cube-scroll :data="followersData" :options="scrollOptions">
             <ul class="list-wrapper">
-              <li v-for="(item, index) in followersData" class="list-item" :key="index">
+              <li v-for="(item, index) in followersData" class="list-item border-top-1px" :key="index">
                 <div class="top">
                   <img :src="item.avatar" class="avatar">
                   <span class="name">{{item.name}}</span>
@@ -230,6 +230,10 @@
         index = this.findIndex(this.tabLabels, item => item.label === this.selectedLabel)
         return index
       }
+    },
+    mounted () {
+      // 获取推荐
+
     }
   }
 </script>

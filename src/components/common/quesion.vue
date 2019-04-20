@@ -2,11 +2,15 @@
   <div class="questionPage">
     <back-header :backText="backText"></back-header>
     <div class="scroll-list-wrap" ref="question">
-      <cube-scroll>
+      <cube-scroll ref="scroll">
         <div class="question-wrapper">
           <span class="cubeic-question"></span>
           <span class="question">{{question.title}}</span>
         </div>
+        <div class="no-anwser" v-show="answerData.length===0 && dataloaded">
+          暂无答案
+        </div>
+
         <div class="topic-wrapper" v-for="(item,index) in answerData" :key="index">
           <div class="title">
             <span class="title-content">匹配题目</span>
@@ -63,7 +67,9 @@
         // 采纳答案
         adoption: -1,
         question: this.$route.params.question,
-        answerData: []
+        answerData: [],
+        // 数据加载完成
+        dataloaded: false
       }
     },
     methods: {
@@ -154,6 +160,10 @@
         if (response.data.head.stateCode === 200) {
           this.answerData = response.data.body.data
         }
+        this.dataloaded = true
+        this.$nextTick(() => {
+          this.$refs.scroll.refresh()
+        })
       }).catch((error) => {
         console.log(error)
       })
@@ -179,6 +189,15 @@
         .cubeic-question
           margin-right 10px
           color #2faefe
+
+      .no-anwser
+        background-color white
+        height 100px
+        display flex
+        font-size 16px
+        justify-content center
+
+        align-items center
 
       .topic-wrapper
         .title

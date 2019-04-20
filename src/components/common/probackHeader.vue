@@ -2,7 +2,7 @@
   <div class="back-header">
       <span class="cubeic-back" @click="back">
       </span>
-    <i class="cubeic-more" @click="showMoreAction"></i>
+    <i class="cubeic-more" v-show="showMore" @click="showMoreAction"></i>
     <transition name="fade">
       <div class="moreAction" v-show="show">
         <ul>
@@ -48,6 +48,13 @@
       backComponent: {
         type: String,
         default: ''
+      },
+      showMore: {
+        type: Boolean,
+        default: true
+      },
+      intoParams: {
+        type: Object
       }
     },
     computed: {
@@ -60,10 +67,22 @@
     },
     methods: {
       back () {
+        console.log('back')
+        console.log(this.backComponent)
+        console.log(this.backComponent)
+        console.log(this.intoParams)
         if (this.backComponent === '') {
           this.$router.go(BACK_FLAG)
         } else {
-          this.$router.push(this.backComponent)
+          if (this.intoParams) {
+            this.$router.push({
+                name: this.backComponent,
+                params: this.intoParams
+              }
+            )
+          } else {
+            this.$router.push(this.backComponent)
+          }
         }
       },
       showMoreAction () {
