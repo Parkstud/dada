@@ -4,7 +4,7 @@
     <div class="chat-header">
       <span class="cubeic-back" @click="back"></span>
       <span></span>
-      <span class="txt">查看题目</span>
+      <span class="txt" @click="back">查看题目</span>
     </div>
     <cube-scroll ref="commentContainer" :options="scrollOptions" @pulling-up="onPullingUp">
       <!--评论内容-->
@@ -19,8 +19,8 @@
           <span class="info-left">
               <span class="cubeic-message"></span>
               <span class="comment">{{replayInfo.length}}</span>
-              <span class="cubeic-good" :class="hasLiked ?'active':''" @click="goodComment"></span>
-              <span class="approve">{{commentInfo.awesome}}</span>
+              <!--<span class="cubeic-good" :class="hasLiked ?'active':''" @click="goodComment"></span>-->
+              <!--<span class="approve">{{commentInfo.awesome}}</span>-->
           </span>
           <p class="comments">
             {{commentInfo.commentComments}}
@@ -246,46 +246,66 @@
         })
         // 清空信息
         this.value = ''
+      },
+      getData () {
+        // 通过comment 获取评论信息
+        this.$http.get('/commentInfo/comment/id', {
+          params: {
+            commentId: this.commentInfo.commentId
+          }
+        }).then((response) => {
+          this.commentInfo.awesome = response.data.body.data.awesome
+        }).catch((error) => {
+          console.log(error)
+        })
+
+        // 获取评论信息
+        this.$http.get('/commentInfo/reply/page', {
+          params: {
+            commentId: this.commentInfo.commentId,
+            current: this.current,
+            size: this.size
+          }
+        }).then((response) => {
+          let data = response.data.body.data
+          this.replayInfo = data.records
+        }).catch((error) => {
+          console.log(error)
+        })
+
+        // 获取当前用户是否点赞该评论
+
+        this.$http.get('/Interaction/awesome', {
+          params: {
+            commentId: this.commentInfo.commentId
+          }
+        }).then((response) => {
+          response.data.body.data = this.hasLiked
+        })
       }
+    },
+    beforeRouteEnter (to, from, next) {
+      // 路由导航钩子，此时还不能获取组件实例 `this`，所以无法在data中定义变量（利用vm除外）
+      // 参考 https://router.vuejs.org/zh-cn/advanced/navigation-guards.html
+      // 所以，利用路由元信息中的meta字段设置变量，方便在各个位置获取。这就是为什么在meta中定义isBack
+      // 参考 https://router.vuejs.org/zh-cn/advanced/meta.html
+      if (from.name === 'problemDetails') {
+        to.meta.isBack = false
+      }
+      next()
+    },
+    activated () {
+      if (!this.$route.meta.isBack) {
+        // 如果isBack是false，表明需要获取新数据，否则就不再请求，直接使用缓存的数据
+        this.getData()
+      }
+      // 恢复成默认的false，避免isBack一直是true，导致下次无法获取数据
+      this.$route.meta.isBack = true
     },
     mounted () {
       // 设置滑动高度
       this.clientHeight = `${document.documentElement.clientHeight}`
       this.$refs.commentContainer.$refs.wrapper.style.height = this.clientHeight - 81 + 'px'
-      // 通过comment 获取评论信息
-      this.$http.get('/commentInfo/comment/id', {
-        params: {
-          commentId: this.commentInfo.commentId
-        }
-      }).then((response) => {
-        this.commentInfo.awesome = response.data.body.data.awesome
-      }).catch((error) => {
-        console.log(error)
-      })
-
-      // 获取评论信息
-      this.$http.get('/commentInfo/reply/page', {
-        params: {
-          commentId: this.commentInfo.commentId,
-          current: this.current,
-          size: this.size
-        }
-      }).then((response) => {
-        let data = response.data.body.data
-        this.replayInfo = data.records
-      }).catch((error) => {
-        console.log(error)
-      })
-
-      // 获取当前用户是否点赞该评论
-
-      this.$http.get('/Interaction/awesome', {
-        params: {
-          commentId: this.commentInfo.commentId
-        }
-      }).then((response) => {
-        response.data.body.data = this.hasLiked
-      })
     }
 
   }
@@ -314,7 +334,7 @@
       justify-content space-between
       align-items center
       height 40px
-      background-color #fff
+      background-color #007efe
       box-shadow: 1px 2px 4px rgba(0, 0, 0, 0.1)
 
       .cubeic-back
@@ -323,13 +343,13 @@
         height 30px
         line-height 30px
         font-size 20px
-        color #64a4fe
+        color white
         text-align center
 
       .txt
         display inline-block
-        padding-right 20px
-        color #64a4fe
+        padding 20px
+        color white
 
     .comment-content
       .author-info
@@ -371,6 +391,7 @@
         .comments
           margin-top 10px
           letter-spacing 1px
+          font-size 20px
           color: #444
 
     .split
@@ -406,12 +427,13 @@
       box-shadow: 1px 2px 4px rgba(0, 0, 0, 0.5)
       height: 40px
       background-color gray
-
+      .cube-input
+        font-size 24px
       .temp-space
         margin 0 5px
 
       .cubeic-navigation
-        font-size 20px
+        font-size 24px
         margin 0 5px
 
       .not-send

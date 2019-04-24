@@ -20,38 +20,47 @@
       >
         <!-- 关注 -->
         <cube-slide-item>
-          <cube-scroll :data="followersData" :options="scrollOptions">
+          <cube-scroll :data="recommendData" :options="scrollOptions">
             <ul class="list-wrapper">
-              <li v-for="(item, index) in followersData" class="list-item border-top-1px" :key="index">
+              <li v-for="(item, index) in recommendData" class="list-item border-top-1px"
+                  :key="index">
                 <div class="top">
-                  <img :src="item.avatar" class="avatar">
-                  <span class="name">{{item.name}}</span>
+                  <img :src="imgURL+item.avatar" class="avatar">
+                  <span class="name">{{item.nickName}}</span>
                 </div>
                 <div>{{resolveQuestionFollowers(item)}}</div>
                 <div class="btn-invite">
                   <cube-button :inline="true"
                                :class="{'invite-active':item.invited,'invite':!item.invited}"
-                               @click="invite(index)">
-                    {{item.invitedInfo}}
+                               @click="invite(item)">
+                    {{resolveText(item.invited)}}
                   </cube-button>
                 </div>
               </li>
             </ul>
           </cube-scroll>
         </cube-slide-item>
-        <!-- 推荐 -->
+        <!-- 好友 -->
         <cube-slide-item>
-          <cube-scroll :data="recommendData" :options="scrollOptions">
+          <cube-scroll :data="followersData" :options="scrollOptions">
             <ul class="list-wrapper">
-              <li v-if="recommendData.length===0">
+              <li v-if="followersData.length===0">
                 你还没有好友
               </li>
-              <li v-else v-for="(item, index) in recommendData" class="list-item" :key="index">
-                <div class="top is-black is-bold line-height">
-                  {{item.question}}
+              <li v-for="(item, index) in followersData" class="list-item border-top-1px"
+                  :key="index">
+                <div class="top">
+                  <img :src="imgURL+item.avatar" class="avatar">
+                  <span class="name">{{item.nickName}}</span>
                 </div>
-                <div class="middle is-grey line-height">{{item.content}}</div>
-                <div>{{resolveQuestionFollowers(item)}}</div>
+                <!--<div>{{resolveQuestionFollowers(item)}}</div>-->
+                <div class="btn-invite">
+                  <cube-button :inline="true"
+                               :class="{'invite-active':item.invited,'invite':!item.invited}"
+                               @click="invite(item)">
+                    {{resolveText(item.invited)}}
+                  </cube-button>
+                </div>
               </li>
             </ul>
           </cube-scroll>
@@ -64,94 +73,6 @@
 <script type="text/ecmascript-6">
   import BackHeader from '../common/backHeader'
 
-  const followersData = [
-    {
-      avatar: './avatar.jpg',
-      name: '陈苗',
-      question: 'avatar.jpg',
-      answers: '13',
-      invited: true,
-      invitedInfo: '已邀请'
-    }, {
-      avatar: 'avatar.jpg',
-      name: 'chenmiao',
-      question: 'adasd',
-      answers: '12',
-      invited: true,
-      invitedInfo: '已邀请'
-    }, {
-      avatar: 'avatar.jpg',
-      name: 'chenmiao',
-      question: 'adasd',
-      answers: '12',
-      invited: true,
-      invitedInfo: '已邀请'
-    }, {
-      avatar: 'avatar.jpg',
-      name: 'chenmiao',
-      question: 'adasd',
-      answers: '12',
-      invited: true,
-      invitedInfo: '已邀请'
-    }, {
-      avatar: 'avatar.jpg',
-      name: 'chenmiao',
-      question: 'adasd',
-      answers: '12',
-      invited: false,
-      invitedInfo: '邀请'
-    }, {
-      avatar: 'avatar.jpg',
-      name: 'chenmiao',
-      question: 'adasd',
-      answers: '12',
-      invited: false,
-      invitedInfo: '邀请'
-    }, {
-      avatar: 'avatar.jpg',
-      name: 'chenmiao',
-      question: 'adasd',
-      answers: '12'
-    }, {
-      avatar: 'avatar.jpg',
-      name: 'chenmiao',
-      question: 'adasd',
-      answers: '12'
-    }, {
-      avatar: 'avatar.jpg',
-      name: 'chenmiao',
-      question: 'adasd',
-      answers: '12'
-    }, {
-      avatar: 'avatar.jpg',
-      name: 'chenmiao',
-      question: 'adasd',
-      answers: '12'
-    }, {
-      avatar: 'avatar.jpg',
-      name: 'chenmiao',
-      question: 'adasd',
-      answers: '12'
-    }, {
-      avatar: 'avatar.jpg',
-      name: 'chenmiao',
-      question: 'adasd',
-      answers: '12'
-    }, {
-      avatar: 'avatar.jpg',
-      name: 'chenmiao',
-      question: 'adasd',
-      answers: '12'
-    }, {
-      avatar: 'avatar.jpg',
-      name: 'chenmiao',
-      question: 'adasd',
-      answers: ' 12'
-    }
-  ]
-
-  const recommendData = []
-
   export default {
     name: 'inviteanswer',
     components: { BackHeader },
@@ -160,8 +81,9 @@
         backText: '返回',
         selectedLabel: '推荐',
         disabled: false,
-        followersData: followersData,
-        recommendData: recommendData,
+        followersData: [],
+        recommendData: [],
+        problemId: null,
         tabLabels: [
           {
             label: '推荐'
@@ -182,12 +104,23 @@
       }
     },
     methods: {
-      invite (index) {
-        let selectData = followersData[index]
-        if (!selectData.invited) {
-          selectData.invited = true
-          selectData.invitedInfo = '已邀请'
+      invite (item) {
+        if (item.invited) {
+          return
         }
+        item.invited = true
+        // 邀请用户
+        this.$http.post('/Interaction/invitedInfo',
+          this.$qs.stringify({
+            problemId: this.problemId,
+            invitedId: item.userId
+          }),
+          { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } })
+          .then((response) => {
+
+          }).catch((error) => {
+          console.log(error)
+        })
       },
       findIndex (ary, fn) {
         if (ary.findIndex) {
@@ -217,11 +150,18 @@
         this.$refs.tabNav.setSliderTransform(deltaX)
       },
 
-      resolveTitle (item) {
-        return `${item.name}关注了问题 · ${item.postTime} 小时前`
+      resolveText (invited) {
+        if (invited) {
+          return '已邀请'
+        }
+        return '邀请'
       },
       resolveQuestionFollowers (item) {
-        return `该类型下,累计获得${item.answers} 赞同 `
+        if (item.type === 1) {
+          return '推荐这位教师回答'
+        }
+        // return `该类型下,累计获得${item.answers} 赞同 `
+        return `该类型下,累计获得较多赞同 `
       }
     },
     computed: {
@@ -232,8 +172,34 @@
       }
     },
     mounted () {
-      // 获取推荐
+      if (this.$route.params.problemId) {
+        window.localStorage.setItem('inv_problemId', this.$route.params.problemId)
+      }
+      this.problemId = window.localStorage.getItem('inv_problemId')
+      console.log('mounted')
+      console.log(this.problemId)
 
+      // 获取推荐
+      this.$http.get('/Interaction/recommend', {
+        params: {
+          problemId: this.problemId
+        }
+      }).then((response) => {
+        this.recommendData = response.data.body.data
+      }).catch((error) => {
+        console.log(error)
+      })
+
+      // 获取care
+      this.$http.get('/Interaction/caredInvitedList', {
+        params: {
+          problemId: this.problemId
+        }
+      }).then((response) => {
+        this.followersData = response.data.body.data
+      }).catch((error) => {
+        console.log(error)
+      })
     }
   }
 </script>
@@ -279,11 +245,12 @@
             font-weight: bold
 
           .top
+            margin 10px 0
             display: flex
 
             .avatar
-              width: 30px
-              height: 30px
+              width: 40px
+              height: 40px
               margin-right: 2px
               border-radius: 100%
 

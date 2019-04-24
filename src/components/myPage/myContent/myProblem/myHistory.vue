@@ -29,7 +29,7 @@
   import BackHeader from '../../../common/backHeader'
 
   export default {
-    name: 'myProblem',
+    name: 'myHistory',
     data () {
       return {
         backText: '我的问题',
@@ -49,7 +49,7 @@
         if (this.problemInfo.length > 0 && this.problemInfo.length % this.size === 0) {
           this.current++
         }
-        this.$http.get('/problemInfo/PageProblemInfo', {
+        this.$http.get('/problemInfo/PageProblemHistory', {
           params: {
             current: this.current,
             size: this.size
@@ -70,7 +70,7 @@
     mounted () {
       this.clientHeight = `${document.documentElement.clientHeight}`
       this.$refs.scrollWrapper.style.height = (this.clientHeight - 42) + 'px'
-      this.$http.get('/problemInfo/PageProblemInfo', {
+      this.$http.get('/problemInfo/PageProblemHistory', {
         params: {
           current: this.current,
           size: this.size
@@ -95,6 +95,7 @@
 
           .item-top
             margin-bottom 10px
+
           .item-bottom
             display -webkit-box;
             -webkit-box-orient: vertical;

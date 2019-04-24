@@ -144,6 +144,7 @@
         this.$store.commit('updateCount', 2)
         this.$store.commit('updateMessage', '通知')
         // 跳转界面 阅读评论界面
+        console.log(commentInfo)
         this.$router.push({
             name: 'commentDetail',
             params: {
@@ -219,7 +220,6 @@
           if (data.records.length === this.size) {
             this.current++
           }
-
           this.tabs[0].content = data.records
           console.log(this.tabs[0].content)
         }

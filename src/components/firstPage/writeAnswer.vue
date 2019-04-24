@@ -71,7 +71,7 @@
       margin 10px 0
       padding-bottom 10px
       box-shadow 0 2px 2px -2px #bbb
-
+      font-size 26px
       .cubeic-close
         width 40px
         text-align center
@@ -93,7 +93,7 @@
           color: #007efe
 
     .write-content
-      height 100%
+      height 300px
 
     .cube-textarea-wrapper
       height 100%

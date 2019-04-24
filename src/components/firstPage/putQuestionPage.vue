@@ -41,7 +41,7 @@
         window.localStorage.setItem('modelName', this.$route.params.modelName)
         window.localStorage.setItem('modelIcon', this.$route.params.modelIcon)
       }
-      this.modelName = window.localStorage.getItem('modelName')
+      this.modelName = JSON.parse(window.localStorage.getItem('modelName'))
       this.modelIcon = window.localStorage.getItem('modelIcon')
       console.log(this.modelName)
       console.log(this.modelIcon)
@@ -92,9 +92,9 @@
       justify-content space-between
       height 40px
       width 100%
-      font-size 20px
-      color #444
-      background-color #f1f1f1
+      font-size 18px
+      color white
+      background-color #007efe
 
       .cubeic-back, .release-name
         display inline-block
@@ -104,8 +104,7 @@
         line-height 40px
 
       .release-name
-        font-size 14px
-
+        font-size 18px
     .question-content-wrapper
       .cube-textarea-wrapper
         height 100px

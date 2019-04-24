@@ -10,7 +10,7 @@
           </span>
 
       </li>
-      <li class="item">
+      <li class="item" @click="myCollection">
         <span class="myicon cubeic-star"></span>
         <span class="text">我收藏的</span>
         <span class="wrapper">
@@ -26,7 +26,7 @@
               <span class="cubeic-arrow"></span>
           </span>
       </li>
-      <li class="item">
+      <li class="item" @click="myHistory">
         <span class="myicon cubeic-time"></span>
         <span class="text">浏览历史</span>
         <span class="wrapper">
@@ -66,6 +66,16 @@
       }
     },
     methods: {
+      myHistory () {
+        this.$store.commit('setTransition', 'turn-on')
+        this.$store.commit('updateCount', MAIN_MY)
+        this.$router.push('/myHistory')
+      },
+      myCollection () {
+        this.$store.commit('setTransition', 'turn-on')
+        this.$store.commit('updateCount', MAIN_MY)
+        this.$router.push('/myCollection')
+      },
       // 跳转myProblem组件界面
       myProblem () {
         this.$store.commit('setTransition', 'turn-on')

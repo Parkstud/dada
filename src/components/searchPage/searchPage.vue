@@ -116,7 +116,8 @@
 
     .title
       padding 20px
-      font-size 20px
+      font-weight lighter
+      font-size 26px
 
     .content
       .item-wrapper

@@ -26,6 +26,8 @@ import avatarDemo from './components/demo/avatarDemo'
 import homePage from './components/firstPage/homePage'
 import commentDetail from './components/msgPage/commentDetail'
 import report from './components/myPage/myContent/report'
+import myCollection from './components/myPage/myContent/myProblem/myCollection'
+import myHistory from './components/myPage/myContent/myProblem/myHistory'
 
 Vue.config.productionTip = false
 
@@ -56,25 +58,80 @@ Vue.use(VueRouter)
 Vue.use(Vuex)
 const router = new VueRouter({
   routes: [
-    { path: '/', component: Main },
-    { path: '/login', component: Login },
-    { path: '/mainApp', component: Main },
-    { path: '/register', component: Register },
-    { path: '/forgetPwd', component: Forget },
-    { path: '/myProblem', component: myProblem },
-    { name: 'putQuestionPage', path: '/putQuestionPage', component: putQuestionPage },
-    { path: '/onlySearchPage', component: onlySearchPage },
-    { name: 'problemDetails', path: '/problemDetails', component: problemDetails },
-    { path: '/personSet', component: personSet },
-    { path: '/inviteAnswer', component: inviteAnswer },
-    { path: '/question', name: 'question', component: quesion },
-    { path: '/chatPage', name: 'chatPage', component: chatPage },
-    { path: '/writeAnswer', name: 'writeAnswer', component: writeAnswer },
-    { path: '/editPersonalInformation', component: editPersonalInformation },
-    { path: '/avatarDemo', component: avatarDemo },
-    { path: '/homePage', name: 'homePage', component: homePage },
-    { path: '/commentDetail', name: 'commentDetail', component: commentDetail },
-    { path: '/report', name: 'report', component: report }
+    { path: '/', component: Main, meta: { keepAlive: true } },
+    { path: '/login', component: Login, meta: { keepAlive: true } },
+    { path: '/mainApp', component: Main, name: 'mainApp', meta: { keepAlive: true } },
+    { path: '/register', component: Register, meta: { keepAlive: true } },
+    { path: '/forgetPwd', component: Forget, meta: { keepAlive: true } },
+    { path: '/myProblem', component: myProblem, meta: { isBack: false, keepAlive: true } },
+    { path: '/myCollection', component: myCollection, meta: { isBack: false, keepAlive: true } },
+    { path: '/myHistory', component: myHistory, meta: { isBack: false, keepAlive: true } },
+    {
+      name: 'putQuestionPage',
+      path: '/putQuestionPage',
+      component: putQuestionPage,
+      meta: { isBack: false, keepAlive: true }
+    },
+    {
+      path: '/onlySearchPage',
+      component: onlySearchPage,
+      meta: { isBack: false, keepAlive: true }
+    },
+    {
+      name: 'problemDetails',
+      path: '/problemDetails',
+      component: problemDetails,
+      meta: { isBack: true, keepAlive: true }
+    },
+    { path: '/personSet', component: personSet, meta: { isBack: false, keepAlive: true } },
+    {
+      path: '/inviteAnswer',
+      name: 'inviteAnswer',
+      component: inviteAnswer,
+      meta: { isBack: false, keepAlive: true }
+    },
+    {
+      path: '/question',
+      name: 'question',
+      component: quesion,
+      meta: { isBack: false, keepAlive: false }
+    },
+    {
+      path: '/chatPage',
+      name: 'chatPage',
+      component: chatPage,
+      meta: { isBack: false, keepAlive: true }
+    },
+    {
+      path: '/writeAnswer',
+      name: 'writeAnswer',
+      component: writeAnswer,
+      meta: { isBack: false, keepAlive: true }
+    },
+    {
+      path: '/editPersonalInformation',
+      component: editPersonalInformation,
+      meta: { isBack: false, keepAlive: true }
+    },
+    { path: '/avatarDemo', component: avatarDemo, meta: { isBack: false, keepAlive: true } },
+    {
+      path: '/homePage',
+      name: 'homePage',
+      component: homePage,
+      meta: { isBack: false, keepAlive: true }
+    },
+    {
+      path: '/commentDetail',
+      name: 'commentDetail',
+      component: commentDetail,
+      meta: { isBack: false, keepAlive: true }
+    },
+    {
+      path: '/report',
+      name: 'report',
+      component: report,
+      meta: { isBack: false, keepAlive: true }
+    }
 
   ]
 })
@@ -95,9 +152,21 @@ const store = new Vuex.Store({
     // 显示消息界面的内容
     message: '通知',
     // 是否更新主界面问题列表
-    problemList: []
+    problemList: [],
+    // 是否更新problemInfo
+    updateProblem: -1,
+    // 更新全部item
+    flushCount: 0
   },
   mutations: {
+    // 更新列表
+    setFlushCount (state) {
+      state.flushCount++
+    },
+    // 更新问题
+    setProblem (state, change) {
+      state.updateProblem = change
+    },
     // 更新主页问题列表
     updateProblemList (state, change) {
       state.problemList = change

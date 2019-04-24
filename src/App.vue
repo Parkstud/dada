@@ -1,10 +1,13 @@
 <template>
   <div id="app">
-    <keep-alive>
-      <transition name="fade" mode="out-in">
-        <router-view></router-view>
-      </transition>
-    </keep-alive>
+    <transition name="fade1" mode="out-in">
+      <keep-alive>
+        <router-view v-if="$route.meta.keepAlive"></router-view>
+      </keep-alive>
+    </transition>
+    <transition name="fade2">
+      <router-view v-if="!$route.meta.keepAlive"></router-view>
+    </transition>
   </div>
 </template>
 
@@ -53,12 +56,20 @@
   }
 </script>
 <style lang="stylus">
-    #app
-      .fade-enter-active, .fade-leave-active {
-        transition: opacity .2s;
-      }
+  #app
+    .fade1-enter-active, .fade1-leave-active {
+      transition: opacity .2s;
+    }
 
-      .fade-enter, .fade-leave-to {
-        opacity: 0;
-      }
+    .fade1-enter, .fade1-leave-to {
+      opacity: 0;
+    }
+
+    .fade2-enter-active, .fade2-leave-active {
+      transition: opacity .2s;
+    }
+
+    .fade2-enter, .fade2-leave-to {
+      opacity: 0;
+    }
 </style>

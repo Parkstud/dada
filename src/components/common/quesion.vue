@@ -18,18 +18,19 @@
           <div class="topic-content">
             <div class="split-line"></div>
             <div class="question-des">
-              <p v-html="transferString(item.problem.title)">
+              <p v-html="item.problem.title ? transferString(item.problem.title):''">
               </p>
             </div>
             <div class="answer-wrapper">
               <div class="split-line2"></div>
               <div class="solve-name">解答</div>
               <div class="solve-content">
-                {{item.problem.answerContent}}
+                {{item.problem.answerContent?item.problem.answerContent:''}}
               </div>
               <div class="forecast">
                 <div class="forecast-title">匹配预估</div>
-                <div class="forecast-value">{{item.similarityDegree}}%</div>
+                <div class="forecast-value">{{item.similarityDegree ?item.similarityDegree : ''}}%
+                </div>
               </div>
               <div class="split-line3"></div>
               <div class="help-wrapper">
@@ -37,9 +38,19 @@
                   是否采纳该答案
                 </div>
                 <div class="help-msg">
-                  <div class="help-yes" :class="item.problem.id===adoption?'adoption':''">
-                    <span class="cubeic-pullup"></span>
-                    <span class="help-info" @click="adoptionAnswer(item.problem.id)">采纳</span>
+                  <div class="help-yes">
+                    <cube-button :inline="true" icon="cubeic-pullup"
+                                 :class="item.problem.id===adoption?'adoption':'adoption-not'"
+                                 @click="adoptionAnswer(item.problem.id)">
+                      <span class="text">赞同 {{item.problem.id===adoption?'1':''}}</span>
+                    </cube-button>
+                    <!--<span class="help-info"">-->
+                    <!--采纳</span>-->
+                    <cube-button :inline="true" icon="cubeic-pulldown"
+                                 :class="item.problem.id===oppose?'oppose':'oppose-not'"
+                                 @click="opposeAnswer(item.problem.id)">
+                      <span class="text">反对 {{item.problem.id===oppose?'1':''}}</span>
+                    </cube-button>
                   </div>
                 </div>
               </div>
@@ -49,10 +60,10 @@
         </div>
       </cube-scroll>
     </div>
-    <div class="bottom">
-      <cube-button @click="showBtn">发布人工问答</cube-button>
-      <cube-button :light="true" @click="backPutQuestion">再问一题</cube-button>
-    </div>
+    <!--<div class="bottom">-->
+    <!--<cube-button @click="showBtn">发布人工问答</cube-button>-->
+    <!--<cube-button :light="true" @click="backPutQuestion">再问一题</cube-button>-->
+    <!--</div>-->
   </div>
 </template>
 
@@ -64,15 +75,31 @@
     data () {
       return {
         backText: '返回',
-        // 采纳答案
+        // 赞同答案
         adoption: -1,
+        oppose: -1,
         question: this.$route.params.question,
         answerData: [],
         // 数据加载完成
         dataloaded: false
       }
     },
+    // beforeRouteEnter (to, from, next) {
+    //   if (from.name === 'putQuestionPage') {
+    //     to.meta.isBack = false
+    //   }
+    //   next()
+    // },
+    // activated () {
+    //   if (!this.$route.meta.isBack) {
+    //     this.getData()
+    //   }
+    //   this.$route.meta.isBack = false
+    // },
     methods: {
+      test (item) {
+        console.log(item)
+      },
       showBtn () {
         this.$createDialog({
           type: 'confirm',
@@ -113,21 +140,39 @@
       backPutQuestion () {
         this.$router.go(-1)
       },
-      // 采纳按钮
+      // 反对
+      opposeAnswer (answerid) {
+        this.adoption = -1
+        if (this.oppose === answerid) {
+          this.oppose = -1
+        } else {
+          this.oppose = answerid
+        }
+        this.handleAdoptAndOppose(answerid)
+      },
+
+      // 赞同按钮
       adoptionAnswer (answerid) {
-        let flag = 'false'
+        this.oppose = -1
         if (this.adoption === answerid) {
           this.adoption = -1
-          flag = 'true'
         } else {
           this.adoption = answerid
         }
-
+        this.handleAdoptAndOppose(answerid)
+      },
+      // 处理反对或赞同
+      handleAdoptAndOppose (answerid) {
         let url = '/control/problem/adoptAnswerProblem'
         let param = new URLSearchParams()
         param.append('problemId', this.question.id)
         param.append('answerId', answerid)
-        param.append('flag', flag)
+        if (this.adoption !== -1) {
+          param.append('flag', 'true')
+        } else {
+          param.append('flag', 'false')
+        }
+
         this.$http.post(url, param)
           .then((response) => {
           }).catch((error) => {
@@ -144,29 +189,33 @@
           alert(e.message)
         }
         return string
+      },
+      getData () {
+        // 获取浏览器可视区域高度
+        this.clientHeight = `${document.documentElement.clientHeight}`
+        this.$refs.question.style.height = (this.clientHeight - 42) + 'px'
+        // 自动问答接口
+        let url = '/problem/intelligentQuestionAnswering'
+        this.$http.get(url, {
+          params: {
+            questionStr: this.question.title
+          }
+        }).then((response) => {
+          if (response.data.head.stateCode === 200) {
+            console.log(response.data.body.data)
+            this.answerData = response.data.body.data
+          }
+          this.dataloaded = true
+          this.$nextTick(() => {
+            this.$refs.scroll.refresh()
+          })
+        }).catch((error) => {
+          console.log(error)
+        })
       }
     },
     mounted () {
-      // 获取浏览器可视区域高度
-      this.clientHeight = `${document.documentElement.clientHeight}`
-      this.$refs.question.style.height = (this.clientHeight - 74) + 'px'
-      // 自动问答接口
-      let url = '/problem/intelligentQuestionAnswering'
-      this.$http.get(url, {
-        params: {
-          questionStr: this.question.title
-        }
-      }).then((response) => {
-        if (response.data.head.stateCode === 200) {
-          this.answerData = response.data.body.data
-        }
-        this.dataloaded = true
-        this.$nextTick(() => {
-          this.$refs.scroll.refresh()
-        })
-      }).catch((error) => {
-        console.log(error)
-      })
+      this.getData()
     },
     components: { BackHeader }
   }
@@ -274,41 +323,63 @@
                 justify-content: space-between;
                 color #bababa
 
-                .adoption
-                  color: #45bfff
-
                 .help-yes
-                  .cubeic-pullup
-                    font-size 30px
-                    vertical-align top
+                  .oppose-not
+                    color: #7A7A7A
+
+                  .adoption-not
+                    color: #7A7A7A
+
+                  .oppose
+                    color: #45bfff
+
+                  .adoption
+                    color: #45bfff
+
+                  .cube-btn
+                    background-color #f7f7f7
+                    padding 6px
+
+                    .text
+                      display inline-block
+                      padding-top 6px
+                      margin-left -6px
+
+                    .cubeic-pullup, .cubeic-pulldown
+                      font-size 30px
+                      line-height 15px
+                      vertical-align: middle;
+
+                    &:nth-child(1)
+                      margin-right 10px
 
                   .help-info
                     display inline-block
                     height 30px
                     vertical-align middle
 
-    .bottom
-      position absolute
-      bottom 0
-      left 0
-      width 100%
-      height 50px
-      z-index 999
-      border 1px solid #f1f1f1
-      background-color #fff
-      box-sizing border-box
-      display flex
-      justify-content space-between
+  /*.bottom*/
+  /*position absolute*/
+  /*bottom 0*/
+  /*left 0*/
+  /*width 100%*/
+  /*height 50px*/
+  /*z-index 999*/
+  /*border 1px solid #f1f1f1*/
+  /*background-color #fff*/
+  /*box-sizing border-box*/
+  /*display flex*/
+  /*justify-content space-between*/
 
-      .cube-btn
-        margin 10px 10px 10px 10px
-        border-radius 5px
-        line-height 2px
+  /*.cube-btn*/
+  /*margin 10px 10px 10px 10px*/
+  /*border-radius 5px*/
+  /*line-height 2px*/
 
-        &:first-child
-          background-color #45bfff
+  /*&:first-child*/
+  /*background-color #45bfff*/
 
-        &:nth-child(2)
-          color: #45bfff
+  /*&:nth-child(2)*/
+  /*color: #45bfff*/
 
 </style>
