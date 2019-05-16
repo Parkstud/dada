@@ -131,7 +131,8 @@
             if (response.data.head.stateCode === 200) {
               this.$router.push({
                 name: 'chatPage',
-                params: { letterUser: response.data.body.data,
+                params: {
+                  letterUser: response.data.body.data,
                   problem: this.problem
                 }
               })
@@ -140,21 +141,39 @@
       },
       showMoreAction () {
         this.show = !this.show
+      },
+      getData () {
+        // 获取用户信息
+        let url = '/problemInfo/userInfo'
+        this.$http.get(url, {
+          params: {
+            userId: this.userId
+          }
+        }).then((response) => {
+          let data = response.data.body.data
+          this.userData = data
+        }).catch((error) => {
+          console.log(error)
+        })
       }
     },
+    beforeRouteEnter (to, from, next) {
+      console.log(from)
+      if (from.name === 'problemDetails') {
+        to.meta.isBack = false
+      }
+      next()
+    },
+    activated () {
+      if (!this.$route.meta.isBack) {
+        // 如果isBack是false，表明需要获取新数据，否则就不再请求，直接使用缓存的数据
+        this.getData()
+      }
+      // 恢复成默认的false，避免isBack一直是true，导致下次无法获取数据
+      this.$route.meta.isBack = true
+    },
     mounted () {
-      // 获取用户信息
-      let url = '/problemInfo/userInfo'
-      this.$http.get(url, {
-        params: {
-          userId: this.userId
-        }
-      }).then((response) => {
-        let data = response.data.body.data
-        this.userData = data
-      }).catch((error) => {
-        console.log(error)
-      })
+      this.getData()
     }
   }
 </script>

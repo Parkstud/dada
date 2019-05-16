@@ -2,30 +2,18 @@
   <div class="person-set">
     <back-header :backText="backText"></back-header>
     <div class="tip-info">
-      <span>消息推送</span>
-    </div>
-
-    <div class="push-info-wrapper">
-      <span class="text">允许消息推送</span>
-      <cube-switch v-model="value">
-      </cube-switch>
-    </div>
-
-    <div class="tip-info">
       通用设置
     </div>
     <ul class="ulshow">
-      <li class="line_border">编辑个人资料</li>
-      <li class="line_border">修改密码</li>
-      <li class="line_border">更换手机用户</li>
-      <li>黑名单设置</li>
+      <li class="line_border" @click="editPersonInfo">编辑个人资料</li>
+      <li class="line_border" @click="changPwd">修改密码</li>
+      <li class="line_border" @click="changeTel">修改手机号</li>
     </ul>
     <div class="tip-info">
       其他
     </div>
     <ul>
-      <li class="line_border">关于达达</li>
-      <li class="line_border">清除缓存</li>
+      <li class="line_border" @click="about">关于达达</li>
       <li class="line_border" @click="logout">退出登录</li>
     </ul>
   </div>
@@ -43,6 +31,20 @@
       }
     },
     methods: {
+      about () {
+        this.$router.push('/aboutdada')
+      },
+      changeTel () {
+        this.$router.push('/changeTel')
+      },
+      // 修改密码
+      changPwd () {
+        this.$router.push('/changePass')
+      },
+      // 编辑个人资料
+      editPersonInfo () {
+        this.$router.push('/editPersonalInformation')
+      },
       // 退出登录
       logout () {
         this.$createDialog({
@@ -76,7 +78,7 @@
       align-items center
       padding-left 18px
       background-color #fbfcfc
-      color: #e58c7c
+      color: #007efe
       font-size 14px
       height 32px
       border-bottom 1px solid #e2e2e2

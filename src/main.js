@@ -28,6 +28,10 @@ import commentDetail from './components/msgPage/commentDetail'
 import report from './components/myPage/myContent/report'
 import myCollection from './components/myPage/myContent/myProblem/myCollection'
 import myHistory from './components/myPage/myContent/myProblem/myHistory'
+import changePass from './components/myPage/myContent/personSet/changePass'
+import changeTel from './components/myPage/myContent/personSet/changeTel'
+import aboutdada from './components/myPage/myContent/personSet/aboutdada'
+import myCareFans from './components/myPage/myHeader/myCareFans'
 
 Vue.config.productionTip = false
 
@@ -52,8 +56,8 @@ axios.interceptors.request.use(
   })
 
 Vue.prototype.$qs = Qs
-const vConsole = new VConsole()
-export default vConsole
+// const vConsole = new VConsole()
+// export default vConsole
 Vue.use(VueRouter)
 Vue.use(Vuex)
 const router = new VueRouter({
@@ -130,7 +134,31 @@ const router = new VueRouter({
       path: '/report',
       name: 'report',
       component: report,
-      meta: { isBack: false, keepAlive: true }
+      meta: { isBack: false, keepAlive: false }
+    },
+    {
+      path: '/changePass',
+      name: 'changePass',
+      component: changePass,
+      meta: { isBack: false, keepAlive: false }
+    },
+    {
+      path: '/changeTel',
+      name: 'changeTel',
+      component: changeTel,
+      meta: { isBack: false, keepAlive: false }
+    },
+    {
+      path: '/aboutdada',
+      name: 'aboutdada',
+      component: aboutdada,
+      meta: { isBack: false, keepAlive: false }
+    },
+    {
+      path: '/myCareFans',
+      name: 'myCareFans',
+      component: myCareFans,
+      meta: { isBack: false, keepAlive: false }
     }
 
   ]

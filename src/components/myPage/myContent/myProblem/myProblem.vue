@@ -9,6 +9,7 @@
           :options="options">
           <ul class="list-wrapper">
             <li v-for="(item, index) in problemInfo" class="list-item border-top-1px"
+                @click="choseProblem(item)"
                 :key="index">
               <div class="item-top">
                 {{item.problemTitle}}
@@ -39,12 +40,16 @@
           pullUpLoad: true,
           directionLockThreshold: 0
         },
-        problemInfo: [
-        ]
+        problemInfo: []
       }
     },
     components: { BackHeader },
     methods: {
+      choseProblem (item) {
+        // 跳转问题详细界面
+
+        console.log(item)
+      },
       onPullingUp () {
         if (this.problemInfo.length > 0 && this.problemInfo.length % this.size === 0) {
           this.current++
@@ -92,9 +97,35 @@
           .list-item
             margin 10px 10px
             padding-top 10px
+            position: relative;
+            overflow: hidden;
+
+            &:after
+              content: "";
+              display: block;
+              position: absolute;
+              width: 100%;
+              height: 100%;
+              top: 0;
+              left: 0;
+              pointer-events: none;
+              //设置径向渐变
+              background-image: radial-gradient(circle, #666 10%, transparent 10.01%);
+              background-repeat: no-repeat;
+              background-position: 50%;
+              transform: scale(10, 10);
+              opacity: 0;
+              transition: transform .3s, opacity .5s;
+
+            &:active:after
+              transform: scale(0, 0);
+              opacity: .3;
+              //设置初始状态
+              transition: 0s;
 
           .item-top
             margin-bottom 10px
+
           .item-bottom
             display -webkit-box;
             -webkit-box-orient: vertical;

@@ -18,14 +18,6 @@
               <span class="cubeic-arrow"></span>
           </span>
       </li>
-      <li class="item">
-        <span class="myicon cubeic-good"></span>
-        <span class="text">我赞过的</span>
-        <span class="wrapper">
-             <span class="num">{{awesomeCount}}</span>
-              <span class="cubeic-arrow"></span>
-          </span>
-      </li>
       <li class="item" @click="myHistory">
         <span class="myicon cubeic-time"></span>
         <span class="text">浏览历史</span>

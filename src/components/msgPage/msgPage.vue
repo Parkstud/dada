@@ -20,7 +20,8 @@
       <cube-tab-panel :label="tabs[0].label">
         <cube-scroll
           ref="panelContatiner"
-          @pulling-up="onPullingUp"
+          :data="this.tabs[0].content"
+          @pulling-up="onPullingUp1"
           :options="scrollOptions">
           <ul>
             <li class="tab-panel-li" v-for="(contentItem, index) in tabs[0].content" :key="index">
@@ -29,13 +30,13 @@
               <div class="item-panl1"
                    @click="clickNotice(contentItem.commentId,contentItem.commentInfo)">
                 <div class="item-top">
-                  <span class="name" :style="{'color':setChangeColor()}">{{contentItem.commentInfo.commentUserNickName || ''}}</span>
+                  <span v-if="contentItem.commentInfo" class="name"
+                        :style="{'color':setChangeColor()}">{{contentItem.commentInfo.commentUserNickName || ''}}</span>
                   <span class="type">{{contentItem.title}}</span>
                   <span class="time">{{formatData(contentItem.createTime,1)}}</span>
                 </div>
-                <div class="item-center">
-                  {{contentItem.commentInfo.commentComments}}
-
+                <div class="item-center" v-if="contentItem.commentInfo"
+                     v-html="contentItem.commentInfo.commentComments">
                 </div>
                 <div class="item-bttom">
                   {{contentItem.content}}
@@ -46,13 +47,11 @@
             </li>
           </ul>
         </cube-scroll>
-
       </cube-tab-panel>
       <cube-tab-panel :label="tabs[1].label">
         <cube-scroll
           ref="notice"
-          @pulling-up="onPullingUp"
-          :options="scrollOptions">
+          :options="scrollOptions1">
           <ul>
 
             <li class="tab-panel-li" v-for="(personItem, index) in tabs[1].personCall"
@@ -67,7 +66,7 @@
                   </div>
                   <div class="right" @click="chatWith(personItem.userInfo)">
                     <div class="right-top">
-                      <span class="letter-name">{{personItem.userInfo?personItem.userInfo.userNickName:''}}</span>
+                      <span class="letter-name">{{personItem.userInfo ? personItem.userInfo.userNickName:''}}</span>
                       <span class="letter-time">{{formatData(personItem.msg[0].time,1)}}</span>
                     </div>
                     <div class="right-content">
@@ -108,6 +107,9 @@
           label: '私信',
           personCall: []
         }],
+        scrollOptions1: {
+          directionLockThreshold: 0
+        },
         scrollOptions: {
           pullUpLoad: true,
           directionLockThreshold: 0
@@ -131,8 +133,26 @@
           }
         })
       },
+      showToastTime () {
+        const toast = this.$createToast({
+          type: 'txt',
+          time: 0,
+          txt: '该问题已被删除',
+          $class: {
+            'own-class': true
+          }
+        })
+        toast.show()
+        setTimeout(() => {
+          toast.hide()
+        }, 1000)
+      },
       // 点击notice
       clickNotice (commentId, commentInfo) {
+        if (!commentInfo) {
+          this.showToastTime()
+          return
+        }
         // 处理多次点击
         let now = new Date()
         if (now - this.evTimeStamp < 100) {
@@ -167,11 +187,31 @@
         this.$router.push('/onlySearchPage')
       },
       // 上拉
-      onPullingUp () {
-        setTimeout(() => {
-          // 如果没有新数据
-          this.$refs.panelContatiner.forceUpdate()
-        }, 500)
+      onPullingUp1 () {
+        this.getNoticeInfo()
+      },
+      // 获取通知信息
+      getNoticeInfo () {
+        // 获取通知信息
+        let url = '/message/notices/page'
+        let param = {
+          current: this.current,
+          size: this.size
+        }
+        this.$http.get(url, {
+          params: param
+        }).then((response) => {
+          if (response.data.head.stateCode === 200) {
+            let data = response.data.body.data
+            if (data.records.length === this.size) {
+              this.current++
+            }
+            this.tabs[0].content = data.records
+            console.log(this.tabs[0].content)
+          }
+        }).catch((error) => {
+          console.log(error)
+        })
       },
       translateType (type) {
         if (type === '1') {
@@ -185,6 +225,7 @@
       // 获取浏览器可视区域高度
       this.clientHeight = `${document.documentElement.clientHeight}`
       this.$refs.panelContatiner.$refs.wrapper.style.height = this.clientHeight - 117 + 'px'
+      this.$refs.notice.$refs.wrapper.style.height = this.clientHeight - 117 + 'px'
       let url = '/message/news/groups'
       // 获取私信消息
       this.$http.get(url, null).then((response) => {
@@ -205,28 +246,7 @@
       }).catch((error) => {
         console.log(error)
       })
-
-      // 获取通知信息
-      url = '/message/notices/page'
-      let param = {
-        current: this.current,
-        size: this.size
-      }
-      this.$http.get(url, {
-        params: param
-      }).then((response) => {
-        if (response.data.head.stateCode === 200) {
-          let data = response.data.body.data
-          if (data.records.length === this.size) {
-            this.current++
-          }
-          this.tabs[0].content = data.records
-          console.log(this.tabs[0].content)
-        }
-      }).catch((error) => {
-        console.log(error)
-      })
-
+      this.getNoticeInfo()
       this.$nextTick(() => {
         if (this.$store.state.message === '私信') {
           this.$refs.tabNav.$refs.slider.style.width = '50%'
@@ -238,13 +258,14 @@
           this.$refs.tabNav.$refs.slider.style.transition = null
         }
       })
-    },
-    beforeUpdate () {
     }
   }
 </script>
 
 <style lang='stylus' rel='stylesheet/stylus'>
+  .own-class
+    height: 180%;
+
   .msg-page
     height 100%
 

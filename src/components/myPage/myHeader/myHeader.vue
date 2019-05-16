@@ -7,13 +7,13 @@
       </div>
       <div class="info-wrapper">
         <div class="name">{{nickName}}</div>
-        <div class="attention-wrapper">
+        <div class="attention-wrapper" @click.stop="myCare">
               <span class="attention-wrapper">
                 <span class="attention">关注</span>
                 <span class="attention-num">{{cares}}</span>
               </span>
         </div>
-        <div class="fan-wrapper">
+        <div class="fan-wrapper" @click.stop="myFans">
           <span class="fan">粉丝</span>
           <span class="fan-num">{{fans}}</span>
         </div>
@@ -34,6 +34,24 @@
       }
     },
     methods: {
+      myCare () {
+        this.$router.push({
+            name: 'myCareFans',
+            params: {
+              itemName: '关注'
+            }
+          }
+        )
+      },
+      myFans () {
+        this.$router.push({
+            name: 'myCareFans',
+            params: {
+              itemName: '粉丝'
+            }
+          }
+        )
+      },
       // 编辑个人资料
       editPerson () {
         this.$router.push('/editPersonalInformation')

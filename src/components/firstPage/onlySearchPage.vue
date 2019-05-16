@@ -3,23 +3,58 @@
     <div class="search-wrapper">
       <span class="cubeic-back" @click="back"></span>
       <span class="input-wrapper">
-          <cube-input ref="search1" :placeholder="placeholder" :type="type"
+          <cube-input ref="search1" :placeholder="placeholder" :type="type" v-model="val"
                       @keyup.enter.native="searchInfo"
                       :autofocus="autofocus"></cube-input>
       </span>
       <span class="temp"></span>
     </div>
-    <div class="history-wrapper">
-      <div class="history-item">
+
+    <ul class="history-wrapper" v-show="showHistory && historys.length>0">
+      <li v-for="(item, index) in historys" :key="index" class="history-item">
         <span class="cubeic-time"></span>
-        <span class="text">text</span>
-        <span class="cubeic-close" @click="deleteHistory"></span>
-      </div>
-      <div class="history-item">
-        <span class="cubeic-time"></span>
-        <span class="text">text</span>
-        <span class="cubeic-close"></span>
-      </div>
+        <span class="text">{{item}}</span>
+        <span class="cubeic-close" @click="deleteHistory(index)"></span>
+      </li>
+      <li class="clear-history" @click="clearAllHistory">
+        清除搜索记录
+      </li>
+    </ul>
+
+    <div class="scroll-list-wrap" ref="scrollWrapper" v-show="!showHistory">
+      <cube-scroll
+        ref="scroll"
+        :data="problemInfo"
+        :options="options">
+        <ul class="list-wrapper">
+          <li class="load-wrapper" v-show="showload">
+            <div class="cube-loading">
+                <span class="cube-loading-spinners"><i
+                  class="cube-loading-spinner"></i><i class="cube-loading-spinner"></i><i
+                  class="cube-loading-spinner"></i><i class="cube-loading-spinner"></i><i
+                  class="cube-loading-spinner"></i><i class="cube-loading-spinner"></i><i
+                  class="cube-loading-spinner"></i><i class="cube-loading-spinner"></i><i
+                  class="cube-loading-spinner"></i><i class="cube-loading-spinner"></i><i
+                  class="cube-loading-spinner"></i><i class="cube-loading-spinner"></i>
+            </span>
+            </div>
+
+          </li>
+          <li class="list-item" v-show="problemInfo.length===0 && !showload">
+            没有搜索结果
+          </li>
+          <li v-for="(item, index) in problemInfo" class="list-item border-top-1px"
+              :key="index">
+            <div class="item-top">
+              {{item.title}}
+            </div>
+            <div class="item-bottom">
+              {{item.browseCount}}人浏览 · {{item.answerCount}}人回答<br>
+              发布时间: {{formatData(item.time,2)}}
+            </div>
+          </li>
+        </ul>
+      </cube-scroll>
     </div>
   </div>
 </template>
@@ -31,25 +66,70 @@
     name: 'onlySearchPage',
     data () {
       return {
+        val: '',
         placeholder: '搜索',
         autofocus: true,
         type: 'search',
-        waiting: 'false'
-
+        waiting: 'false',
+        showHistory: true,
+        historys: [],
+        current: 1,
+        size: 10,
+        options: {
+          pullUpLoad: true,
+          directionLockThreshold: 0
+        },
+        showload: false,
+        problemInfo: []
       }
     },
     methods: {
-      deleteHistory () {
-        console.log('asdasd')
+      clearAllHistory () {
+        this.historys = []
+      },
+      deleteHistory (index) {
+        this.historys.splice(index, 1)
       },
       back () {
+        if (!this.showHistory) {
+          this.showHistory = true
+          return
+        }
+        localStorage.setItem('search_history', JSON.stringify(this.historys))
         this.$router.go(BACK_FLAG)
       },
       searchInfo () {
+        if (this.val.trim() === '') {
+          return
+        }
         event.preventDefault() // 禁止默认事件（默认是换行）
-        // 跳转界面
-        this.$router.go(BACK_FLAG)
-        this.$refs.search1.blur()
+        if (this.historys.length > 10) {
+          this.historys.pop()
+        }
+        this.historys.unshift(this.val)
+        // 获取搜索信息
+        this.showHistory = false
+        this.showload = true
+        this.problemInfo = []
+        this.$http.get('/problemInfo/webProblemVOLikePage', {
+          params: {
+            title: this.val,
+            current: this.current,
+            size: this.size
+          }
+        }).then((res) => {
+          this.problemInfo = res.data.body.data.records
+          this.showload = false
+        })
+      }
+    },
+    mounted () {
+      // 设置
+      this.clientHeight = `${document.documentElement.clientHeight}`
+      this.$refs.scrollWrapper.style.height = (this.clientHeight - 42) + 'px'
+      let localSearchHistory = JSON.parse(localStorage.getItem('search_history'))
+      if (localSearchHistory) {
+        this.historys = localSearchHistory
       }
     }
   }
@@ -88,6 +168,11 @@
     .history-wrapper
       color #aaa
 
+      .clear-history
+        height 24px
+        text-align center
+        border-bottom 1px solid #f1f1f1
+
       .history-item
         margin 10px
         display flex
@@ -107,4 +192,30 @@
           width 60px
           text-align center
 
+    .scroll-list-wrap
+      .list-wrapper
+        letter-spacing 1px
+
+        .load-wrapper
+          display flex
+          justify-content center
+          align-items center
+          height 60px
+
+        .list-item
+          margin 10px 10px
+          padding-top 10px
+
+        .item-top
+          margin-bottom 10px
+
+        .item-bottom
+          display -webkit-box;
+          -webkit-box-orient: vertical;
+          -webkit-line-clamp: 3;
+          overflow: hidden;
+          white-space: normal
+          line-height 20px
+          font-size 12px
+          color #ccc
 </style>

@@ -70,6 +70,8 @@
         minProblemId: '',
         upCurrent: 0,
         downCurrent: 0,
+        flush: this.$store.state.flushCount,
+        // flushCount: this.$route.state.flushCount,
         scrollOptions: {
           pullDownRefresh: {
             threshold: 50,
@@ -110,8 +112,7 @@
             this.upCurrent = this.current
             this.downCurrent = this.current
 
-            this.$store.commit('setFlushCount')
-            // this.$refs.scroll.forceUpdate()
+            // this.$store.commit('setFlushCount')
           })
           .catch((error) => {
             console.log(error)
@@ -160,6 +161,14 @@
           .catch((error) => {
             console.log(error)
           })
+      }
+    },
+    activated () {
+      // 删除元素之后更新后更新
+      if (this.flush !== this.$store.state.flushCount) {
+        console.log('flush 更新')
+        this.flush = this.$store.state.flushCount
+        this.getData()
       }
     },
     mounted () {

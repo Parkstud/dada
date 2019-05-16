@@ -22,43 +22,44 @@
         <cube-slide-item>
           <cube-scroll :data="recommendData" :options="scrollOptions">
             <ul class="list-wrapper">
+              <li v-if="followersData.length===0">
+                你还没有关注
+              </li>
               <li v-for="(item, index) in recommendData" class="list-item border-top-1px"
                   :key="index">
                 <div class="top">
                   <img :src="imgURL+item.avatar" class="avatar">
-                  <span class="name">{{item.nickName}}</span>
+                  <span class="name">{{item.username}}</span>
                 </div>
-                <div>{{resolveQuestionFollowers(item)}}</div>
                 <div class="btn-invite">
                   <cube-button :inline="true"
-                               :class="{'invite-active':item.invited,'invite':!item.invited}"
-                               @click="invite(item)">
-                    {{resolveText(item.invited)}}
+                               :class="{'invite-active':item.eachCare>=0,'invite':item.eachCare<0}"
+                               @click="care(item)">
+                    {{resolveText(item.eachCare)}}
                   </cube-button>
                 </div>
               </li>
             </ul>
           </cube-scroll>
         </cube-slide-item>
-        <!-- 好友 -->
+        <!-- 粉丝 -->
         <cube-slide-item>
           <cube-scroll :data="followersData" :options="scrollOptions">
             <ul class="list-wrapper">
               <li v-if="followersData.length===0">
-                你还没有好友
+                你还没有粉丝
               </li>
               <li v-for="(item, index) in followersData" class="list-item border-top-1px"
                   :key="index">
                 <div class="top">
                   <img :src="imgURL+item.avatar" class="avatar">
-                  <span class="name">{{item.nickName}}</span>
+                  <span class="name">{{item.username}}</span>
                 </div>
-                <div>推荐这位好友来回答</div>
                 <div class="btn-invite">
                   <cube-button :inline="true"
-                               :class="{'invite-active':item.invited,'invite':!item.invited}"
-                               @click="invite(item)">
-                    {{resolveText(item.invited)}}
+                               :class="{'invite-active':item.eachCare>0,'invite':item.eachCare<=0}"
+                               @click="fans(item)">
+                    {{fansText(item.eachCare)}}
                   </cube-button>
                 </div>
               </li>
@@ -70,25 +71,24 @@
   </div>
 </template>
 
-<script type="text/ecmascript-6">
-  import BackHeader from '../common/backHeader'
+<script type='text/ecmascript-6'>
+  import BackHeader from '../../common/backHeader'
 
   export default {
-    name: 'inviteanswer',
-    components: { BackHeader },
+    name: 'myCareFans',
     data () {
       return {
         backText: '返回',
-        selectedLabel: '推荐',
+        selectedLabel: this.$route.params.itemName,
         disabled: false,
         followersData: [],
         recommendData: [],
         problemId: null,
         tabLabels: [
           {
-            label: '推荐'
+            label: '关注'
           }, {
-            label: '好友'
+            label: '粉丝'
           }],
         loop: false,
         autoPlay: false,
@@ -104,22 +104,37 @@
       }
     },
     methods: {
-      invite (item) {
-        if (item.invited) {
-          return
+      fans (item) {
+        if (item.eachCare > 0) {
+          item.eachCare = 0
+        } else {
+          item.eachCare = 1
         }
-        item.invited = true
-        // 邀请用户
-        this.$http.post('/Interaction/invitedInfo',
-          this.$qs.stringify({
-            problemId: this.problemId,
-            invitedId: item.userId
-          }),
-          { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } })
-          .then((response) => {
-
+        this.$http.post('/problemInfo/change/careinfo', this.$qs.stringify({
+          userId: item.userId
+        })).then((res) => {
+          // 获取关注信息
+          this.$http.get('/Interaction/careInfoPage', {
+            params: {
+              problemId: this.problemId
+            }
+          }).then((response) => {
+            this.recommendData = response.data.body.data.records
           }).catch((error) => {
-          console.log(error)
+            console.log(error)
+          })
+        })
+      },
+      care (item) {
+        if (item.eachCare >= 0) {
+          item.eachCare = -1
+        } else {
+          item.eachCare = 0
+        }
+        this.$http.post('/problemInfo/change/careinfo', this.$qs.stringify({
+          userId: item.userId
+        })).then((res) => {
+          console.log(res)
         })
       },
       findIndex (ary, fn) {
@@ -136,7 +151,6 @@
             return ret
           }
         })
-
         return index
       },
       changePage (current) {
@@ -149,41 +163,32 @@
         const deltaX = x / slideScrollerWidth * tabItemWidth
         this.$refs.tabNav.setSliderTransform(deltaX)
       },
-
-      resolveText (invited) {
-        if (invited) {
-          return '已邀请'
+      fansText (eachCare) {
+        if (eachCare > 0) {
+          return '已关注'
         }
-        return '邀请'
+        return '关注'
       },
-      resolveQuestionFollowers (item) {
-        if (item.type === 1) {
-          return '推荐这位教师回答'
+      resolveText (eachCare) {
+        if (eachCare >= 0) {
+          return '已关注'
         }
-        // return `该类型下,累计获得${item.answers} 赞同 `
-        return `该类型下,累计获得较多赞同 `
+        return '关注'
       },
       getData () {
-        if (this.$route.params.problemId) {
-          window.localStorage.setItem('inv_problemId', this.$route.params.problemId)
-        }
-        this.problemId = window.localStorage.getItem('inv_problemId')
-        console.log('mounted')
-        console.log(this.problemId)
-
-        // 获取推荐
-        this.$http.get('/Interaction/recommend', {
+        // 获取关注
+        this.$http.get('/Interaction/careInfoPage', {
           params: {
             problemId: this.problemId
           }
         }).then((response) => {
-          this.recommendData = response.data.body.data
+          this.recommendData = response.data.body.data.records
         }).catch((error) => {
           console.log(error)
         })
 
-        // 获取care
-        this.$http.get('/Interaction/caredInvitedList', {
+        // 获取粉丝
+        this.$http.get('/Interaction/fansInfoPage', {
           params: {
             problemId: this.problemId
           }
@@ -204,10 +209,15 @@
     },
     activated () {
       this.getData()
-    }
+    },
+    mounted () {
+      this.getData()
+    },
+    components: { BackHeader }
   }
 </script>
-<style lang="stylus" rel="stylesheet/stylus">
+
+<style lang='stylus' rel='stylesheet/stylus'>
   .cube-tab-bar
     background-color: white
 
@@ -266,11 +276,12 @@
               font-size 14px
 
           .btn-invite
-            margin-top -30px
+            margin-top -40px
             text-align right
 
             .invite-active
-              background-color gray
+              background-color #efefef
+              color #999
 
             .invite
               background-color #0184ff

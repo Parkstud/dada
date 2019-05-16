@@ -2,7 +2,7 @@
   <div class="back-header">
       <span class="cubeic-back" @click="back">
       </span>
-    <i class="cubeic-more" v-show="showMore" @click="showMoreAction"></i>
+    <i class="cubeic-more" ref="showmore" v-show="showMore" @click="showMoreAction"></i>
     <transition name="fade">
       <div class="moreAction" v-show="show">
         <ul>
@@ -10,13 +10,13 @@
             <i class="cubeic-star" :class="{'cubeic-star-collect':hasCollection}"></i>
             <span>{{collectText}}</span>
           </li>
-          <li>
+          <li @click="reportProblem">
             <i class="cubeic-danger"></i>
             <span>举报</span>
           </li>
-          <li>
-            <i class="cubeic-edit"></i>
-            <span>纠错</span>
+          <li @click="deleteProblem" v-show="showDelete">
+            <i class="cubeic-delete"></i>
+            <span>删除</span>
           </li>
         </ul>
       </div>
@@ -63,9 +63,23 @@
           return '已收藏'
         }
         return '收藏'
+      },
+      showDelete () {
+        if (JSON.parse(window.localStorage.getItem('token')).type === 1) {
+          return true
+        }
+        return false
       }
     },
     methods: {
+      reportProblem () {
+        this.$emit('changeReport')
+      },
+      // 删除问题
+      deleteProblem () {
+        this.$emit('deleteProblem')
+        console.log('删除')
+      },
       back () {
         console.log('back')
         console.log(this.backComponent)

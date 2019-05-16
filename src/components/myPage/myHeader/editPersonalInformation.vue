@@ -22,7 +22,7 @@
              :data="data"
              :max-file-size="maxFileSize"
              :url="serverUrl">
-             <img class="avatar" width="35" :src="this.imgURL+personInfo.path">
+             <img class="avatar" width="35" height="35" :src="this.imgURL+personInfo.path">
          </vue-core-image-upload>
         </span>
       </div>

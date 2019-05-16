@@ -4,7 +4,7 @@
     <div class="chat-header">
       <span class="cubeic-back" @click="back"></span>
       <span></span>
-      <span class="txt" @click="back">查看题目</span>
+      <span class="txt"></span>
     </div>
     <cube-scroll ref="commentContainer" :options="scrollOptions" @pulling-up="onPullingUp">
       <!--评论内容-->
@@ -16,11 +16,11 @@
           </span>
           <span class="author-name">{{commentInfo.commentUserNickName}}</span>
           <span class="answer-time">{{commentInfo.commentTime}}</span>
-          <span class="info-left">
+          <span class="info-left" @click="replyComment">
               <span class="cubeic-message"></span>
               <span class="comment">{{replayInfo.length}}</span>
-              <!--<span class="cubeic-good" :class="hasLiked ?'active':''" @click="goodComment"></span>-->
-              <!--<span class="approve">{{commentInfo.awesome}}</span>-->
+            <!--<span class="cubeic-good" :class="hasLiked ?'active':''" @click="goodComment"></span>-->
+            <!--<span class="approve">{{commentInfo.awesome}}</span>-->
           </span>
           <p class="comments">
             {{commentInfo.commentComments}}
@@ -40,7 +40,10 @@
             {{item.repliedUsername?'回复 '+item.repliedUsername+' 的评论 :'+item.content:item.content}}
           </p>
         </div>
+        <hr style="filter: progid:DXImageTransform.Microsoft.Glow(color=#ccc,strength=10)"
+            color=#ccc SIZE=1/>
       </div>
+
     </cube-scroll>
     <!--底部-->
     <div class="chat-footer">
@@ -79,10 +82,25 @@
         }
       }
     },
+    computed: {
+      reportOrDelete () {
+        if (this.replyOtherInfo) {
+          if (this.replyOtherInfo.replyUserId === JSON.parse(window.localStorage.getItem('token')).id) {
+            return '删除'
+          }
+        }
+        return '举报'
+      }
+    },
     methods: {
+      replyComment () {
+        this.replyOtherInfo = null
+        this.placeholder = '请输入你的回复内容'
+      },
       // 点击回复item
       clickReply (item) {
         this.replyOtherInfo = item
+
         this.dialog = this.$createDialog({
           type: 'alert',
           showClose: false,
@@ -105,7 +123,7 @@
                 click: this.clickReport
               },
               slot: 'title'
-            }, '举报'),
+            }, this.reportOrDelete),
             createElement('div', {
               'class': {
                 'my-content': true,
@@ -124,16 +142,32 @@
         if (this.dialog) {
           this.dialog.hide()
         }
-        // 跳转举报页面
-        this.$router.push({
-          name: 'report',
-          params: {
-            type: 3,
-            reportInfo: this.replyOtherInfo,
-            commentInfo: this.commentInfo
-          }
-        })
-        this.replyOtherInfo = null
+        if (this.reportOrDelete === '举报') {
+
+          // 跳转举报页面
+          this.$router.push({
+            name: 'report',
+            params: {
+              type: 3,
+              reportInfo: this.replyOtherInfo,
+              commentInfo: this.commentInfo
+            }
+          })
+          this.replyOtherInfo = null
+        } else {
+          console.log(this.replyOtherInfo)
+          this.$http.delete('/Interaction/reply',
+            {
+              params: {
+                replyId: this.replyOtherInfo.id
+              }
+            }
+          ).then((res) => {
+            this.getData()
+          }).catch((error) => {
+            console.log(error)
+          })
+        }
       },
       // 点击发送信息
       sendReplyClick () {
@@ -141,7 +175,6 @@
       },
       // 回复别人
       replyOther () {
-        console.log(this.replyOtherInfo)
         if (this.replyOtherInfo) {
           this.placeholder = '回复: ' + this.replyOtherInfo.replyUsername
         }
@@ -285,10 +318,7 @@
       }
     },
     beforeRouteEnter (to, from, next) {
-      // 路由导航钩子，此时还不能获取组件实例 `this`，所以无法在data中定义变量（利用vm除外）
-      // 参考 https://router.vuejs.org/zh-cn/advanced/navigation-guards.html
-      // 所以，利用路由元信息中的meta字段设置变量，方便在各个位置获取。这就是为什么在meta中定义isBack
-      // 参考 https://router.vuejs.org/zh-cn/advanced/meta.html
+      console.log(from)
       if (from.name === 'problemDetails') {
         to.meta.isBack = false
       }
@@ -306,12 +336,19 @@
       // 设置滑动高度
       this.clientHeight = `${document.documentElement.clientHeight}`
       this.$refs.commentContainer.$refs.wrapper.style.height = this.clientHeight - 81 + 'px'
+      this.getData()
     }
 
   }
 </script>
 
 <style lang='stylus' rel='stylesheet/stylus'>
+  .cube-dialog-content-def, .cube-dialog-content
+    margin 0
+
+  .cube-dialog-title + .cube-dialog-content
+    margin 0
+
   .my-content
 
     height 50px
@@ -355,7 +392,7 @@
       .author-info
         position: relative;
         margin 10px
-        color: #999999
+        color: #7A7A7A
 
         .avatar > img
           border-radius 50%
@@ -364,7 +401,7 @@
         .author-name
           display inline-block
           position absolute
-          top: 4px
+          top: 12px
           font-size 14px
 
         .answer-time
@@ -401,8 +438,7 @@
     .reply-wrapper
       margin 10px
       position relative
-      border-bottom 1px solid gray
-      padding-bottom 20px
+      color #7A7A7A
 
       .avatar > img
         margin-right 10px
@@ -411,7 +447,7 @@
       .reply-content
         .reply-name
           position absolute
-          top 5px
+          top 10px
           left 50px
 
         .reply-time
@@ -420,20 +456,26 @@
           top: 5px
 
         .reply-content
-
+          color: #363636
           margin-left 50px
 
     .chat-footer
       box-shadow: 1px 2px 4px rgba(0, 0, 0, 0.5)
       height: 40px
       background-color gray
+
       .cube-input
-        font-size 24px
+        padding-left 6px
+        padding-right 6px
+
+        .text
+          font-size 20px
+
       .temp-space
         margin 0 5px
 
       .cubeic-navigation
-        font-size 24px
+        font-size 20px
         margin 0 5px
 
       .not-send

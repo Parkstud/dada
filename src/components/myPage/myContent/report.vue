@@ -1,6 +1,6 @@
 <template>
   <div class="report">
-    <back-header :backText="backText" :into-params="backinfo()" :backComponent="backComponent"
+    <back-header :backText="backText"
                  :show-more="false"></back-header>
     <div class="content">
       <!--举报类型-->
@@ -57,14 +57,8 @@
       }
     },
     methods: {
-      backinfo () {
-        return {
-          commentInfo: this.commentInfo
-        }
-      },
       submitReport () {
         this.showToastTime()
-        console.log()
         // 设置举报信息并提交
         let report = {}
         report.reportId = this.reportInfo.id
@@ -78,7 +72,7 @@
           this.$qs.stringify(report),
           { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } }
         ).then((response) => {
-
+          this.$router.go(-1)
         }).catch((error) => {
           console.log(error)
         })
@@ -86,13 +80,17 @@
       showToastTime () {
         const toast = this.$createToast({
           type: 'txt',
-          time: 1000,
+          time: 0,
           txt: '举报成功',
           $class: {
             'own-class': true
           }
         })
         toast.show()
+        setTimeout(() => {
+          toast.hide()
+          this.$router.go(-1)
+        }, 1000)
       },
       selectReason (item) {
         this.choose = item.id

@@ -191,9 +191,6 @@
         return string
       },
       getData () {
-        // 获取浏览器可视区域高度
-        this.clientHeight = `${document.documentElement.clientHeight}`
-        this.$refs.question.style.height = (this.clientHeight - 42) + 'px'
         // 自动问答接口
         let url = '/problem/intelligentQuestionAnswering'
         this.$http.get(url, {
@@ -205,6 +202,27 @@
             console.log(response.data.body.data)
             this.answerData = response.data.body.data
           }
+          // 设置问题开放
+          console.log(this.question)
+          if (this.answerData.length === 0) {
+            let temp = {}
+            console.log(this.question.id)
+            temp.id = this.question.id
+            temp.title = this.question.title
+            temp.userId = this.question.userId
+
+            temp.open = 1
+            this.$http.post('/control/problem/problemInfo',
+              this.$qs.stringify(temp)
+              ,
+              { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } }
+            ).then((res) => {
+
+            }).catch((error) => {
+              console.log(error)
+            })
+          }
+
           this.dataloaded = true
           this.$nextTick(() => {
             this.$refs.scroll.refresh()
@@ -215,6 +233,9 @@
       }
     },
     mounted () {
+      // 获取浏览器可视区域高度
+      this.clientHeight = `${document.documentElement.clientHeight}`
+      this.$refs.question.style.height = (this.clientHeight - 42) + 'px'
       this.getData()
     },
     components: { BackHeader }

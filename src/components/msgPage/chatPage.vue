@@ -35,7 +35,7 @@
     <div class="chat-footer">
 
       <cube-input v-model="value" @keyup.enter.native="sendMessage">
-        <span slot="prepend" class="cubeic-picture"></span>
+        <!--<span slot="prepend" class="cubeic-picture"></span>-->
         <span slot="append" @click="sendMessageClick" class="cubeic-navigation"
               :class="value.length>0?'sending':'not-send'"></span>
       </cube-input>
@@ -63,7 +63,7 @@
             hasRead: 0
           }
         ],
-        letterUser: this.$route.params.letterUser,
+        letterUser: {},
         nowUser: {},
         options: {
           startY: 0,
@@ -193,6 +193,32 @@
           }).catch((error) => {
           console.log(error)
         })
+      },
+      getData () {
+        this.letterUser = this.$route.params.letterUser
+        // 通过letter 和当前用户信息查询聊天记录
+        // 查询当前的用户信息
+        let url = '/myPage/user/userInformation'
+        this.$http.get(url, null)
+          .then((response) => {
+            if (response.data.head.stateCode === 200) {
+              this.nowUser.userAvatar = response.data.body.data.path
+              // 获取历史消息
+              let url = '/message/news/history/list'
+              this.$http.get(url, {
+                params: {
+                  receiveId: this.nowUser.userId,
+                  sendId: this.letterUser.userId
+                }
+              }).then((response) => {
+                if (response.data.head.stateCode === 200) {
+                  this.msgs = response.data.body.data
+                }
+              })
+            }
+          }).catch((error) => {
+          console.log(error)
+        })
       }
     },
     watch: {
@@ -202,6 +228,23 @@
         }, 200)
       }
     },
+
+    beforeRouteEnter (to, from, next) {
+      console.log(from)
+      if (from.name === 'mainApp') {
+        to.meta.isBack = false
+      }
+      next()
+    },
+    activated () {
+      if (!this.$route.meta.isBack) {
+        // 如果isBack是false，表明需要获取新数据，否则就不再请求，直接使用缓存的数据
+        this.getData()
+      }
+      // 恢复成默认的false，避免isBack一直是true，导致下次无法获取数据
+      this.$route.meta.isBack = true
+    },
+
     mounted () {
       this.options.startY = document.documentElement.clientHeight - this.$refs.scrollChat.$refs.listWrapper.scrollHeight - 70
       // contentWrapper
@@ -212,30 +255,7 @@
         this.$refs.scrollChat.refresh()
         this.$refs.scrollChat.scroll.scrollTo(0, this.$refs.scrollChat.scroll.maxScrollY)
       })
-
-      // 通过letter 和当前用户信息查询聊天记录
-      // 查询当前的用户信息
-      let url = '/myPage/user/userInformation'
-      this.$http.get(url, null)
-        .then((response) => {
-          if (response.data.head.stateCode === 200) {
-            this.nowUser.userAvatar = response.data.body.data.path
-            // 获取历史消息
-            let url = '/message/news/history/list'
-            this.$http.get(url, {
-              params: {
-                receiveId: this.nowUser.userId,
-                sendId: this.letterUser.userId
-              }
-            }).then((response) => {
-              if (response.data.head.stateCode === 200) {
-                this.msgs = response.data.body.data
-              }
-            })
-          }
-        }).catch((error) => {
-        console.log(error)
-      })
+      this.getData()
     }
   }
 </script>
@@ -347,6 +367,10 @@
       .chat-footer
         height: 40px
         background-color gray
+        font-size 10px
+
+        .cube-input
+          padding-left 20px
 
         .cubeic-picture
           color #0a89ff

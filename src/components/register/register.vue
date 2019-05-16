@@ -50,7 +50,6 @@
         pwd: '',
         pwdplaceholder: '密码',
         typePwd: 'password',
-        canClick: true,
         eye: {
           open: false,
           reverse: false
@@ -59,9 +58,6 @@
     },
     methods: {
       countDown () {
-        if (!this.canClick) {
-          return
-        }
         this.sendCodeInfo = this.totalTime + 's后重新发送'
         let clock = window.setInterval(() => {
           this.totalTime--
@@ -110,6 +106,9 @@
       },
       // 发送验证码
       sendCode () {
+        if (this.sendActve) {
+          return
+        }
         this.sendActve = true
         // 发送验证码
         let param = new URLSearchParams()

@@ -1,8 +1,11 @@
 <template>
   <div class="proble-details">
-    <proback-header :back-text="backText" :back-component="backComponent"
+    <proback-header ref="backheader" :back-text="backText" :back-component="backComponent"
                     :has-collection="hasCollection"
-                    v-on:changeHasCollection="changeHasCollection"></proback-header>
+                    v-on:changeHasCollection="changeHasCollection"
+                    v-on:changeReport="changeReport"
+                    v-on:deleteProblem="deleteProblem"
+    ></proback-header>
     <cube-scroll ref="answer"
                  :options="scrollOptions"
                  :data="comments"
@@ -126,6 +129,54 @@
       }
     },
     methods: {
+      deleteProblem () {
+        this.$createDialog({
+          type: 'confirm',
+          icon: 'cubeic-alert',
+          title: '确认删除该题目',
+          confirmBtn: {
+            text: '确认',
+            active: true,
+            disabled: false,
+            href: 'javascript:;'
+          },
+          cancelBtn: {
+            text: '取消',
+            active: false,
+            disabled: false,
+            href: 'javascript:;'
+          },
+          onConfirm: () => {
+            // 需要全部更新列表
+            this.$store.commit('setFlushCount')
+            this.$refs.backheader.$refs.showmore.click()
+
+            this.$http.post('/control/problem/id',
+              this.$qs.stringify({
+                id: this.problem.id
+              }),
+              { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } }
+            ).then((res) => {
+              const toast = this.$createToast({
+                type: 'warn',
+                time: 0,
+                txt: '删除成功'
+              })
+              toast.show()
+
+              setTimeout(() => {
+                toast.hide()
+                this.$router.go(-1)
+              }, 1000)
+            }).catch((error) => {
+              console.log(error)
+            })
+          },
+          onCancel: () => {
+            this.$refs.backheader.$refs.showmore.click()
+          }
+        }).show()
+      },
       // 反对
       pullDown (item) {
         // 处理多次点击
@@ -194,10 +245,7 @@
         this.changeAwesome(item)
       },
       onPullingDown () {
-        setTimeout(() => {
-          this.$refs.answer.forceUpdate()
-          // this.$refs.answer.scrollTo(0, 26, 300)
-        }, 1000)
+        this.getData()
       },
       // 点击头像跳转界面
       toHomepage (commentId) {
@@ -289,6 +337,24 @@
           }
         })
       },
+      // 接收子组件的举报信息
+      changeReport () {
+        // 跳转到举报信息页面
+        console.log((JSON.parse(window.localStorage.getItem('token'))))
+        let reportInfo = {}
+        reportInfo['id'] = this.problem.id
+        reportInfo['replyUserId'] = this.problem.userId
+        // 跳转举报页面
+        this.$router.push({
+          name: 'report',
+          params: {
+            type: 1,
+            reportInfo: reportInfo
+          }
+        })
+
+        console.log('举报')
+      },
       // 接收子组件修改的收藏信息
       changeHasCollection (value) {
         this.hasCollection = value
@@ -315,7 +381,7 @@
           window.localStorage.setItem('proDet_problem', JSON.stringify(this.$route.params.problem))
         }
         this.problem = JSON.parse(window.localStorage.getItem('proDet_problem'))
-
+        console.log(this.problem)
         // 更新浏览记录
         let url = '/problemInfo/problem/history'
         let param = new URLSearchParams()
@@ -349,11 +415,7 @@
       }
     },
     beforeRouteEnter (to, from, next) {
-      // 路由导航钩子，此时还不能获取组件实例 `this`，所以无法在data中定义变量（利用vm除外）
-      // 参考 https://router.vuejs.org/zh-cn/advanced/navigation-guards.html
-      // 所以，利用路由元信息中的meta字段设置变量，方便在各个位置获取。这就是为什么在meta中定义isBack
-      // 参考 https://router.vuejs.org/zh-cn/advanced/meta.html
-      console.log('from ' + from)
+      console.log(from)
       if (from.name === 'mainApp') {
         to.meta.isBack = false
       }

@@ -19,8 +19,8 @@
           <span class="answer-name">{{answerPerson.username}}</span>
         </div>
         <div class="answer-wrapper">
-          <p class="answer-content">
-            {{answerContent}}
+          <p class="answer-content" v-html="answerContent">
+
           </p>
         </div>
         <div class="bottom-wrapper">
