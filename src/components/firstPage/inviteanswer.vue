@@ -211,8 +211,6 @@
   .cube-tab-bar
     background-color: white
 
-    .cube-tab-bar-slider
-      background-color: #e8864c
 
   .tab-slide-container
     position: fixed

@@ -65,7 +65,8 @@
         return '收藏'
       },
       showDelete () {
-        if (JSON.parse(window.localStorage.getItem('token')).type === 1) {
+        let userAccount = JSON.parse(window.localStorage.getItem('token'))
+        if (userAccount.type === 1 || userAccount.id) {
           return true
         }
         return false
@@ -81,10 +82,6 @@
         console.log('删除')
       },
       back () {
-        console.log('back')
-        console.log(this.backComponent)
-        console.log(this.backComponent)
-        console.log(this.intoParams)
         if (this.backComponent === '') {
           this.$router.go(BACK_FLAG)
         } else {

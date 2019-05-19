@@ -8,7 +8,7 @@
           :data="problemInfo"
           :options="options">
           <ul class="list-wrapper">
-            <li v-for="(item, index) in problemInfo" class="list-item border-top-1px"
+            <li v-for="(item, index) in problemInfo" class="my-list-item border-top-1px"
                 @click="choseProblem(item)"
                 :key="index">
               <div class="item-top">
@@ -47,8 +47,19 @@
     methods: {
       choseProblem (item) {
         // 跳转问题详细界面
-
-        console.log(item)
+        let newProblem = {}
+        newProblem.answerContent = item.answerContent
+        newProblem.id = item.problemId
+        newProblem.open = item.open
+        newProblem.time = item.time
+        newProblem.title = item.problemTitle
+        newProblem.userId = item.userId
+        this.$router.push({
+          name: 'problemDetails',
+          params: {
+            problem: newProblem
+          }
+        })
       },
       onPullingUp () {
         if (this.problemInfo.length > 0 && this.problemInfo.length % this.size === 0) {
@@ -92,47 +103,35 @@
     .content
       .scroll-list-wrap
         .list-wrapper
-          letter-spacing 1px
 
-          .list-item
-            margin 10px 10px
+          .my-list-item
             padding-top 10px
             position: relative;
             overflow: hidden;
 
-            &:after
-              content: "";
-              display: block;
-              position: absolute;
-              width: 100%;
-              height: 100%;
-              top: 0;
-              left: 0;
-              pointer-events: none;
-              //设置径向渐变
-              background-image: radial-gradient(circle, #666 10%, transparent 10.01%);
-              background-repeat: no-repeat;
-              background-position: 50%;
-              transform: scale(10, 10);
-              opacity: 0;
-              transition: transform .3s, opacity .5s;
+            &:active
+              background #efefef;
 
-            &:active:after
-              transform: scale(0, 0);
-              opacity: .3;
-              //设置初始状态
-              transition: 0s;
+  /*            &:after
+                content: "";
+                display: block;
+                position: absolute;
+                width: 100%;
+                height: 100%;
+                top: 0;
+                left: 0;
+                pointer-events: none;
+                //设置径向渐变
+                background-image: radial-gradient(circle, #666 10%, transparent 10.01%);
+                background-repeat: no-repeat;
+                background-position: 50%;
+                transform: scale(10, 10);
+                opacity: 0;
+                transition: transform .3s, opacity .5s;
 
-          .item-top
-            margin-bottom 10px
-
-          .item-bottom
-            display -webkit-box;
-            -webkit-box-orient: vertical;
-            -webkit-line-clamp: 3;
-            overflow: hidden;
-            white-space: normal
-            line-height 20px
-            font-size 12px
-            color #ccc
+              &:active:after
+                transform: scale(0, 0);
+                opacity: .3;
+                //设置初始状态
+                transition: 0s;*/
 </style>

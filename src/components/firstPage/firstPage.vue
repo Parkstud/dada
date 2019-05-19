@@ -107,12 +107,11 @@
           .then((response) => {
             let data = response.data.body.data
             this.items = data.records
+            console.log(this.items )
             this.minProblemId = this.items[0].id
             this.maxProblemId = this.items[this.items.length - 1].id
             this.upCurrent = this.current
             this.downCurrent = this.current
-
-            // this.$store.commit('setFlushCount')
           })
           .catch((error) => {
             console.log(error)
@@ -129,6 +128,7 @@
         this.$http.get(url, { params })
           .then((response) => {
             let data = response.data.body.data
+
             // 有数据
             if (data.records.length > 0) {
               this.upCurrent++
@@ -174,7 +174,6 @@
     mounted () {
       // 获取浏览器可视区域高度
       this.clientHeight = `${document.documentElement.clientHeight}`
-      // this.$refs.containerPage.style.height = (this.clientHeight - 44) + 'px'
       this.$refs.mywrapper.style.height = (this.clientHeight - 87) + 'px'
       this.getData()
     }
@@ -188,39 +187,38 @@
     background-color #f4f6f9
 
     .top-wrapper
-      padding-bottom 1px
+      padding 4px
       box-shadow: 0 1px #efefef;
-
+      background-color: #017fff
       .search-wrapper
-        background-color #f1f1f1
+        background-color #3298fe
         border-radius 8px
         margin 2px
         height: 38px
         display flex
         justify-content space-between
         align-items: center;
-        /*box-shadow:-1px 0 2px 1px #efefef;*/
 
         .cubeic-search
           flex 1
           align-self: center;
           display inline-block
           text-align center
-          color: #7A7A7A
+          color: #fff
 
         .input-wrapper
           flex 5
 
           .cube-input
-            background-color #f1f1f1
+            background-color #3298fe
             border 0
             padding-right 8px
-
+            color: #a0cfff
             .cube-input-field
-              padding 0
+              padding 4px
 
             &:active
-              background-color #f5f5f5
+              background-color #5fb5ff
 
           .cube-input::after
             content: none;
@@ -228,13 +226,12 @@
         .submit-wrapper
           flex: 2;
           font-size 18px
-          color: #7A7A7A
+          color: #fff
 
           .cubeic-edit
             text-align right
             padding-left 6px
-            border-left 1px solid #dedede
-            color: #666
+            color: #fff
 
           .text
             padding-left 6px

@@ -114,8 +114,11 @@
         this.datePicker.show()
       },
       selectDateHandle (date, selectedVal, selectedText) {
+        console.log(selectedText.join('-'))
+
         this.personInfo.birthday = this.getTime(selectedText.join('-'))
-        this.updatePersonInfo()
+        console.log(this.personInfo.birthday)
+        // this.updatePersonInfo()
       },
       showActiveSex () {
         this.$createActionSheet({

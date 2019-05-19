@@ -1,7 +1,8 @@
 <template>
   <div class="proble-details">
-    <proback-header ref="backheader" :back-text="backText" :back-component="backComponent"
+    <proback-header ref="backheader" :back-text="backText"
                     :has-collection="hasCollection"
+                    :intoParams="problem"
                     v-on:changeHasCollection="changeHasCollection"
                     v-on:changeReport="changeReport"
                     v-on:deleteProblem="deleteProblem"
@@ -389,7 +390,7 @@
         this.$http.post(url, param)
           .then((response) => {
             // let data = response.data.body.data
-          }).then((error) => {
+          }).catch((error) => {
           console.log(error)
         })
 
@@ -415,8 +416,8 @@
       }
     },
     beforeRouteEnter (to, from, next) {
-      console.log(from)
-      if (from.name === 'mainApp') {
+      if (from.name === 'mainApp' || from.name === 'myProblem' ||
+        from.name === 'myCollection' || from.name === 'myHistory') {
         to.meta.isBack = false
       }
       next()
@@ -437,6 +438,8 @@
 </script>
 
 <style lang='stylus' rel='stylesheet/stylus'>
+  .cubeic-alert
+    color: #DA4F49
   .proble-details
     .cube-scroll-wrapper
       height 640px

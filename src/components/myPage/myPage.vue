@@ -28,6 +28,6 @@
 <style lang='stylus' rel='stylesheet/stylus'>
   .my-page
     height 100%
-    background-color #EAEBEB
+    background-color #f4f6f9
 
 </style>

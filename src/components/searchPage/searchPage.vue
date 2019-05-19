@@ -1,6 +1,7 @@
 <template>
   <div class="search-page">
     <div class="title">
+      <i class="cubeic-aim"></i>
       精确提问
     </div>
     <div class="content">
@@ -112,12 +113,12 @@
 <style lang='stylus' rel='stylesheet/stylus'>
   .search-page
     height 100%
-    background-color #eaeaea
-
+    background-color #f4f6f9
     .title
       padding 20px
       font-weight lighter
       font-size 26px
+      color: #017fff
 
     .content
       .item-wrapper

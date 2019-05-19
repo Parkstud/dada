@@ -9,6 +9,9 @@ import Register from './components/register/register'
 import Forget from './components/forget/forget'
 import axios from 'axios'
 import Qs from 'qs'
+import animate from 'animate.css'
+import base from './base'
+
 import VConsole from 'vconsole'
 import './common/stylus/index.styl'
 import myProblem from './components/myPage/myContent/myProblem/myProblem'
@@ -33,6 +36,7 @@ import changeTel from './components/myPage/myContent/personSet/changeTel'
 import aboutdada from './components/myPage/myContent/personSet/aboutdada'
 import myCareFans from './components/myPage/myHeader/myCareFans'
 
+
 Vue.config.productionTip = false
 
 Vue.prototype.imgURL = 'http://148.70.8.85/'
@@ -54,12 +58,14 @@ axios.interceptors.request.use(
   error => {
     return Promise.reject(error)
   })
-
+Vue.use(base)
 Vue.prototype.$qs = Qs
 // const vConsole = new VConsole()
 // export default vConsole
 Vue.use(VueRouter)
 Vue.use(Vuex)
+Vue.use(animate)
+
 const router = new VueRouter({
   routes: [
     { path: '/', component: Main, meta: { keepAlive: true } },
@@ -67,9 +73,24 @@ const router = new VueRouter({
     { path: '/mainApp', component: Main, name: 'mainApp', meta: { keepAlive: true } },
     { path: '/register', component: Register, meta: { keepAlive: true } },
     { path: '/forgetPwd', component: Forget, meta: { keepAlive: true } },
-    { path: '/myProblem', component: myProblem, meta: { isBack: false, keepAlive: true } },
-    { path: '/myCollection', component: myCollection, meta: { isBack: false, keepAlive: true } },
-    { path: '/myHistory', component: myHistory, meta: { isBack: false, keepAlive: true } },
+    {
+      path: '/myProblem',
+      name: 'myProblem',
+      component: myProblem,
+      meta: { isBack: false, keepAlive: true }
+    },
+    {
+      path: '/myCollection',
+      name: 'myCollection',
+      component: myCollection,
+      meta: { isBack: false, keepAlive: true }
+    },
+    {
+      path: '/myHistory',
+      name: 'myHistory',
+      component: myHistory,
+      meta: { isBack: false, keepAlive: true }
+    },
     {
       name: 'putQuestionPage',
       path: '/putQuestionPage',
@@ -163,7 +184,6 @@ const router = new VueRouter({
 
   ]
 })
-
 // Vuex配置
 const store = new Vuex.Store({
   state: {
@@ -218,49 +238,6 @@ const store = new Vuex.Store({
 
   }
 })
-// 设置cookie,增加到vue实例方便全局调用
-// vue全局调用的理由是，有些组件所用到的接口可能需要session验证，session从cookie获取
-// 当然，如果session保存到vuex的话除外
-Vue.prototype.setCookie = (cookieName, value, expiredays) => {
-  var exdate = new Date()
-  exdate.setDate(exdate.getDate() + expiredays)
-  document.cookie = cookieName + '=' + escape(value) + ((expiredays == null) ? '' : ';expires=' + exdate.toGMTString())
-}
-//  获取时间搓
-Vue.prototype.getTime = function (strTime) {
-  let date = new Date(strTime.replace(/-/g, '/'))
-  return date.getTime()
-}
-
-// 转换时间格式
-Vue.prototype.formatData = function (data, model) {
-  if (!data) {
-    return data
-  }
-  let date = new Date(data)
-  let Y = date.getFullYear() + '-'
-  let M = (date.getMonth() + 1 < 10 ? '0' + (date.getMonth() + 1) : date.getMonth() + 1) + '-'
-  let D = (date.getDate() < 10 ? '0' + date.getDate() : date.getDate()) + ' '
-  let h = (date.getHours() < 10 ? '0' + date.getHours() : date.getHours()) + ':'
-  let m = (date.getMinutes() < 10 ? '0' + date.getMinutes() : date.getMinutes()) + ':'
-  let s = (date.getSeconds() < 10 ? '0' + date.getSeconds() : date.getSeconds())
-  if (model === 1) {
-    return Y + M + D + h + m + s
-  }
-  if (model === 2) {
-    return Y + M + D
-  }
-}
-Vue.prototype.change = (oldParam, newParam) => {
-  if (!newParam || newParam.length === 0) {
-    return false
-  }
-  if (oldParam === newParam) {
-    return false
-  }
-  return true
-}
-
 new Vue({
   render: h => h(App),
   router,

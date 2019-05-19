@@ -138,28 +138,33 @@
 
 <style lang='stylus' rel='stylesheet/stylus'>
   .only-search
+    background #f4f6f9
+    height 100%
     .search-wrapper
       display flex
       align-content: space-between;
-      background-color #f1f1f1
-      border-radius 10px
+      background-color #007efe
       box-shadow: 1px 2px 4px rgba(0, 0, 0, 0.2)
 
       .input-wrapper
         flex 1
 
         .cube-input
-          background-color #f1f1f1
+          background-color #007efe
+          border-bottom-width: 0
+
+          .cube-input-field
+            color: #fff
 
         .cube-input::after
-          content: none;
+          content: none
 
       .cubeic-back
         width 40px
         align-self: center;
         text-align center;
         font-size 22px
-        color gray
+        color #fff
 
       .temp
         height 20px
@@ -167,7 +172,7 @@
 
     .history-wrapper
       color #aaa
-
+      background #f4f6f9
       .clear-history
         height 24px
         text-align center

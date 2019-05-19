@@ -1,15 +1,17 @@
 <template>
   <div class="msg-page">
-    <div class="search-wrapper">
-      <span class="cubeic-search"></span>
-      <span class="input-wrapper" @click="showSearch">
+    <div class="top-wrapper">
+      <div class="search-wrapper">
+        <span class="cubeic-search"></span>
+        <span class="input-wrapper" @click="showSearch">
           <cube-input :placeholder="placeholder" :readonly="readonly"></cube-input>
       </span>
 
-      <span class="submit-wrapper" @click="putQuestion">
+        <span class="submit-wrapper" @click="putQuestion">
           <span class="cubeic-edit"></span>
           <span class="text">提问</span>
       </span>
+      </div>
     </div>
     <cube-tab-bar v-model="selectedLabel" :show-slider="showSlider" ref="tabNav">
       <cube-tab v-for="(item, index) in tabs" :icon="item.icon" :label="item.label"
@@ -268,50 +270,56 @@
 
   .msg-page
     height 100%
+    .top-wrapper
+      padding 4px
+      box-shadow: 0 1px #efefef;
+      background-color: #017fff
+      .search-wrapper
+        background-color #3298fe
+        border-radius 8px
+        margin 2px
+        height: 38px
+        display flex
+        justify-content space-between
+        align-items: center;
 
-    .search-wrapper
-      background-color #f1f1f1
-      border-radius 8px
-      margin 2px
-      height: 38px
-      display flex
-      justify-content space-between
-      align-items: center;
-
-      .cubeic-search
-        flex 1
-        align-self: center;
-        display inline-block
-        text-align center
-
-      .input-wrapper
-        flex 5
-
-        .cube-input
-          background-color #f1f1f1
-          border 0
-          padding-right 8px
-
-          .cube-input-field
-            padding 0
-
-          &:active
-            background-color #f5f5f5
-
-        .cube-input::after
-          content: none;
-
-      .submit-wrapper
-        flex: 2;
-
-        .cubeic-edit
-          text-align right
-          padding-left 6px
-          border-left 1px solid gray
-
-        .text
-          padding-left 6px
+        .cubeic-search
+          flex 1
+          align-self: center;
+          display inline-block
           text-align center
+          color: #fff
+
+        .input-wrapper
+          flex 5
+
+          .cube-input
+            background-color #3298fe
+            border 0
+            padding-right 8px
+            color: #a0cfff
+            .cube-input-field
+              padding 4px
+
+            &:active
+              background-color #5fb5ff
+
+          .cube-input::after
+            content: none;
+
+        .submit-wrapper
+          flex: 2;
+          font-size 18px
+          color: #fff
+
+          .cubeic-edit
+            text-align right
+            padding-left 6px
+            color: #fff
+
+          .text
+            padding-left 6px
+            text-align center
 
     .cube-tab-panels
 
@@ -320,7 +328,7 @@
 
         .cube-scroll-wrapper
           height: 600px
-
+          background #f4f6f9
           .tab-panel-li
             margin-left 10px
             margin-right 10px

@@ -9,6 +9,7 @@
           :options="options">
           <ul class="list-wrapper">
             <li v-for="(item, index) in problemInfo" class="list-item border-top-1px"
+                @click="choseHistory(item)"
                 :key="index">
               <div class="item-top">
                 {{item.problemTitle}}
@@ -39,12 +40,27 @@
           pullUpLoad: true,
           directionLockThreshold: 0
         },
-        problemInfo: [
-        ]
+        problemInfo: []
       }
     },
     components: { BackHeader },
     methods: {
+      choseHistory (item) {
+        // 跳转问题详细界面
+        let newProblem = {}
+        newProblem.answerContent = item.answerContent
+        newProblem.id = item.problemId
+        newProblem.open = item.open
+        newProblem.time = item.time
+        newProblem.title = item.problemTitle
+        newProblem.userId = item.userId
+        this.$router.push({
+          name: 'problemDetails',
+          params: {
+            problem: newProblem
+          }
+        })
+      },
       onPullingUp () {
         if (this.problemInfo.length > 0 && this.problemInfo.length % this.size === 0) {
           this.current++

@@ -52,7 +52,7 @@
         typeArray: ['用户', '问题', '评论', '回复'],
         // 点击原因突出显示
         choose: null,
-        reportType: {},
+        reportType: [],
         backComponent: 'commentDetail'
       }
     },
@@ -102,6 +102,7 @@
       this.$http.get('/report/manage/reasons', null)
         .then((response) => {
           this.reportType = response.data.body.data
+          this.choose = this.reportType[this.reportType.length - 1].id
         }).catch((error) => {
         console.log(error)
       })
@@ -122,7 +123,7 @@
 
     .content
       height 100%
-      background-color #ececec
+      background-color #f4f6f9
 
       .report-type-wrapper
         background-color white

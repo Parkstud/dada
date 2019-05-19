@@ -14,7 +14,8 @@
     "vue": "^2.5.22",
     "vue-router": "^3.0.2",
     "vuex": "^3.1.0",
-    "vue-core-image-upload": "^2.4.11"
+    "vue-core-image-upload": "^2.4.11",
+    "animate.css": "^3.7.0"
   },
   "devDependencies": {
     "@vue/cli-plugin-babel": "^3.4.0",
