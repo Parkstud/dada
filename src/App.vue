@@ -21,7 +21,8 @@
           nick: null,
           uid: null,
           portrait: null
-        }
+        },
+        transitionName: ''
       }
     },
     methods: {
@@ -33,18 +34,6 @@
           uid: '1',
           portrait: 'profile.png'
         }
-
-        // 实例开发中这里会向服务端请求数据
-        // 如下(用了vue-resource):
-        // ts.$http.get(url, {
-        //   //参数
-        //   "params":{}
-        // }).then((response) => {
-        //   //Success
-        // }, (response) => {
-        //   //Error
-        // });
-
         // 提交mutation到Store
         this.$store.commit('updateUserInfo', this.userInfo)
       },

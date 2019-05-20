@@ -4,9 +4,9 @@
       <div class="center">
         <div class="question-propose">
           <div class="questioner-info">
-            <img class="question-avatar" width="36" height="36" v-show="questionPerson.avatar"
-                 :src="this.imgURL+questionPerson.avatar">
-            <span class="questioner-name">{{questionPerson.username}}</span>
+            <img class="question-avatar" width="36" height="36" v-show="problemItem.avatar"
+                 :src="this.imgURL+problemItem.avatar">
+            <span class="questioner-name">{{problemItem.username}}</span>
           </div>
           <span class="questioner-time">{{getDateDiff(problemItem.time)}}</span>
         </div>
@@ -17,28 +17,31 @@
           </span>
         </div>
         <div class="content">
-          <div class="answer-people" v-show="commentCount>0">
-            <span class="answer-name">{{answerPerson.username}}: </span>
-            <span class="answer-content" v-html="answerContent">
-            </span>
+          <div class="answer-people">
+               <span class="answer-name"
+                     v-show="commentInfo.username">{{commentInfo.username}}:
+               </span>
+            <span class="answer-content" v-show="commentInfo.comments"
+                  v-html="commentInfo.comments">
+              </span>
           </div>
         </div>
       </div>
       <div class="bottom-wrapper border-top-1px">
         <div class="put-good border-right-1px" @click.stop="pullUp">
-          <div v-show="problemItem.open===0 && commentCount>0">
+          <div v-show="commentInfo.userLike">
             <i class="cubeic-good"
-               :class="nowUserLike===1?'adoption':'adoption-not'">
-              <span class="text" v-if="awesomeCount>0">{{awesomeCount}}</span>
+               :class="commentInfo.userLike===1?'adoption':'adoption-not'">
+              <span class="text" v-if="commentInfo.awesome>0">{{commentInfo.awesome}}</span>
               <span class="text" v-else>赞同</span>
             </i>
           </div>
         </div>
         <div class="put-bad border-right-1px" @click.stop="pullDown">
-          <div v-show="problemItem.open===0 && commentCount>0">
+          <div v-show="commentInfo.userLike">
             <i class="cubeic-bad"
-               :class="nowUserLike===2?'oppose':'oppose-not'">
-              <span class="text" v-if="badReview>0">{{badReview}}</span>
+               :class="commentInfo.userLike===2?'oppose':'oppose-not'">
+              <span class="text" v-if="commentInfo.badReview>0">{{commentInfo.badReview}}</span>
               <span class="text" v-else>反对</span>
             </i>
           </div>
@@ -47,7 +50,7 @@
           <div>
               <span class="comment-wrapper">
                 <span class="cubeic-message"></span>
-                <span class="text" v-if="this.commentCount>0">{{this.commentCount}}</span>
+                <span class="text" v-if="commentInfo.answerCount">{{commentInfo.answerCount}}</span>
                 <span class="text" v-else>评论</span>
               </span>
           </div>
@@ -81,6 +84,7 @@
         nowUserLike: 0,
         // 点赞id
         commentId: null,
+        commentInfo: {},
         // 当前是否需要刷新
         flush: 0,
         categoryArr: ['', '数据结构理论', '线性表', '栈和队列', '字符串', '树', '图', '算法']
@@ -90,19 +94,6 @@
       problemItem: {
         type: Object,
         required: true
-      }
-    },
-    watch: {
-      problemItem () {
-        this.questionPerson = {}
-        this.answerPerson = {}
-        this.answerContent = 0
-        this.commentCount = 0
-        this.awesomeCount = 0
-        this.badReview = 0
-        this.nowUserLike = 0
-        this.commentId = null
-        this.getData()
       }
     },
     activated () {
@@ -127,16 +118,16 @@
           return
         }
         this.evTimeStamp = now
-        if (this.nowUserLike === 2) {
-          this.nowUserLike = 0
-          this.badReview--
-        } else if (this.nowUserLike === 1) {
-          this.nowUserLike = 2
-          this.badReview++
-          this.awesomeCount--
+        if (this.commentInfo.userLike === 2) {
+          this.commentInfo.userLike = 0
+          this.commentInfo.badReview--
+        } else if (this.commentInfo.userLike === 1) {
+          this.commentInfo.userLike = 2
+          this.commentInfo.badReview++
+          this.commentInfo.awesome--
         } else {
-          this.nowUserLike = 2
-          this.badReview++
+          this.commentInfo.userLike = 2
+          this.commentInfo.badReview++
         }
 
         this.changeAwesome()
@@ -145,8 +136,8 @@
       changeAwesome () {
         let url = '/Interaction/awesome'
         let userLikes = {}
-        userLikes.commentId = this.commentId
-        userLikes.result = this.nowUserLike
+        userLikes.commentId = this.commentInfo.id
+        userLikes.result = this.commentInfo.userLike
         this.$http.post(
           url,
           this.$qs.stringify(userLikes),
@@ -169,16 +160,16 @@
           return
         }
         this.evTimeStamp = now
-        if (this.nowUserLike === 1) {
-          this.nowUserLike = 0
-          this.awesomeCount--
-        } else if (this.nowUserLike === 2) {
-          this.nowUserLike = 1
-          this.awesomeCount++
-          this.badReview--
+        if (this.commentInfo.userLike === 1) {
+          this.commentInfo.userLike = 0
+          this.commentInfo.awesome--
+        } else if (this.commentInfo.userLike === 2) {
+          this.commentInfo.userLike = 1
+          this.commentInfo.awesome++
+          this.commentInfo.badReview--
         } else {
-          this.nowUserLike = 1
-          this.awesomeCount++
+          this.commentInfo.nowUserLike = 1
+          this.commentInfo.awesome++
         }
 
         this.changeAwesome()
@@ -190,48 +181,14 @@
           params: { problem: this.problemItem }
         })
       },
-      // 遍历 计算赞数
-      computedAwesome (comments) {
-        let sum = 0
-        for (let i = 0; i < comments.length; i++) {
-          sum += comments[i].awesome
-        }
-        return sum
-      },
-      computedBadReview (comments) {
-        let sum = 0
-        for (let i = 0; i < comments.length; i++) {
-          sum += comments[i].badReview
-        }
-        return sum
-      },
       getData () {
         // 查询提问人信息 , 评论 回复 点赞信息
-        if (this.problemItem.avatar) {
-          this.questionPerson.avatar = this.problemItem.avatar
-        }
-        if (this.problemItem.username) {
-          this.questionPerson.username = this.problemItem.username
-        }
         let url = '/problemInfo/problem/' + this.problemItem.id
         this.$http.get(url, null)
           .then((response) => {
             let data = response.data.body.data
-            this.questionPerson.username = data.username
-            this.questionPerson.avatar = data.avatar
-            this.nowUserLike = data.userLike
-            if (data.comments.length === 0) {
-              // 没有回复 显示默认回复
-              this.answerContent = this.problemItem.answerContent
-            } else {
-              this.commentId = data.comments[0].id
-              this.answerPerson = data.comments[0]
-              this.answerContent = data.comments[0].comments
-              this.commentCount = data.comments.length
-              this.badReview = data.comments[0].badReview
-              // 计算赞数
-              this.awesomeCount = this.computedAwesome(data.comments)
-              this.badReview = this.computedBadReview(data.comments)
+            if (data) {
+              this.commentInfo = data
             }
           })
       }
@@ -275,7 +232,7 @@
 
         .questioner-time
           position relative
-          right 0
+          right 10px
 
       .question-header
         font-size 16px
@@ -302,34 +259,22 @@
         width 100%
 
         .answer-people
-          height 30px
           margin-top 4px
-
-          .avatar
-            vertical-align: middle
-            border-radius 50%
-
-          .answer-name
-            margin-left 5px
-            font-size 14px
+          display -webkit-box;
+          -webkit-box-orient: vertical;
+          -webkit-line-clamp: 4;
+          overflow: hidden;
+          white-space: normal
+          letter-spacing 1px
+          line-height 20px
+          font-size 14px
 
         .answer-wrapper
           display flex
           align-items center
 
-          .answer-content
-            display -webkit-box;
-            -webkit-box-orient: vertical;
-            -webkit-line-clamp: 3;
-            overflow: hidden;
-            white-space: normal
-            letter-spacing 1px
-            line-height 20px
-            font-size 14px
-
     .bottom-wrapper
       color: rgb(169, 181, 192)
-      margin-top 20px
       height 40px
       display flex
       justify-items center

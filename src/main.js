@@ -36,7 +36,6 @@ import changeTel from './components/myPage/myContent/personSet/changeTel'
 import aboutdada from './components/myPage/myContent/personSet/aboutdada'
 import myCareFans from './components/myPage/myHeader/myCareFans'
 
-
 Vue.config.productionTip = false
 
 Vue.prototype.imgURL = 'http://148.70.8.85/'
@@ -68,7 +67,7 @@ Vue.use(animate)
 
 const router = new VueRouter({
   routes: [
-    { path: '/', component: Main, meta: { keepAlive: true } },
+    { path: '/', redirect: '/mainApp', component: Main, meta: { keepAlive: true } },
     { path: '/login', component: Login, meta: { keepAlive: true } },
     { path: '/mainApp', component: Main, name: 'mainApp', meta: { keepAlive: true } },
     { path: '/register', component: Register, meta: { keepAlive: true } },

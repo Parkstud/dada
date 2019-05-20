@@ -31,10 +31,7 @@
     },
     methods: {
       back () {
-        this.$router.push({
-          name: 'problemDetails',
-          params: { problem: this.problem }
-        })
+        this.$router.go(-1)
       },
       writeAnswer () {
         this.clickSend = true
@@ -45,10 +42,8 @@
 
         this.$http.post(url, param)
           .then((response) => {
-            this.$router.push({
-              name: 'problemDetails',
-              params: { problem: this.problem }
-            })
+
+            this.$router.go(-1)
           }).catch((error) => {
           console.log(error)
         })
@@ -72,6 +67,7 @@
       padding-bottom 10px
       box-shadow 0 2px 2px -2px #bbb
       font-size 26px
+
       .cubeic-close
         width 40px
         text-align center

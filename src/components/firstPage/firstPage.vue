@@ -107,11 +107,8 @@
           .then((response) => {
             let data = response.data.body.data
             this.items = data.records
-            console.log(this.items )
-            this.minProblemId = this.items[0].id
-            this.maxProblemId = this.items[this.items.length - 1].id
-            this.upCurrent = this.current
-            this.downCurrent = this.current
+            this.maxProblemId = this.items[0].id
+            this.minProblemId = this.items[this.items.length - 1].id
           })
           .catch((error) => {
             console.log(error)
@@ -120,20 +117,19 @@
       onPullingUp () {
         let url = '/problemInfo/page'
         let params = {
-          current: this.upCurrent,
+          current: this.current,
           size: this.size,
           descs: 'id',
-          id: this.maxProblemId
+          id: this.minProblemId
         }
         this.$http.get(url, { params })
           .then((response) => {
             let data = response.data.body.data
-
+            console.log(data)
             // 有数据
             if (data.records.length > 0) {
-              this.upCurrent++
               this.items = this.items.concat(data.records)
-              this.maxProblemId = this.items[this.items.length - 1].id
+              this.minProblemId = this.items[this.items.length - 1].id
             } else {
               this.$refs.scroll.forceUpdate()
             }
@@ -154,9 +150,6 @@
             this.items = data.records
             this.minProblemId = this.items[0].id
             this.maxProblemId = this.items[this.items.length - 1].id
-
-            this.upCurrent = this.current
-            this.downCurrent = this.current
           })
           .catch((error) => {
             console.log(error)
@@ -166,7 +159,6 @@
     activated () {
       // 删除元素之后更新后更新
       if (this.flush !== this.$store.state.flushCount) {
-        console.log('flush 更新')
         this.flush = this.$store.state.flushCount
         this.getData()
       }
@@ -190,6 +182,7 @@
       padding 4px
       box-shadow: 0 1px #efefef;
       background-color: #017fff
+
       .search-wrapper
         background-color #3298fe
         border-radius 8px
@@ -214,6 +207,7 @@
             border 0
             padding-right 8px
             color: #a0cfff
+
             .cube-input-field
               padding 4px
 
