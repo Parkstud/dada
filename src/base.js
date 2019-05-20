@@ -4,6 +4,32 @@ exports.install = function (Vue, options) {
     let date = new Date(strTime)
     return date.getTime()
   }
+  // 显示mask的toastthis
+  Vue.prototype.showMaskToast = function (msg) {
+    const maskToast = this.$createToast({
+      txt: msg,
+      time: 0,
+      mask: true
+    })
+    maskToast.show()
+    return maskToast
+  }
+
+  // 显示toast提示
+  Vue.prototype.showToast = function (msg) {
+    const toast = this.$createToast({
+      type: 'txt',
+      time: 0,
+      txt: msg,
+      $class: {
+        'own-class': true
+      }
+    })
+    toast.show()
+    setTimeout(() => {
+      toast.hide()
+    }, 1000)
+  }
   // 获取指定时间格式
   Vue.prototype.formatData = function (data, model) {
     if (!data) {

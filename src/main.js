@@ -18,7 +18,7 @@ import myProblem from './components/myPage/myContent/myProblem/myProblem'
 import personSet from './components/myPage/myContent/personSet/personSet'
 import problemDetails from './components/firstPage/problemDetails'
 import inviteAnswer from './components/firstPage/inviteanswer'
-import './common/icon/iconfont.styl'
+import './common/icon2/iconfont.styl'
 import quesion from './components/common/quesion'
 import onlySearchPage from './components/firstPage/onlySearchPage'
 import putQuestionPage from './components/firstPage/putQuestionPage'
@@ -200,12 +200,18 @@ const store = new Vuex.Store({
     message: '通知',
     // 是否更新主界面问题列表
     problemList: [],
-    // 是否更新problemInfo
+    // first是否更新problemInfo
     updateProblem: -1,
-    // 更新全部item
-    flushCount: 0
+    // first 更新全部item
+    flushCount: 0,
+    // problemDetail 修改回复数
+    flushDetail: -1
   },
   mutations: {
+    // 刷新详情页
+    updateFlushDetail (state, change) {
+      state.flushDetail = change
+    },
     // 更新列表
     setFlushCount (state) {
       state.flushCount++

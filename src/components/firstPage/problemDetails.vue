@@ -1,7 +1,7 @@
 <template>
   <div class="proble-details">
     <proback-header ref="backheader" :back-text="backText"
-                    :has-collection="hasCollection"
+                    :has-collection="headerInfo.hasCollection"
                     :intoParams="problem"
                     v-on:changeHasCollection="changeHasCollection"
                     v-on:changeReport="changeReport"
@@ -77,11 +77,11 @@
            <cube-button :inline="true" icon="cubeic-good"
                         :class="item.result===1?'adoption':'adoption-not'"
                         @click.stop="pullUp(item)">
-                      <span class="text">赞同 {{item.awesome}}</span>
+                      <span class="text">赞同 {{item.awesome}} </span>
            </cube-button>
            <cube-button :inline="true" icon="cubeic-bad" @click.stop="pullDown(item)"
                         :class="item.result===2?'oppose':'oppose-not'">
-            <span class="text">反对 {{item.badReview}}</span>
+            <span class="text">反对 {{item.badReview}} </span>
           </cube-button>
         </span>
           </div>
@@ -151,29 +151,25 @@
             href: 'javascript:;'
           },
           onConfirm: () => {
-            // 需要全部更新列表
-            this.$store.commit('setFlushCount')
             this.$refs.backheader.$refs.showmore.click()
 
-            this.$http.post('/control/problem/id',
+            this.$http.post('/control/problem/problemId',
               this.$qs.stringify({
-                id: this.problem.id
+                problemId: this.problem.id
               }),
               { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } }
             ).then((res) => {
-              const toast = this.$createToast({
-                type: 'warn',
-                time: 0,
-                txt: '删除成功'
-              })
-              toast.show()
-
-              setTimeout(() => {
-                toast.hide()
+              if (res.data.body.data) {
+                this.showToast('删除成功!')
+                // 需要全部更新列表
+                this.$store.commit('setFlushCount')
                 this.$router.go(-1)
-              }, 1000)
+              } else {
+                this.showToast('删除失败!')
+              }
             }).catch((error) => {
               console.log(error)
+              this.showToast('删除异常!')
             })
           },
           onCancel: () => {
@@ -224,7 +220,6 @@
         })
         // 通知修改
         this.$store.commit('setProblem', this.problem.id)
-        console.log(this.$store.state.updateProblem)
       },
       // 赞同
       pullUp (item) {
@@ -245,7 +240,6 @@
           item.result = 1
           item.awesome++
         }
-
         this.changeAwesome(item)
       },
       onPullingDown () {
@@ -271,31 +265,22 @@
         })
       },
       toDetail (item) {
-        // 通过comment 获取评论信息
-        this.$http.get('/commentInfo/comment/id', {
-          params: {
-            commentId: item.commentId
-          }
-        }).then((response) => {
-          console.log(response.data)
-          // 跳转界面 阅读评论界面
-          let commentInfo = {}
-          commentInfo.awesome = response.data.body.data.awesome
-          commentInfo.commentComments = response.data.body.data.comments
-          commentInfo.commentId = response.data.body.data.id
-          commentInfo.commentUserAvatar = response.data.body.data.path
-          commentInfo.commentUserId = response.data.body.data.awesome
-          commentInfo.commentUserNickName = response.data.body.data.username
-          this.$router.push({
-              name: 'commentDetail',
-              params: {
-                commentInfo: commentInfo
-              }
+        console.log(item)
+        this.$router.push({
+            name: 'commentDetail',
+            params: {
+              commentId: item.commentId
             }
-          )
-        }).catch((error) => {
-          console.log(error)
-        })
+          }
+        )
+        // 通过comment 获取评论信息
+        // this.$http.get('/commentInfo/comment/' + item.commentId, null).then((response) => {
+        //   console.log(response.data)
+        //   // 跳转界面 阅读评论界面
+        //
+        // }).catch((error) => {
+        //   console.log(error)
+        // })
       },
       // 邀请
       invite () {
@@ -313,48 +298,47 @@
           params: { problem: this.problem }
         })
       },
-      // 上拉获取更多评论信息,传入 问题 id  已经显示的三条信息(或者没有)
+      // 下拉刷新
       onPullingUp () {
         let url = '/problemInfo/problem/detail'
-        const qs = this.$qs
         this.$http.get(url, {
           params: {
-            problemId: this.problem.id,
-            size: 10,
-            current: this.current
-          },
-          paramsSerializer: function (params) {
-            return qs.stringify(params, { arrayFormat: 'repeat' })
+            problemId: this.problem.id
           }
-        }).then((response) => {
-          let data = response.data.body.data
+        })
+          .then((response) => {
+            let data = response.data.body.data
+            this.headerInfo = data.headerInfo
+            this.contentInfo = data.contentInfo
+
+            this.$refs.answer.forceUpdate()
+          }).catch((error) => {
+          console.log(error)
         })
       },
       // 接收子组件的举报信息
       changeReport () {
         // 跳转到举报信息页面
-        console.log((JSON.parse(window.localStorage.getItem('token'))))
         let reportInfo = {}
-        reportInfo['id'] = this.problem.id
-        reportInfo['replyUserId'] = this.problem.userId
+        reportInfo['reportId'] = this.problem.id
+        reportInfo['toUserId'] = this.problem.userId
+        reportInfo['type'] = 1
         // 跳转举报页面
+        this.$refs.backheader.$refs.showmore.click()
         this.$router.push({
           name: 'report',
           params: {
-            type: 1,
             reportInfo: reportInfo
           }
         })
-
-        console.log('举报')
       },
       // 接收子组件修改的收藏信息
       changeHasCollection (value) {
-        this.hasCollection = value
+        this.headerInfo.hasCollection = value
         if (value) {
-          this.collectCount++
+          this.headerInfo.collection++
         } else {
-          this.collectCount--
+          this.headerInfo.collection--
         }
         // 修改收藏信息
         let url = '/problemInfo/problem/collection'
@@ -408,6 +392,11 @@
       next()
     },
     activated () {
+      if (this.$store.state.flushDetail !== -1) {
+        this.getData()
+        this.$store.commit('updateFlushDetail', -1)
+      }
+
       if (!this.$route.meta.isBack) {
         // 如果isBack是false，表明需要获取新数据，否则就不再请求，直接使用缓存的数据
         this.getData()
@@ -429,6 +418,9 @@
 <style lang='stylus' rel='stylesheet/stylus'>
   .cubeic-alert
     color: #DA4F49
+
+  .own-class
+    height: 180%;
 
   .proble-details
     .my-details
@@ -533,11 +525,15 @@
             letter-spacing 1px
 
           .btn-wrapper
+            padding-top 4px
             text-align right
             padding-bottom 6px
 
             .approval-wrapper
               margin-right 20px
+
+              .cube-btn-inline
+                font-size 14px
 
               .oppose-not
                 color: #7A7A7A

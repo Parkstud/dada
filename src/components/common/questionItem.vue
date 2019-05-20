@@ -29,7 +29,7 @@
       </div>
       <div class="bottom-wrapper border-top-1px">
         <div class="put-good border-right-1px" @click.stop="pullUp">
-          <div v-show="commentInfo.userLike">
+          <div v-show="commentInfo.id">
             <i class="cubeic-good"
                :class="commentInfo.userLike===1?'adoption':'adoption-not'">
               <span class="text" v-if="commentInfo.awesome>0">{{commentInfo.awesome}}</span>
@@ -38,7 +38,7 @@
           </div>
         </div>
         <div class="put-bad border-right-1px" @click.stop="pullDown">
-          <div v-show="commentInfo.userLike">
+          <div v-show="commentInfo.id">
             <i class="cubeic-bad"
                :class="commentInfo.userLike===2?'oppose':'oppose-not'">
               <span class="text" v-if="commentInfo.badReview>0">{{commentInfo.badReview}}</span>

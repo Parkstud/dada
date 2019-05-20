@@ -25,8 +25,15 @@
         maxlength: 1000,
         value: '',
         problem: this.$route.params.problem,
-        placeholder: '写回答......',
-        clickSend: false
+        placeholder: '写回答......'
+      }
+    },
+    computed: {
+      clickSend () {
+        if (this.value.trim().length > 0) {
+          return false
+        }
+        return true
       }
     },
     methods: {
@@ -34,15 +41,17 @@
         this.$router.go(-1)
       },
       writeAnswer () {
-        this.clickSend = true
         let url = '/control/problem/answer'
         let param = new URLSearchParams()
         param.append('questionId', this.problem.id)
-        param.append('comments', this.value)
-
+        param.append('comments', this.value.replace(/\n|\r\n/g, '<br/>'))
+        this.value = ''
+        let toast = this.showMaskToast('发送中...')
         this.$http.post(url, param)
           .then((response) => {
-
+            this.$store.commit('setProblem', this.problem.id)
+            this.$store.commit('updateFlushDetail', this.problem.id)
+            toast.hide()
             this.$router.go(-1)
           }).catch((error) => {
           console.log(error)

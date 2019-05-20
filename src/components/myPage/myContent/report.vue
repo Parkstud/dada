@@ -6,7 +6,7 @@
       <!--举报类型-->
       <div class="report-type-wrapper">
         <span>举报类型</span>
-        <span>{{typeArray[type]}}</span>
+        <span>{{typeArray[reportInfo.type]}}</span>
       </div>
       <!--举报原因-->
       <div class="report-reason-wrapper">
@@ -45,10 +45,8 @@
         // 举报说明
         placeholder: '请输入举报说明',
         value: '',
-        commentInfo: this.$route.params.commentInfo,
         reportInfo: this.$route.params.reportInfo,
         backText: '举报',
-        type: this.$route.params.type,
         typeArray: ['用户', '问题', '评论', '回复'],
         // 点击原因突出显示
         choose: null,
@@ -58,12 +56,12 @@
     },
     methods: {
       submitReport () {
-        this.showToastTime()
+
         // 设置举报信息并提交
         let report = {}
-        report.reportId = this.reportInfo.id
-        report.reportType = this.type
-        report.toUserId = this.reportInfo.replyUserId
+        report.reportId = this.reportInfo.reportId
+        report.reportType = this.reportInfo.type
+        report.toUserId = this.reportInfo.toUserId
         // 获取举报原因id
         report.reportReasonId = this.choose
         // 获取说明
@@ -72,7 +70,7 @@
           this.$qs.stringify(report),
           { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } }
         ).then((response) => {
-          this.$router.go(-1)
+          this.showToastTime()
         }).catch((error) => {
           console.log(error)
         })

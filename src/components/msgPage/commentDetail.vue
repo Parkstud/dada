@@ -1,50 +1,60 @@
 <template>
   <div class="comment-detail">
 
-    <div class="chat-header">
-      <span class="cubeic-back" @click="back"></span>
-      <span></span>
-      <span class="txt"></span>
-    </div>
-    <cube-scroll ref="commentContainer" :options="scrollOptions" @pulling-up="onPullingUp">
-      <!--评论内容-->
-      <div class="comment-content">
-        <div class="author-info">
-          <!--@click="toHomepage(item.id)-->
-          <span class="avatar">
-            <img :src="imgURL+commentInfo.commentUserAvatar" width="50" height="50">
-          </span>
-          <span class="author-name">{{commentInfo.commentUserNickName}}</span>
-          <span class="answer-time">{{commentInfo.commentTime}}</span>
-          <span class="info-left" @click="replyComment">
-              <span class="cubeic-message"></span>
-              <span class="comment">{{replayInfo.length}}</span>
-            <!--<span class="cubeic-good" :class="hasLiked ?'active':''" @click="goodComment"></span>-->
-            <!--<span class="approve">{{commentInfo.awesome}}</span>-->
-          </span>
-          <p class="comments">
-            {{commentInfo.commentComments}}
-          </p>
-        </div>
-      </div>
-      <div class="split"></div>
-      <!--回复内容-->
-      <div class="reply-wrapper" v-for="(item,index) in replayInfo" :key="index">
-      <span class="avatar">
-          <img :src="imgURL+item.avatar" width="40" height="40">
-      </span>
-        <div class="reply-content" @click="clickReply(item)">
-          <span class="reply-name">{{item.replyUsername}}</span>
-          <span class="reply-time">{{formatData(item.replyTime,1)}}</span>
-          <p class="reply-content">
-            {{item.repliedUsername?'回复 '+item.repliedUsername+' 的评论 :'+item.content:item.content}}
-          </p>
-        </div>
-        <hr style="filter: progid:DXImageTransform.Microsoft.Glow(color=#ccc,strength=10)"
-            color=#ccc SIZE=1/>
-      </div>
+    <proback-header ref="backheader" :back-text="backText"
+                    :show-adopt="showAdopt"
+                    :show-collect="false"
+                    :show-report="showReport"
+                    v-on:deleteProblem="deleteComment"
+                    v-on:changeReport="changeReport"
+    ></proback-header>
 
-    </cube-scroll>
+    <div class="comment-wrapper" ref="commentScroll">
+      <cube-scroll ref="commentContainer" :options="scrollOptions" @pulling-up="onPullingUp">
+        <!--评论内容-->
+        <div class="comment-content" v-show="commentInfo">
+          <div class="author-info">
+            <!--@click="toHomepage(item.id)-->
+            <span class="avatar">
+            <img :src="imgURL+commentInfo.avatar" width="50" height="50"
+                 v-show="commentInfo.avatar">
+          </span>
+            <span class="author-name">{{commentInfo.username}}</span>
+            <span class="answer-time">{{commentInfo.commentTime}}</span>
+            <span class="info-left" @click="replyComment">
+              <span class="cubeic-message"></span>
+              <span class="comment">{{replys.length}}</span>
+            <span class="cubeic-good"></span>
+            <span class="approve">{{commentInfo.awesome}}</span>
+              <span class="cubeic-bad"></span>
+            <span class="approve">{{commentInfo.badReview}}</span>
+          </span>
+            <p class="comments" v-html="commentInfo.comments">
+            </p>
+          </div>
+        </div>
+        <div class="split"></div>
+        <!--回复内容-->
+        <div class="reply-wrapper border-bottom-1px" v-for="(item,index) in replys" :key="index">
+          <span class="avatar">
+              <img :src="imgURL+item.replyAvatar" width="40" height="40">
+          </span>
+          <div class="reply-content" @click="clickReply(item)">
+            <span class="reply-name">{{item.replyUsername}}</span>
+            <span class="reply-time">{{formatData(item.replyTime,1)}}</span>
+            <p class="reply-content">
+              {{item.repliedUserId?'回复 '+item.repliedUsername+' 的评论 :'
+              +item.replyContent:item.replyContent}}
+            </p>
+          </div>
+          <hr
+            style="border: none;filter: progid:DXImageTransform.Microsoft.Glow(color=#ccc,strength=10)"
+            color=#ccc SIZE=1/>
+        </div>
+
+      </cube-scroll>
+    </div>
+
     <!--底部-->
     <div class="chat-footer">
       <cube-input v-model="value" :placeholder="placeholder" @keyup.enter.native="sendReply">
@@ -52,19 +62,24 @@
         <span slot="append" @click="sendReplyClick" class="cubeic-navigation"
               :class="value.length>0?'sending':'not-send'"></span>
       </cube-input>
-
     </div>
   </div>
 </template>
 
 <script type='text/ecmascript-6'>
+  import probackHeader from '../common/probackHeader'
+
   export default {
     name: 'commentDetail',
     data () {
       return {
+        backText: '返回',
         // 回复输入框
         value: '',
-        commentInfo: this.$route.params.commentInfo,
+        user: JSON.parse(window.localStorage.getItem('token')),
+        commentId: this.$route.params.commentId,
+        commentInfo: {},
+        replys: [],
         // 分页的当前页数
         current: 1,
         // 分页页数
@@ -76,16 +91,32 @@
         replayInfo: [],
         placeholder: '请输入你的回复内容',
         dialog: null,
+        needClear: true,
         scrollOptions: {
-          pullUpLoad: true,
           directionLockThreshold: 0
         }
       }
     },
     computed: {
+      showReport () {
+        if (this.user.id === this.commentInfo.userId) {
+          // false
+          return true
+        }
+        return true
+      },
+      showAdopt () {
+        if (this.user.type !== 0) {
+          // false
+          return true
+        }
+        return true
+      },
       reportOrDelete () {
         if (this.replyOtherInfo) {
-          if (this.replyOtherInfo.replyUserId === JSON.parse(window.localStorage.getItem('token')).id) {
+          let user = JSON.parse(window.localStorage.getItem('token'))
+          console.log(user)
+          if (this.replyOtherInfo.replyUserId === user.id || user.type !== 0) {
             return '删除'
           }
         }
@@ -93,12 +124,32 @@
       }
     },
     methods: {
+      changeReport () {
+        console.log('举报')
+        let reportInfo = {}
+        reportInfo['reportId'] = this.commentInfo.commentId
+        reportInfo['toUserId'] = this.commentInfo.userId
+        reportInfo['type'] = 2
+        // 跳转举报页面
+        this.$refs.backheader.$refs.showmore.click()
+        this.$router.push({
+          name: 'report',
+          params: {
+            reportInfo: reportInfo
+          }
+        })
+      },
+      // 删除评论
+      deleteComment () {
+
+      },
       replyComment () {
         this.replyOtherInfo = null
         this.placeholder = '请输入你的回复内容'
       },
       // 点击回复item
       clickReply (item) {
+        console.log(item)
         this.replyOtherInfo = item
 
         this.dialog = this.$createDialog({
@@ -143,30 +194,60 @@
           this.dialog.hide()
         }
         if (this.reportOrDelete === '举报') {
-
+          let reportInfo = {}
+          reportInfo['reportId'] = this.replyOtherInfo.replyId
+          reportInfo['toUserId'] = this.replyOtherInfo.replyUserId
+          reportInfo['type'] = 3
           // 跳转举报页面
           this.$router.push({
             name: 'report',
             params: {
-              type: 3,
-              reportInfo: this.replyOtherInfo,
-              commentInfo: this.commentInfo
+              reportInfo: reportInfo
             }
           })
           this.replyOtherInfo = null
         } else {
-          console.log(this.replyOtherInfo)
-          this.$http.delete('/Interaction/reply',
-            {
-              params: {
-                replyId: this.replyOtherInfo.id
-              }
+          this.$createDialog({
+            type: 'confirm',
+            icon: 'cubeic-alert',
+            title: '确认删除该回复',
+            confirmBtn: {
+              text: '确认',
+              active: true,
+              disabled: false,
+              href: 'javascript:;'
+            },
+            cancelBtn: {
+              text: '取消',
+              active: false,
+              disabled: false,
+              href: 'javascript:;'
+            },
+            onConfirm: () => {
+              this.$http.delete('/Interaction/reply',
+                {
+                  params: {
+                    replyId: this.replyOtherInfo.replyId
+                  }
+                }
+              ).then((res) => {
+                if (res.data.body.data) {
+                  this.showToast('删除成功!')
+                  // 需要全部更新列表
+                  this.needClear = false
+                  this.getData()
+                } else {
+                  this.showToast('删除失败!')
+                }
+              }).catch((error) => {
+                console.log(error)
+                this.showToast('删除异常!')
+              })
+            },
+            onCancel: () => {
+
             }
-          ).then((res) => {
-            this.getData()
-          }).catch((error) => {
-            console.log(error)
-          })
+          }).show()
         }
       },
       // 点击发送信息
@@ -253,27 +334,8 @@
           this.$qs.stringify(replyinfo),
           { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } }
         ).then((response) => {
-          // 重新请求当前页信息
-
-          if (this.replayInfo.length > 0 && this.replayInfo.length % this.size === 0) {
-            this.current++
-          }
-
-          this.$http.get('/commentInfo/reply/page', {
-            params: {
-              commentId: this.commentInfo.commentId,
-              current: this.current,
-              size: this.size
-            }
-          }).then((response) => {
-            let data = response.data.body.data
-            if (data.records.length > 0) {
-              let temp = this.replayInfo.length % this.size
-              this.replayInfo = this.replayInfo.concat(data.records.slice(temp))
-            }
-          }).catch((error) => {
-            console.log(error)
-          })
+          this.needClear = false
+          this.getData()
         }).catch((error) => {
           console.log(error)
         })
@@ -281,39 +343,19 @@
         this.value = ''
       },
       getData () {
-        // 通过comment 获取评论信息
-        this.$http.get('/commentInfo/comment/id', {
-          params: {
-            commentId: this.commentInfo.commentId
-          }
-        }).then((response) => {
-          this.commentInfo.awesome = response.data.body.data.awesome
+        // 通过commentID 获取评论信息
+        if (this.needClear) {
+          this.commentInfo = {}
+          this.replys = []
+        }
+        this.needClear = true
+        this.commentId = this.$route.params.commentId
+        this.$http.get('/commentInfo/comment/' + this.commentId, null).then((response) => {
+          console.log(response.data)
+          this.commentInfo = response.data.body.data.commentInfo
+          this.replys = response.data.body.data.replys
         }).catch((error) => {
           console.log(error)
-        })
-
-        // 获取评论信息
-        this.$http.get('/commentInfo/reply/page', {
-          params: {
-            commentId: this.commentInfo.commentId,
-            current: this.current,
-            size: this.size
-          }
-        }).then((response) => {
-          let data = response.data.body.data
-          this.replayInfo = data.records
-        }).catch((error) => {
-          console.log(error)
-        })
-
-        // 获取当前用户是否点赞该评论
-
-        this.$http.get('/Interaction/awesome', {
-          params: {
-            commentId: this.commentInfo.commentId
-          }
-        }).then((response) => {
-          response.data.body.data = this.hasLiked
         })
       }
     },
@@ -332,13 +374,13 @@
       // 恢复成默认的false，避免isBack一直是true，导致下次无法获取数据
       this.$route.meta.isBack = true
     },
+    components: { probackHeader },
     mounted () {
       // 设置滑动高度
       this.clientHeight = `${document.documentElement.clientHeight}`
       this.$refs.commentContainer.$refs.wrapper.style.height = this.clientHeight - 81 + 'px'
       this.getData()
     }
-
   }
 </script>
 
@@ -433,7 +475,7 @@
 
     .split
       height 10px
-      background-color #ebebeb
+      background-color #f4f6f9
 
     .reply-wrapper
       margin 10px
