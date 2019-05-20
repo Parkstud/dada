@@ -19,7 +19,7 @@
             <span>删除</span>
           </li>
           <li @click="adoptComment" v-show="showAdopt">
-            <i class="iconfont icon-caina"></i>
+            <i class="iconfont icon-caina" :class="{'cubeic-star-collect':hasAdopt}"></i>
             <span>{{adoptText}}</span>
           </li>
         </ul>
@@ -108,12 +108,12 @@
         this.$emit('changeReport')
       },
       adoptComment () {
-
+        this.$emit('adoptComment', !this.hasAdopt)
+        console.log('采纳')
       },
       // 删除问题
       deleteProblem () {
         this.$emit('deleteProblem')
-        console.log('删除')
       },
       back () {
         if (this.backComponent === '') {

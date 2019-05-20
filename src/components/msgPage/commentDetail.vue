@@ -3,10 +3,12 @@
 
     <proback-header ref="backheader" :back-text="backText"
                     :show-adopt="showAdopt"
+                    :has-adopt="commentInfo.adopt>0"
                     :show-collect="false"
                     :show-report="showReport"
-                    v-on:deleteProblem="deleteComment"
+                    v-on:deleteProblem="deleteProblem"
                     v-on:changeReport="changeReport"
+                    v-on:adoptComment="adoptComment"
     ></proback-header>
 
     <div class="comment-wrapper" ref="commentScroll">
@@ -22,12 +24,13 @@
             <span class="author-name">{{commentInfo.username}}</span>
             <span class="answer-time">{{commentInfo.commentTime}}</span>
             <span class="info-left" @click="replyComment">
+              <span class="iconfont icon-caina" v-show="commentInfo.adopt>0"></span>
               <span class="cubeic-message"></span>
               <span class="comment">{{replys.length}}</span>
-            <span class="cubeic-good"></span>
-            <span class="approve">{{commentInfo.awesome}}</span>
-              <span class="cubeic-bad"></span>
-            <span class="approve">{{commentInfo.badReview}}</span>
+              <!--            <span class="cubeic-good"></span>-->
+              <!--            <span class="approve">{{commentInfo.awesome}}</span>-->
+              <!--              <span class="cubeic-bad"></span>-->
+              <!--            <span class="approve">{{commentInfo.badReview}}</span>-->
           </span>
             <p class="comments" v-html="commentInfo.comments">
             </p>
@@ -124,6 +127,25 @@
       }
     },
     methods: {
+      adoptComment (val) {
+        if (val) {
+          this.commentInfo.adopt = 1
+        } else {
+          this.commentInfo.adopt = 0
+        }
+        this.$refs.backheader.$refs.showmore.click()
+
+        this.$http.post('/Interaction/adoptAnswer/' + this.commentInfo.commentId,
+          this.$qs.stringify({
+            adopt: this.commentInfo.adopt
+          })
+        ).then((response) => {
+          if (response.data.body.data) {
+            this.$store.commit('updateFlushDetail', this.commentInfo.questionId)
+          }
+
+        })
+      },
       changeReport () {
         console.log('举报')
         let reportInfo = {}
@@ -140,8 +162,50 @@
         })
       },
       // 删除评论
-      deleteComment () {
+      deleteProblem () {
+        console.log('删除评论')
+        this.$createDialog({
+          type: 'confirm',
+          icon: 'cubeic-alert',
+          title: '确认删除该回答',
+          confirmBtn: {
+            text: '确认',
+            active: true,
+            disabled: false,
+            href: 'javascript:;'
+          },
+          cancelBtn: {
+            text: '取消',
+            active: false,
+            disabled: false,
+            href: 'javascript:;'
+          },
+          onConfirm: () => {
+            this.$refs.backheader.$refs.showmore.click()
 
+            this.$http.post('/commentInfo/comment/id',
+              this.$qs.stringify({
+                commentId: this.commentInfo.commentId
+              }),
+              { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } }
+            ).then((res) => {
+              if (res.data.body.data) {
+                this.showToast('删除成功!')
+                // 需要全部更新列表
+                this.$store.commit('updateFlushDetail', this.commentInfo.questionId)
+                this.$router.go(-1)
+              } else {
+                this.showToast('删除失败!')
+              }
+            }).catch((error) => {
+              console.log(error)
+              this.showToast('删除异常!')
+            })
+          },
+          onCancel: () => {
+            this.$refs.backheader.$refs.showmore.click()
+          }
+        }).show()
       },
       replyComment () {
         this.replyOtherInfo = null
@@ -457,6 +521,11 @@
           right 0
           margin-right 20px
           top 20px
+
+          .icon-caina
+            margin-right 20px
+            color #64a4fe
+            font-size 20px
 
           .cubeic-good
             &.active

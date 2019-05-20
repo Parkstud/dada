@@ -160,25 +160,25 @@ const router = new VueRouter({
       path: '/changePass',
       name: 'changePass',
       component: changePass,
-      meta: { isBack: false, keepAlive: false }
+      meta: { isBack: false, keepAlive: true }
     },
     {
       path: '/changeTel',
       name: 'changeTel',
       component: changeTel,
-      meta: { isBack: false, keepAlive: false }
+      meta: { isBack: false, keepAlive: true }
     },
     {
       path: '/aboutdada',
       name: 'aboutdada',
       component: aboutdada,
-      meta: { isBack: false, keepAlive: false }
+      meta: { isBack: false, keepAlive: true }
     },
     {
       path: '/myCareFans',
       name: 'myCareFans',
       component: myCareFans,
-      meta: { isBack: false, keepAlive: false }
+      meta: { isBack: false, keepAlive: true }
     }
 
   ]

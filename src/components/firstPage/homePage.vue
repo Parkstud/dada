@@ -180,7 +180,7 @@
 
 <style lang='stylus' rel='stylesheet/stylus'>
   .home-page
-    background-color #ebebeb
+    background-color #f4f6f9
     height 100%
 
     .back-header

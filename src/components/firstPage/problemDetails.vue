@@ -65,6 +65,7 @@
             <span class="author-name" @click.stop="toHomepage(item.userId)">{{item.username}}</span>
             <span class="answer-time">{{formatData(item.commentTime,1)}}</span>
             <span class="info-left">
+              <span class="iconfont icon-caina" v-show="item.adopt>0"></span>
               <span class="cubeic-message"></span>
               <span class="comment" v-if="item.replyCount>0">{{item.replyCount}}</span>
               <span class="comment-text" v-else>回复</span>
@@ -265,7 +266,6 @@
         })
       },
       toDetail (item) {
-        console.log(item)
         this.$router.push({
             name: 'commentDetail',
             params: {
@@ -508,6 +508,10 @@
               right 0
               margin-right 20px
               top 20px
+              .icon-caina
+                margin-right 12px
+                font-size 18px
+                color #0084ff
 
               .comment, .approve
                 display inline-block
