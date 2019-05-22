@@ -72,11 +72,11 @@
       }
     },
     destroyed () {
-      console.log('客户端断开连接')
-      this.websock.close()
+      // console.log('客户端断开连接')
+      // this.websock.close()
     },
     created () {
-      this.initWebSocket()
+      // this.initWebSocket()
     },
     methods: {
       sendMessageClick () {
@@ -97,48 +97,48 @@
 
         this.saveMessage(newMsg)
       },
-      // websocket初始化
-      initWebSocket () {
-        const wsuri = 'ws://192.168.43.106:8080/websocket/' + JSON.parse(window.localStorage.getItem('token')).id
-        // const wsuri = 'ws://106.14.4.232:8080/dsqas-0.0.1-SNAPSHOT/websocket/' + JSON.parse(window.localStorage.getItem('token')).id
-        this.websock = new WebSocket(wsuri)
-        this.websock.onmessage = this.webSocketOnMessage
-        this.websock.onopen = this.webSocketOnOpen
-        this.websock.onerror = this.webSocketOnError
-        this.websock.onclose = this.webSocketClose
-      },
-      // 连接建立之后执行send方法发送数据
-      webSocketOnOpen () {
-        this.sendFirstMsg()
-        console.log('建立连接')
-      },
-      // 第一次建立连接发送信息
-      sendFirstMsg () {
-        let temp = JSON.parse(window.localStorage.getItem('token'))
-        this.nowUser.userNickName = temp.nickName
-        this.nowUser.userId = temp.id
-        let firstMsg = {}
-        firstMsg.sendUserId = this.nowUser.userId
-        firstMsg.receiveUserId = this.letterUser.userId
-        this.webSocketSend(JSON.stringify(firstMsg))
-      },
-      // 连接建立失败重连
-      webSocketOnError () {
-        this.initWebSocket()
-      },
-      // 数据接收
-      webSocketOnMessage (e) {
-        this.msgs.push(JSON.parse(e.data))
-        console.log(e.data)
-      },
-      // 数据发送
-      webSocketSend (data) {
-        this.websock.send(data)
-      },
-      // 关闭
-      webSocketClose (e) {
-        console.log('断开连接', e)
-      },
+      // // websocket初始化
+      // initWebSocket () {
+      //   const wsuri = 'ws://192.168.43.106:8080/websocket/' + JSON.parse(window.localStorage.getItem('token')).id
+      //   // const wsuri = 'ws://106.14.4.232:8080/dsqas-0.0.1-SNAPSHOT/websocket/' + JSON.parse(window.localStorage.getItem('token')).id
+      //   this.websock = new WebSocket(wsuri)
+      //   this.websock.onmessage = this.webSocketOnMessage
+      //   this.websock.onopen = this.webSocketOnOpen
+      //   this.websock.onerror = this.webSocketOnError
+      //   this.websock.onclose = this.webSocketClose
+      // },
+      // // 连接建立之后执行send方法发送数据
+      // webSocketOnOpen () {
+      //   this.sendFirstMsg()
+      //   console.log('建立连接')
+      // },
+      // // 第一次建立连接发送信息
+      // sendFirstMsg () {
+      //   let temp = JSON.parse(window.localStorage.getItem('token'))
+      //   this.nowUser.userNickName = temp.nickName
+      //   this.nowUser.userId = temp.id
+      //   let firstMsg = {}
+      //   firstMsg.sendUserId = this.nowUser.userId
+      //   firstMsg.receiveUserId = this.letterUser.userId
+      //   this.webSocketSend(JSON.stringify(firstMsg))
+      // },
+      // // 连接建立失败重连
+      // webSocketOnError () {
+      //   this.initWebSocket()
+      // },
+      // // 数据接收
+      // webSocketOnMessage (e) {
+      //   this.msgs.push(JSON.parse(e.data))
+      //   console.log(e.data)
+      // },
+      // // 数据发送
+      // webSocketSend (data) {
+      //   this.websock.send(data)
+      // },
+      // // 关闭
+      // webSocketClose (e) {
+      //   console.log('断开连接', e)
+      // },
       back () {
         // 通过评论信息 获取用户id
         if (this.problem) {

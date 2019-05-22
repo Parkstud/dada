@@ -65,6 +65,15 @@ Vue.use(VueRouter)
 Vue.use(Vuex)
 Vue.use(animate)
 
+Vue.directive('focus', {
+  // 当被绑定的元素插入到 DOM 中时……
+  inserted: function (el) {
+    // 聚焦元素
+    console.log(el)
+    el.focus()
+  }
+})
+
 const router = new VueRouter({
   routes: [
     { path: '/', redirect: '/mainApp', component: Main, meta: { keepAlive: true } },
@@ -205,9 +214,25 @@ const store = new Vuex.Store({
     // first 更新全部item
     flushCount: 0,
     // problemDetail 修改回复数
-    flushDetail: -1
+    flushDetail: -1,
+    // 更新mypage的关注数和粉丝数
+    flushMyPageCare: -1,
+    // 全局websock
+    webSocket: null,
+    // msg界面是否需要更新
+    flushMsg: -1
   },
   mutations: {
+    updateMsg (state, change) {
+      state.flushMsg = change
+    },
+    updateWebSocket (state, webScoket) {
+      state.webSocket = webScoket
+    },
+    // 刷新mypage界面
+    updateFlushMyPageCare (state, change) {
+      state.flushMyPageCare = change
+    },
     // 刷新详情页
     updateFlushDetail (state, change) {
       state.flushDetail = change
@@ -243,6 +268,7 @@ const store = new Vuex.Store({
 
   }
 })
+
 new Vue({
   render: h => h(App),
   router,
@@ -253,8 +279,58 @@ new Vue({
   created () {
     this.checkLogin()
   },
+  mounted () {
+    console.log('asdasd')
+  },
+  activated () {
+    console.log('active')
+  },
   methods: {
+    // websocket初始化
+    initWebSocket () {
+      const wsuri = 'ws://192.168.43.106:8080/websocket/' + JSON.parse(window.localStorage.getItem('token')).id
+      // const wsuri = 'ws://106.14.4.232:8080/dsqas-0.0.1-SNAPSHOT/websocket/' + JSON.parse(window.localStorage.getItem('token')).id
+      this.websock = new WebSocket(wsuri)
+      this.websock.onmessage = this.webSocketOnMessage
+      this.websock.onopen = this.webSocketOnOpen
+      this.websock.onerror = this.webSocketOnError
+      this.websock.onclose = this.webSocketClose
+    },
+    // 连接建立之后执行send方法发送数据
+    webSocketOnOpen () {
+      this.sendFirstMsg()
+      console.log('建立连接')
+    },
+    // 第一次建立连接发送信息
+    sendFirstMsg () {
+      let temp = JSON.parse(window.localStorage.getItem('token'))
+      this.nowUser.userNickName = temp.nickName
+      this.nowUser.userId = temp.id
+      let firstMsg = {}
+      firstMsg.sendUserId = this.nowUser.userId
+      firstMsg.receiveUserId = this.letterUser.userId
+      this.webSocketSend(JSON.stringify(firstMsg))
+    },
+    // 连接建立失败重连
+    webSocketOnError () {
+      this.initWebSocket()
+    },
+    // 数据接收
+    webSocketOnMessage (e) {
+      this.msgs.push(JSON.parse(e.data))
+      console.log(e.data)
+    },
+    // 数据发送
+    webSocketSend (data) {
+      this.websock.send(data)
+    },
+    // 关闭
+    webSocketClose (e) {
+      console.log('断开连接', e)
+    },
+
     checkLogin () {
+      console.log('created')
       // 检查是否存在token
       if (this.$router.currentRoute.fullPath === '/register' || this.$router.currentRoute.fullPath === '/forgetPwd') {
         return

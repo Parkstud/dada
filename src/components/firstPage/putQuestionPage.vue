@@ -36,18 +36,28 @@
         modelArray: ['', '数据结构理论', '线性表', '栈和对列', '字符串', '树', '图', '算法']
       }
     },
-    mounted () {
-      if (this.$route.params.modelName) {
-        window.localStorage.setItem('modelName', this.$route.params.modelName)
-        window.localStorage.setItem('modelIcon', this.$route.params.modelIcon)
+    beforeRouteEnter (to, from, next) {
+      console.log(from)
+      if (from.name === 'mainApp') {
+        to.meta.isBack = false
       }
-      this.modelName = JSON.parse(window.localStorage.getItem('modelName'))
-      this.modelIcon = window.localStorage.getItem('modelIcon')
-      console.log(this.modelName)
-      console.log(this.modelIcon)
+      next()
     },
-
+    activated () {
+      if (!this.$route.meta.isBack) {
+        // 如果isBack是false，表明需要获取新数据，否则就不再请求，直接使用缓存的数据
+        this.getData()
+      }
+      // 恢复成默认的false，避免isBack一直是true，导致下次无法获取数据
+      this.$route.meta.isBack = true
+    },
+    mounted () {
+    },
     methods: {
+      getData () {
+        this.modelName = this.$route.params.modelName
+        this.modelIcon = this.$route.params.modelIcon
+      },
       back () {
         this.$router.go(BACK_FLAG)
       },
@@ -105,6 +115,7 @@
 
       .release-name
         font-size 18px
+
     .question-content-wrapper
       .cube-textarea-wrapper
         height 100px

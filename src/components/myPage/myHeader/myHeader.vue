@@ -65,30 +65,37 @@
             oldResouce[i] = newResource[i]
           }
         }
+      },
+      getData () {
+        this.$http.get('/myPage/header/information', null)
+          .then((response) => {
+            if (response.data.head.stateCode === 200) {
+              let data = response.data.body.data
+              if (this.change(this.avatar, data.avatar)) {
+                this.avatar = data.avatar
+              }
+              if (this.change(this.nickName, data.nickName)) {
+                this.nickName = data.nickName
+              }
+              if (this.change(this.fans, data.fans)) {
+                this.fans = data.fans
+              }
+              if (this.change(this.cares, data.cares)) {
+                this.cares = data.cares
+              }
+            }
+          }).catch((error) => {
+          console.log(error)
+        })
+      }
+    },
+    activated () {
+      if (this.$store.state.flushMyPageCare !== -1) {
+        this.getData()
       }
     },
     mounted () {
-      // 获取 头像 关注数 粉丝数
-      this.$http.get('/myPage/header/information', null)
-        .then((response) => {
-          if (response.data.head.stateCode === 200) {
-            let data = response.data.body.data
-            if (this.change(this.avatar, data.avatar)) {
-              this.avatar = data.avatar
-            }
-            if (this.change(this.nickName, data.nickName)) {
-              this.nickName = data.nickName
-            }
-            if (this.change(this.fans, data.fans)) {
-              this.fans = data.fans
-            }
-            if (this.change(this.cares, data.cares)) {
-              this.cares = data.cares
-            }
-          }
-        }).catch((error) => {
-        console.log(error)
-      })
+      this.getData()
     }
   }
 </script>

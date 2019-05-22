@@ -16,12 +16,16 @@
     <cube-tab-bar v-model="selectedLabel" :show-slider="showSlider" ref="tabNav">
       <cube-tab v-for="(item, index) in tabs" :icon="item.icon" :label="item.label"
                 :key="index">
+        {{item.label}}
+        <span class="badge"
+              v-show="index===0 && msginfo.noticeCount>0">{{ msginfo.noticeCount}}</span>
+        <span class="badge" v-show="index===1 && msginfo.newsCount>0">{{ msginfo.newsCount}}</span>
       </cube-tab>
     </cube-tab-bar>
     <cube-tab-panels v-model="selectedLabel">
       <cube-tab-panel :label="tabs[0].label">
         <cube-scroll
-          ref="panelContatiner"
+          ref="noticeScroll"
           :data="this.tabs[0].content"
           @pulling-up="onPullingUp1"
           :options="scrollOptions">
@@ -30,15 +34,16 @@
               <hr class="hr-sty" style="filter: alpha(opacity=100,finishopacity=0,style=2)"
                   color=#fff SIZE=5/>
               <div class="item-panl1"
-                   @click="clickNotice(contentItem.commentId,contentItem.commentInfo)">
+                   @click="clickNotice(contentItem)">
                 <div class="item-top">
-                  <span v-if="contentItem.commentInfo" class="name"
-                        :style="{'color':setChangeColor()}">{{contentItem.commentInfo.commentUserNickName || ''}}</span>
-                  <span class="type">{{contentItem.title}}</span>
+                  <span v-if="contentItem.noticeInfo" class="name"
+                        :style="{'color':setChangeColor()}">{{contentItem.noticeInfo.commentUserNickName || ''}}</span>
+                  <span class="type">{{contentItem.title}}</span><span class="badge-dot"
+                                                                       v-show="contentItem.hasRead===0"></span>
                   <span class="time">{{formatData(contentItem.createTime,1)}}</span>
                 </div>
-                <div class="item-center" v-if="contentItem.commentInfo"
-                     v-html="contentItem.commentInfo.commentComments">
+                <div class="item-center" v-if="contentItem.noticeInfo"
+                     v-html="contentItem.noticeInfo.commentComments">
                 </div>
                 <div class="item-bttom">
                   {{contentItem.content}}
@@ -52,10 +57,9 @@
       </cube-tab-panel>
       <cube-tab-panel :label="tabs[1].label">
         <cube-scroll
-          ref="notice"
+          ref="newsScroll"
           :options="scrollOptions1">
           <ul>
-
             <li class="tab-panel-li" v-for="(personItem, index) in tabs[1].personCall"
                 :key="index">
               <hr class="hr-sty" style="filter: alpha(opacity=100,finishopacity=0,style=2)"
@@ -69,7 +73,9 @@
                   <div class="right" @click="chatWith(personItem.userInfo)">
                     <div class="right-top">
                       <span class="letter-name">{{personItem.userInfo ? personItem.userInfo.userNickName:''}}</span>
-                      <span class="letter-time">{{formatData(personItem.msg[0].time,1)}}</span>
+                      <span class="letter-time">{{formatData(personItem.msg[0].time,1)}}
+                       <span class="badge" v-show="computeNewsCount(personItem.msg)">{{computeNewsCount(personItem.msg)}}</span>
+                      </span>
                     </div>
                     <div class="right-content">
                       <span class="letter-main">{{personItem.msg[0].msg}}</span>
@@ -82,7 +88,6 @@
             </li>
           </ul>
         </cube-scroll>
-
       </cube-tab-panel>
     </cube-tab-panels>
   </div>
@@ -91,6 +96,11 @@
 <script type='text/ecmascript-6'>
   export default {
     name: 'msgPage',
+    props: {
+      msginfo: {
+        type: Object
+      }
+    },
     data () {
       return {
         placeholder: '搜索',
@@ -150,8 +160,8 @@
         }, 1000)
       },
       // 点击notice
-      clickNotice (commentId, commentInfo) {
-        if (!commentInfo) {
+      clickNotice (item) {
+        if (!item.infoId) {
           this.showToastTime()
           return
         }
@@ -162,18 +172,38 @@
         }
         this.evTimeStamp = now
         // 设置评论信息
-        commentInfo.commentId = commentId
+
         this.$store.commit('updateCount', 2)
         this.$store.commit('updateMessage', '通知')
-        // 跳转界面 阅读评论界面
-        console.log(commentInfo)
-        this.$router.push({
-            name: 'commentDetail',
-            params: {
-              commentInfo: commentInfo
+        // 判断是已读
+        if (item.hasRead === 0) {
+          item.hasRead = 1
+          this.msginfo.noticeCount--
+          this.changeDot()
+          // 设置通知已阅
+          this.$http.put('/message/notice/read', this.$qs.stringify({
+              sysMessageId: item.id
             }
-          }
-        )
+          )).then((res) => {
+
+          }).catch((err) => {
+            console.log(err)
+          })
+        }
+        // 跳转界面 阅读评论界面
+        if (item.msgType === 2) {
+          this.$router.push({
+              name: 'commentDetail',
+              params: {
+                commentId: item.infoId
+              }
+            }
+          )
+        }
+      },
+      // 修改红点状态
+      changeDot () {
+        this.$emit('changeDot', this.msginfo)
       },
       // 随机修改的字体颜色
       setChangeColor () {
@@ -190,7 +220,25 @@
       },
       // 上拉
       onPullingUp1 () {
-        this.getNoticeInfo()
+        let url = '/message/notices/page'
+        let param = {
+          current: this.current,
+          size: this.size,
+          messageId: this.tabs[0].content[this.tabs[0].content.length - 1].id
+        }
+        this.$http.get(url, {
+          params: param
+        }).then((response) => {
+          let data = response.data.body.data
+          if (data.records.length > 0) {
+            this.tabs[0].content = this.tabs[0].content.concat(data.records)
+          } else {
+            // this.$refs.noticeScroll.forceUpdate()
+          }
+        }).catch((error) => {
+          console.log(error)
+          // this.$refs.noticeScroll.forceUpdate()
+        })
       },
       // 获取通知信息
       getNoticeInfo () {
@@ -203,14 +251,8 @@
         this.$http.get(url, {
           params: param
         }).then((response) => {
-          if (response.data.head.stateCode === 200) {
-            let data = response.data.body.data
-            if (data.records.length === this.size) {
-              this.current++
-            }
-            this.tabs[0].content = data.records
-            console.log(this.tabs[0].content)
-          }
+          let data = response.data.body.data
+          this.tabs[0].content = data.records
         }).catch((error) => {
           console.log(error)
         })
@@ -221,33 +263,63 @@
         } else {
           return '回答了你发布的问题'
         }
+      },
+      getNewsInfo () {
+        let url = '/message/news/groups'
+        // 获取私信消息
+        this.$http.get(url, null).then((response) => {
+          if (response.data.head.stateCode === 200) {
+            let map = response.data.body.data
+            for (let key in map) {
+              let letters = {}
+              letters.msg = map[key]
+              // 通过key 获取information信息
+              url = '/myPage/user/userInformation/' + key
+              this.$http.get(url, null).then((response) => {
+                letters.userInfo = response.data.body.data
+                // 放到数组中
+                this.tabs[1].personCall.push(letters)
+              })
+            }
+          }
+        }).catch((error) => {
+          console.log(error)
+        })
+      },
+      computeNewsCount (msg) {
+        let count = 0
+        for (let i = 0; i < msg.length; i++) {
+          if (msg[i].hasRead === 0) {
+            count++
+          }
+        }
+        return count
+      }
+    },
+    // beforeRouteEnter (to, from, next) {
+    //   if (from.name === 'putQuestionPage') {
+    //     to.meta.isBack = false
+    //   }
+    //   next()
+    // },
+    // activated () {
+    //   if (!this.$route.meta.isBack) {
+    //     this.getData()
+    //   }
+    //   this.$route.meta.isBack = false
+    // },
+    activated () {
+      // 获取msg界面是否需要更新
+      if (this.$store.state.flushMsg !== -1) {
+        this.getNewsInfo()
       }
     },
     mounted () {
       // 获取浏览器可视区域高度
       this.clientHeight = `${document.documentElement.clientHeight}`
-      this.$refs.panelContatiner.$refs.wrapper.style.height = this.clientHeight - 117 + 'px'
-      this.$refs.notice.$refs.wrapper.style.height = this.clientHeight - 117 + 'px'
-      let url = '/message/news/groups'
-      // 获取私信消息
-      this.$http.get(url, null).then((response) => {
-        if (response.data.head.stateCode === 200) {
-          let map = response.data.body.data
-          for (let key in map) {
-            let letters = {}
-            letters.msg = map[key]
-            // 通过key 获取information信息
-            url = '/myPage/user/userInformation/' + key
-            this.$http.get(url, null).then((response) => {
-              letters.userInfo = response.data.body.data
-              // 放到数组中
-              this.tabs[1].personCall.push(letters)
-            })
-          }
-        }
-      }).catch((error) => {
-        console.log(error)
-      })
+      this.$refs.newsScroll.$refs.wrapper.style.height = this.clientHeight - 117 + 'px'
+      this.$refs.noticeScroll.$refs.wrapper.style.height = this.clientHeight - 117 + 'px'
+      this.getNewsInfo()
       this.getNoticeInfo()
       this.$nextTick(() => {
         if (this.$store.state.message === '私信') {
@@ -270,10 +342,12 @@
 
   .msg-page
     height 100%
+
     .top-wrapper
       padding 4px
       box-shadow: 0 1px #efefef;
       background-color: #017fff
+
       .search-wrapper
         background-color #3298fe
         border-radius 8px
@@ -298,6 +372,7 @@
             border 0
             padding-right 8px
             color: #a0cfff
+
             .cube-input-field
               padding 4px
 
@@ -321,6 +396,25 @@
             padding-left 6px
             text-align center
 
+    .cube-tab-bar
+      .cube-tab
+        font-size 18px
+
+        .badge
+          position absolute
+          top 2px
+          font-size 10px
+          display inline-block
+          background-color #f56c6c
+          color: #fff
+          height 16px
+          text-align center
+          line-height 16px
+          border-radius: 8px
+          padding: 0 4px;
+          white-space: nowrap;
+          border: 1px solid #fff;
+
     .cube-tab-panels
 
       .cube-tab-panel
@@ -329,6 +423,7 @@
         .cube-scroll-wrapper
           height: 600px
           background #f4f6f9
+
           .tab-panel-li
             margin-left 10px
             margin-right 10px
@@ -344,10 +439,22 @@
                   font-weight lighter
 
                 .type
+                  color: #aaa
                   margin-left 10px
                   font-size 12px
+                  margin-right: 4px
+
+                .badge-dot
+                  position absolute
+                  display inline-block
+                  background-color #f56c6c
+                  border-radius 50%
+                  height 6px
+                  width: 6px;
+                  border: 1px solid #fff;
 
                 .time
+                  color: #aaa
                   display float
                   float right
                   margin-right 20px
@@ -361,6 +468,7 @@
 
               .item-bttom
                 margin 10px
+                color: #333
 
             .item-panl2
               .letter-wrapper
@@ -384,6 +492,24 @@
                     .letter-time
                       margin-right 20px
 
+                      .badge
+                        position absolute
+                        z-index 20
+                        right 20px
+                        margin-top 22px
+                        font-size 12px
+                        display inline-block
+                        background-color #f56c6c
+                        color: #fff
+                        height 18px
+                        text-align center
+                        line-height 18px
+                        border-radius: 10px
+                        padding: 0 6px;
+                        white-space: nowrap;
+                        border: 1px solid #fff;
+
                   .right-content
                     margin-top 10px
+
 </style>

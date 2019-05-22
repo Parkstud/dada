@@ -5,11 +5,11 @@
       <span class="input-wrapper">
           <cube-input ref="search1" :placeholder="placeholder" :type="type" v-model="val"
                       @keyup.enter.native="searchInfo"
-                      :autofocus="autofocus"></cube-input>
+                      :autofocus="autofocus"
+                      ></cube-input>
       </span>
       <span class="temp"></span>
     </div>
-
     <ul class="history-wrapper" v-show="showHistory && historys.length>0">
       <li v-for="(item, index) in historys" :key="index" class="history-item">
         <span class="cubeic-time"></span>
@@ -140,6 +140,7 @@
   .only-search
     background #f4f6f9
     height 100%
+
     .search-wrapper
       display flex
       align-content: space-between;
@@ -173,6 +174,7 @@
     .history-wrapper
       color #aaa
       background #f4f6f9
+
       .clear-history
         height 24px
         text-align center

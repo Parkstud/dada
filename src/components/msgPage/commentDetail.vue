@@ -16,12 +16,11 @@
         <!--评论内容-->
         <div class="comment-content" v-show="commentInfo">
           <div class="author-info">
-            <!--@click="toHomepage(item.id)-->
             <span class="avatar">
             <img :src="imgURL+commentInfo.avatar" width="50" height="50"
-                 v-show="commentInfo.avatar">
+                 v-show="commentInfo.avatar" @click="toHomepage(commentInfo.userId)">
           </span>
-            <span class="author-name">{{commentInfo.username}}</span>
+            <span class="author-name" @click="toHomepage(commentInfo.userId)">{{commentInfo.username}}</span>
             <span class="answer-time">{{commentInfo.commentTime}}</span>
             <span class="info-left" @click="replyComment">
               <span class="iconfont icon-caina" v-show="commentInfo.adopt>0"></span>
@@ -32,7 +31,7 @@
               <!--              <span class="cubeic-bad"></span>-->
               <!--            <span class="approve">{{commentInfo.badReview}}</span>-->
           </span>
-            <p class="comments" v-html="commentInfo.comments">
+            <p class="comments" @click="replyComment" v-html="commentInfo.comments">
             </p>
           </div>
         </div>
@@ -40,10 +39,12 @@
         <!--回复内容-->
         <div class="reply-wrapper border-bottom-1px" v-for="(item,index) in replys" :key="index">
           <span class="avatar">
-              <img :src="imgURL+item.replyAvatar" width="40" height="40">
+              <img :src="imgURL+item.replyAvatar" width="40" height="40"
+                   @click="toHomepage(item.replyId)">
           </span>
           <div class="reply-content" @click="clickReply(item)">
-            <span class="reply-name">{{item.replyUsername}}</span>
+            <span class="reply-name"
+                  @click.stop="toHomepage(item.replyId)">{{item.replyUsername}}</span>
             <span class="reply-time">{{formatData(item.replyTime,1)}}</span>
             <p class="reply-content">
               {{item.repliedUserId?'回复 '+item.repliedUsername+' 的评论 :'
@@ -60,7 +61,8 @@
 
     <!--底部-->
     <div class="chat-footer">
-      <cube-input v-model="value" :placeholder="placeholder" @keyup.enter.native="sendReply">
+      <cube-input v-model="value" :placeholder="placeholder" ref="replyInput"
+                  @keyup.enter.native="sendReply">
         <span slot="prepend" class="temp-space"></span>
         <span slot="append" @click="sendReplyClick" class="cubeic-navigation"
               :class="value.length>0?'sending':'not-send'"></span>
@@ -76,6 +78,7 @@
     name: 'commentDetail',
     data () {
       return {
+        focusStatus: false,
         backText: '返回',
         // 回复输入框
         value: '',
@@ -127,6 +130,15 @@
       }
     },
     methods: {
+      // 点击头像跳转界面
+      toHomepage (userId) {
+        this.$router.push({
+          name: 'homePage',
+          params: {
+            userId: userId
+          }
+        })
+      },
       adoptComment (val) {
         if (val) {
           this.commentInfo.adopt = 1
@@ -147,6 +159,9 @@
         })
       },
       changeReport () {
+        if (!this.userId) {
+          return
+        }
         console.log('举报')
         let reportInfo = {}
         reportInfo['reportId'] = this.commentInfo.commentId
@@ -208,6 +223,8 @@
         }).show()
       },
       replyComment () {
+        this.$refs.replyInput.focus()
+        this.focusStatus = true
         this.replyOtherInfo = null
         this.placeholder = '请输入你的回复内容'
       },
@@ -320,6 +337,7 @@
       },
       // 回复别人
       replyOther () {
+        this.$refs.replyInput.focus()
         if (this.replyOtherInfo) {
           this.placeholder = '回复: ' + this.replyOtherInfo.replyUsername
         }
@@ -415,7 +433,11 @@
         this.needClear = true
         this.commentId = this.$route.params.commentId
         this.$http.get('/commentInfo/comment/' + this.commentId, null).then((response) => {
-          console.log(response.data)
+          if (!response.data.body.data.commentInfo) {
+            this.showToast('该回答被删除!')
+            this.$router.go(-1)
+            return
+          }
           this.commentInfo = response.data.body.data.commentInfo
           this.replys = response.data.body.data.replys
         }).catch((error) => {
@@ -425,7 +447,7 @@
     },
     beforeRouteEnter (to, from, next) {
       console.log(from)
-      if (from.name === 'problemDetails') {
+      if (from.name === 'problemDetails' || from.name === 'mainApp') {
         to.meta.isBack = false
       }
       next()

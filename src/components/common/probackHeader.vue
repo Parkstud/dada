@@ -91,6 +91,9 @@
         return '收藏'
       },
       showDelete () {
+        if (this.$router.currentRoute.name === 'homePage') {
+          return false
+        }
         let userAccount = JSON.parse(window.localStorage.getItem('token'))
         if (userAccount.type === 1 || userAccount.id) {
           return true

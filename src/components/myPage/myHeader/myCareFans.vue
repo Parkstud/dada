@@ -20,7 +20,8 @@
       >
         <!-- 关注 -->
         <cube-slide-item>
-          <cube-scroll :data="recommendData" :options="scrollOptions">
+          <cube-scroll :data="recommendData" ref="scrollCare" :options="scrollOptions"
+                       @pulling-up="onPullingUpCare">
             <ul class="list-wrapper">
               <li v-if="followersData.length===0">
                 你还没有关注
@@ -44,7 +45,8 @@
         </cube-slide-item>
         <!-- 粉丝 -->
         <cube-slide-item>
-          <cube-scroll :data="followersData" :options="scrollOptions">
+          <cube-scroll :data="followersData" ref="scrollFans" :options="scrollOptions"
+                       @pulling-up="onPullingUpFans">
             <ul class="list-wrapper">
               <li v-if="followersData.length===0">
                 你还没有粉丝
@@ -99,11 +101,46 @@
           directionLockThreshold: 0
         },
         scrollOptions: {
+          pullUpLoad: true,
           directionLockThreshold: 0
         }
       }
     },
     methods: {
+      onPullingUpFans () {
+        this.$http.get('/Interaction/fansInfoPage', {
+          params: {
+            followId: this.followersData[this.followersData.length - 1].id
+          }
+        }).then((response) => {
+          let data = response.data.body.data.records
+          if (data.length > 0) {
+            this.followersData = this.followersData.concat(data)
+          } else {
+            this.$refs.scrollFans.forceUpdate()
+          }
+        }).catch((error) => {
+          console.log(error)
+          this.$refs.scrollFans.forceUpdate()
+        })
+      },
+      onPullingUpCare () {
+        this.$http.get('/Interaction/careInfoPage', {
+          params: {
+            followId: this.recommendData[this.recommendData.length - 1].id
+          }
+        }).then((response) => {
+          let data = response.data.body.data.records
+          if (data.length > 0) {
+            this.recommendData = this.recommendData.concat(data)
+          } else {
+            this.$refs.scrollCare.forceUpdate()
+          }
+        }).catch((error) => {
+          console.log(error)
+          this.$refs.scrollFans.forceUpdate()
+        })
+      },
       fans (item) {
         if (item.eachCare > 0) {
           item.eachCare = 0
@@ -114,16 +151,16 @@
           userId: item.userId
         })).then((res) => {
           // 获取关注信息
-          this.$http.get('/Interaction/careInfoPage', {
-            params: {
-              problemId: this.problemId
-            }
-          }).then((response) => {
+          this.$http.get('/Interaction/careInfoPage', null).then((response) => {
             this.recommendData = response.data.body.data.records
+            this.needUpdate()
           }).catch((error) => {
             console.log(error)
           })
         })
+      },
+      needUpdate () {
+        this.$store.commit('updateFlushMyPageCare', 1)
       },
       care (item) {
         if (item.eachCare >= 0) {
@@ -134,7 +171,7 @@
         this.$http.post('/problemInfo/change/careinfo', this.$qs.stringify({
           userId: item.userId
         })).then((res) => {
-          console.log(res)
+          this.needUpdate()
         })
       },
       findIndex (ary, fn) {
@@ -176,23 +213,18 @@
         return '关注'
       },
       getData () {
+        if (this.$route.params.itemName) {
+          this.selectedLabel = this.$route.params.itemName
+        }
         // 获取关注
-        this.$http.get('/Interaction/careInfoPage', {
-          params: {
-            problemId: this.problemId
-          }
-        }).then((response) => {
+        this.$http.get('/Interaction/careInfoPage', null).then((response) => {
           this.recommendData = response.data.body.data.records
         }).catch((error) => {
           console.log(error)
         })
 
         // 获取粉丝
-        this.$http.get('/Interaction/fansInfoPage', {
-          params: {
-            problemId: this.problemId
-          }
-        }).then((response) => {
+        this.$http.get('/Interaction/fansInfoPage', null).then((response) => {
           console.log(response)
           this.followersData = response.data.body.data.records
         }).catch((error) => {
@@ -208,9 +240,6 @@
       }
     },
     activated () {
-      this.getData()
-    },
-    mounted () {
       this.getData()
     },
     components: { BackHeader }

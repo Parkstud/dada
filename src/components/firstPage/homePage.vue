@@ -1,28 +1,12 @@
 <template>
   <div class="home-page">
-    <div class="back-header">
-      <span class="cubeic-back" @click="back">
-      </span>
-      <i class="cubeic-more" @click="showMoreAction"></i>
-      <transition name="fade">
-        <div class="moreAction" v-show="show">
-          <ul>
-            <li>
-              <i class="cubeic-remove"></i>
-              <span>加入黑名单</span>
-            </li>
-            <li>
-              <i class="cubeic-danger"></i>
-              <span>举报</span>
-            </li>
-          </ul>
-        </div>
-      </transition>
-      <span class="text">
-        信息
-      </span>
-    </div>
-    <div class="header-info">
+    <proback-header ref="backheader" :back-text="backText"
+                    :show-collect="false"
+                    :show-more="showMore"
+                    v-on:changeReport="changeReport"
+    ></proback-header>
+
+    <div class="header-info" v-show="showPage">
       <div class="avatar-wrapper">
         <img class="avatar" width="60" height="60" :src="this.imgURL+userData.avatar">
       </div>
@@ -37,14 +21,15 @@
       <div class="btn-wrapper">
         <cube-button :icon="userData.cared ? 'cubeic-ok':'cubeic-add' " :inline="true"
                      :outline="userData.cared"
+                     :class="userData.cared?'cube-btn-active':''"
                      @click="clickCare">{{btnCareText}}
         </cube-button>
         <cube-button icon="cubeic-email" :inline="true" @click="privateLetter">私信</cube-button>
       </div>
 
     </div>
-    <div class="question-info">
-      <div class="question-wrapper">
+    <div class="question-info" v-show="showPage">
+      <div class="question-wrapper" @click="putQuestion">
         <span class="left">
           <span class="cubeic-edit"></span>
           <span class="txt">提出问题</span>
@@ -56,7 +41,7 @@
         </span>
 
       </div>
-      <div class="answer-wrapper">
+      <div class="answer-wrapper" @click="collectQuestion">
          <span class="left">
           <span class="cubeic-time"></span>
           <span class="txt">收藏问题</span>
@@ -72,16 +57,18 @@
 </template>
 
 <script type='text/ecmascript-6'>
+  import probackHeader from '../common/probackHeader'
+
   export default {
     name: 'homePage',
     data () {
       return {
-        // 从问题跳转进来的页面
-        problem: this.$route.params.problem,
+        backText: '信息',
+        showPage: true,
         // 用户的id
         userId: this.$route.params.userId,
         // 显示更多
-        show: false,
+        showMore: true,
         userData: {
           avatar: 'group1/M00/00/00/rBsAAlycfB-AA9jFAACjZJqjeEQ581_big.jpg',
           nickName: '小明明',
@@ -100,7 +87,43 @@
       }
     },
     methods: {
+      changeReport () {
 
+        let reportInfo = {}
+        reportInfo['reportId'] = this.userId
+        reportInfo['toUserId'] = this.userId
+        reportInfo['type'] = 0
+        // 跳转举报页面
+        this.$refs.backheader.$refs.showmore.click()
+        this.$router.push({
+          name: 'report',
+          params: {
+            reportInfo: reportInfo
+          }
+        })
+      },
+      // 提出问题界面
+      putQuestion () {
+        this.$router.push({
+            name: 'myProblem',
+            params: {
+              userId: this.userId,
+              backText: this.userData.nickName + ' 的问题'
+            }
+          }
+        )
+      },
+      // 收藏问题界面
+      collectQuestion () {
+        this.$router.push({
+            name: 'myCollection',
+            params: {
+              userId: this.userId,
+              backText: this.userData.nickName + ' 的收藏'
+            }
+          }
+        )
+      },
       clickCare: function () {
         this.userData.cared = !this.userData.cared
         if (this.userData.cared) {
@@ -118,10 +141,7 @@
         })
       },
       back () {
-        this.$router.push({
-          name: 'problemDetails',
-          params: { problem: this.problem }
-        })
+        this.$router.go(-1)
       },
       // 私信界面
       privateLetter () {
@@ -132,17 +152,14 @@
               this.$router.push({
                 name: 'chatPage',
                 params: {
-                  letterUser: response.data.body.data,
-                  problem: this.problem
+                  letterUser: response.data.body.data
                 }
               })
             }
           })
       },
-      showMoreAction () {
-        this.show = !this.show
-      },
       getData () {
+        this.showPage = false
         // 获取用户信息
         let url = '/problemInfo/userInfo'
         this.$http.get(url, {
@@ -152,26 +169,30 @@
         }).then((response) => {
           let data = response.data.body.data
           this.userData = data
+          this.showPage = true
         }).catch((error) => {
           console.log(error)
         })
       }
     },
-    beforeRouteEnter (to, from, next) {
-      console.log(from)
-      if (from.name === 'problemDetails') {
-        to.meta.isBack = false
-      }
-      next()
-    },
     activated () {
-      if (!this.$route.meta.isBack) {
-        // 如果isBack是false，表明需要获取新数据，否则就不再请求，直接使用缓存的数据
+      if (!this.$route.params.userId) {
+        return
+      }
+
+      let my = JSON.parse(localStorage.getItem('token'))
+      if (this.userId === my.id) {
+        this.showMore = false
+      } else {
+        this.showMore = true
+      }
+
+      if (this.userId !== this.$route.params.userId) {
+        this.userId = this.$route.params.userId
         this.getData()
       }
-      // 恢复成默认的false，避免isBack一直是true，导致下次无法获取数据
-      this.$route.meta.isBack = true
     },
+    components: { probackHeader },
     mounted () {
       this.getData()
     }
@@ -212,44 +233,45 @@
         height 30px
         font-size 22px
 
-      .moreAction
-        position absolute;
-        background-color #007efe
-        right 5px
-        width 150px
-        color white
-        z-index 20
-        top 50px
-        border-radius 5px
-        font-size 16px
+    /* .moreAction
+       position absolute;
+       background-color #007efe
+       right 5px
+       width 150px
+       color white
+       z-index 20
+       top 50px
+       border-radius 5px
+       font-size 16px
 
-        ul
-          li
-            padding 10px
-            border-bottom 1px solid white
-            transition background-color 1s
+       ul
+         li
+           padding 10px
+           border-bottom 1px solid white
+           transition background-color 1s
 
-            .cubeic-star-collect
-              color aqua
+           .cubeic-star-collect
+             color aqua
 
-            &:active
-              background-color black
+           &:active
+             background-color black
 
-            span
-              margin 10px
-              width 40px
-              text-align center
+           span
+             margin 10px
+             width 40px
+             text-align center
 
-        &:before
-          content: "";
-          width: 0;
-          height: 0;
-          border-left: 10px solid transparent;
-          border-right: 10px solid transparent;
-          border-bottom: 10px solid #007efe;
-          position: absolute;
-          top: -9px;
-          left: 106px;
+       &:before
+         content: "";
+         width: 0;
+         height: 0;
+         border-left: 10px solid transparent;
+         border-right: 10px solid transparent;
+         border-bottom: 10px solid #007efe;
+         position: absolute;
+         top: -9px;
+         left: 106px;
+*/
 
     .header-info
       color white
@@ -282,6 +304,10 @@
 
         .cube-btn
           width 100px
+          background-color #007efe
+
+        .cube-btn-active
+          background-color #5ba8ff
 
     .question-info
       .question-wrapper, .answer-wrapper
@@ -295,6 +321,12 @@
 
         .cubeic-edit, .cubeic-time
           margin 0 10px
+
+        .cubeic-edit
+          color: #4ccbba
+
+        .cubeic-time
+          color: #1a9dfe
 
         .txt
           font-size 14px

@@ -16,7 +16,7 @@
             <search-page></search-page>
           </cube-slide-item>
           <cube-slide-item>
-            <msg-page></msg-page>
+            <msg-page @changeDot="updateDot" :msginfo="msgInfo"></msg-page>
           </cube-slide-item>
           <cube-slide-item>
             <my-page></my-page>
@@ -32,6 +32,16 @@
                     @change="changeHandler"
                     ref="tarBar"
       >
+        <cube-tab v-for="(item, index) in tabs" :label="item.label" :key="item.label">
+          <!-- name为icon的插槽 -->
+          <span v-show="index===2 && showDot" class="badge-dot"></span>
+          <i slot="icon" :class="item.icon">
+          </i>
+          <!-- 默认插槽 -->
+          <div>
+            {{item.label}}
+          </div>
+        </cube-tab>
       </cube-tab-bar>
 
     </div>
@@ -48,6 +58,8 @@
     name: 'mainApp',
     data () {
       return {
+        msgInfo: {},
+        showDot: false,
         index: this.$store.state.count,
         tabs: [
           {
@@ -89,6 +101,10 @@
       }
     },
     methods: {
+      // 修改dot
+      updateDot (data) {
+        this.msgInfo = data
+      },
       clickHandler (label) {
 
       },
@@ -97,6 +113,36 @@
       },
       onChange (current) {
         this.index = current
+      },
+      // 第一次加载主界面的时候设置设置连接websocket
+      initWebSocket () {
+        // 断开连接 并设置为
+        let webSocket = this.$store.state.webSocket
+        if (webSocket) {
+          // 关闭连接
+          webSocket.close()
+          this.$store.commit('updateWebSocket', null)
+        }
+        // 连接服务器
+        let user = JSON.parse(window.localStorage.getItem('token'))
+        const wsuri = 'ws://192.168.43.106:8080/websocket/' + user.id
+        webSocket = new WebSocket(wsuri)
+        webSocket.onopen = () => {
+          console.log('建立连接')
+        }
+        webSocket.onmessage = (e) => {
+          console.log('接收数据')
+          console.log(e)
+        }
+      },
+      getMsgCount () {
+        this.$http.get('/message/notReadCount', null).then((res) => {
+          let data = res.data.body.data
+          this.msgInfo = data
+          if (data.newsCount > 0 || data.noticeCount > 0) {
+            this.showDot = true
+          }
+        })
       }
     },
     components: {
@@ -108,8 +154,9 @@
     mounted () {
       // 获取浏览器可视区域高度
       this.clientHeight = `${document.documentElement.clientHeight}`
-      // this.$refs.containerPage.style.height = (this.clientHeight - 44) + 'px'
       this.$refs.containerPage.style.height = (this.clientHeight - 46) + 'px'
+      this.initWebSocket()
+      this.getMsgCount()
     }
 
   }
@@ -138,6 +185,15 @@
           padding-top 3px
           position: relative;
           overflow: hidden;
+
+          .badge-dot
+            position absolute
+            display inline-block
+            background-color #f56c6c
+            border-radius 50%
+            height 10px
+            width: 10px;
+            border: 1px solid #fff;
 
           &:after
             content: "";

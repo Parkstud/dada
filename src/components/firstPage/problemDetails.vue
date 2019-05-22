@@ -34,6 +34,7 @@
             </div>
           </div>
         </template>
+
         <div class="question-wrapper">
           <p class="question">{{problem.title}}</p>
           <div class="question-more">
@@ -105,7 +106,7 @@
         evTimeStamp: 0,
         // 返回页面
         backComponent: '/mainApp',
-        backText: '首页',
+        backText: '问题',
         // 收藏数
         collectCount: 0,
         // 评论数
@@ -247,22 +248,12 @@
         this.getData()
       },
       // 点击头像跳转界面
-      toHomepage (commentId) {
-        // 通过评论信息 获取用户id
-        let url = '/problemInfo/comment/info'
-        this.$http.get(url, {
+      toHomepage (userId) {
+        this.$router.push({
+          name: 'homePage',
           params: {
-            id: commentId
+            userId: userId
           }
-        }).then((response) => {
-          let data = response.data.body.data
-          this.$router.push({
-            name: 'homePage',
-            params: {
-              problem: this.problem,
-              userId: data.userId
-            }
-          })
         })
       },
       toDetail (item) {
@@ -379,6 +370,9 @@
             let data = response.data.body.data
             this.headerInfo = data.headerInfo
             this.contentInfo = data.contentInfo
+
+            // 更新浏览记录
+            this.updateLookHistory()
           }).catch((error) => {
           console.log(error)
         })
@@ -410,7 +404,6 @@
       this.clientHeight = `${document.documentElement.clientHeight}`
       this.$refs.detailsWrapper.style.height = (this.clientHeight - 42) + 'px'
       this.getData()
-      this.updateLookHistory()
     }
   }
 </script>
@@ -508,6 +501,7 @@
               right 0
               margin-right 20px
               top 20px
+
               .icon-caina
                 margin-right 12px
                 font-size 18px

@@ -53,7 +53,7 @@
                   <img :src="imgURL+item.avatar" class="avatar">
                   <span class="name">{{item.nickName}}</span>
                 </div>
-                <div>推荐这位好友来回答</div>
+                <div>邀请这位好友来回答</div>
                 <div class="btn-invite">
                   <cube-button :inline="true"
                                :class="{'invite-active':item.invited,'invite':!item.invited}"
@@ -210,8 +210,6 @@
 <style lang="stylus" rel="stylesheet/stylus">
   .cube-tab-bar
     background-color: white
-
-
   .tab-slide-container
     position: fixed
     top: 80px

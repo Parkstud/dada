@@ -66,43 +66,56 @@
       myCollection () {
         this.$store.commit('setTransition', 'turn-on')
         this.$store.commit('updateCount', MAIN_MY)
-        this.$router.push('/myCollection')
+        this.$router.push({
+            name: 'myCollection',
+            params: {
+              userId: this.userId,
+              backText: '我的收藏'
+            }
+          }
+        )
       },
       // 跳转myProblem组件界面
       myProblem () {
         this.$store.commit('setTransition', 'turn-on')
         this.$store.commit('updateCount', MAIN_MY)
-        this.$router.push('/myProblem')
+        this.$router.push({
+            name: 'myProblem',
+            params: {
+              userId: this.userId,
+              backText: '我的问题'
+            }
+          }
+        )
       },
       person_setting () {
         this.$store.commit('updateCount', MAIN_MY)
         this.$router.push('/personSet')
+      },
+      getData () {
+        // 获取 我的问题\收藏\赞\浏览历史的数量
+        this.$http.get('/myPage/content/information/count', null)
+          .then((response) => {
+            let data = response.data.body.data
+            if (this.change(this.collectProblemCount, data.collectProblemCount)) {
+              this.collectProblemCount = data.collectProblemCount
+            }
+            if (this.change(this.awesomeCount, data.awesomeCount)) {
+              this.awesomeCount = data.awesomeCount
+            }
+            if (this.change(this.myQuestionCount, data.myQuestionCount)) {
+              this.myQuestionCount = data.myQuestionCount
+            }
+            if (this.change(this.browseCount, data.browseCount)) {
+              this.browseCount = data.browseCount
+            }
+          }).catch((error) => {
+          console.log(error)
+        })
       }
     },
-    mounted () {
-      window.addEventListener('popstate', () => {
-        this.$store.commit('setTransition', 'turn-off')
-      }, false)
-
-      // 获取 我的问题\收藏\赞\浏览历史的数量
-      this.$http.get('/myPage/content/information/count', null)
-        .then((response) => {
-          let data = response.data.body.data
-          if (this.change(this.collectProblemCount, data.collectProblemCount)) {
-            this.collectProblemCount = data.collectProblemCount
-          }
-          if (this.change(this.awesomeCount, data.awesomeCount)) {
-            this.awesomeCount = data.awesomeCount
-          }
-          if (this.change(this.myQuestionCount, data.myQuestionCount)) {
-            this.myQuestionCount = data.myQuestionCount
-          }
-          if (this.change(this.browseCount, data.browseCount)) {
-            this.browseCount = data.browseCount
-          }
-        }).catch((error) => {
-        console.log(error)
-      })
+    activated () {
+      this.getData()
     }
   }
 </script>

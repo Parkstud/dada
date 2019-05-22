@@ -6,7 +6,31 @@
         <cube-scroll
           ref="scroll"
           :data="problemInfo"
-          :options="options">
+          @pulling-down="onPullingDown"
+          @pulling-up="onPullingUp"
+          :options="scrollOptions">
+          <template slot="pulldown" slot-scope="props">
+            <div v-if="props.pullDownRefresh"
+                 class="cube-pulldown-wrapper"
+                 :style="props.pullDownStyle">
+              <div v-if="props.beforePullDown"
+                   class="before-trigger"
+                   :style="{paddingTop: props.bubbleY + 'px'}">
+            <span
+              :class="{rotate: props.bubbleY > scrollOptions.pullDownRefresh.threshold - 60}">↓</span>
+              </div>
+              <div class="after-trigger" v-else>
+                <div v-show="props.isPullingDown" class="loading">
+                  <cube-loading></cube-loading>
+                </div>
+                <transition name="success">
+                  <div v-show="!props.isPullingDown" class="text-wrapper"><span
+                    class="refresh-text">更新成功</span>
+                  </div>
+                </transition>
+              </div>
+            </div>
+          </template>
           <ul class="list-wrapper">
             <li v-for="(item, index) in problemInfo" class="list-item border-top-1px"
                 @click="choseColProblem(item)"
@@ -34,9 +58,14 @@
     data () {
       return {
         backText: '我的收藏',
+        userId: this.$route.params.userId,
         current: 1,
         size: 10,
-        options: {
+        scrollOptions: {
+          pullDownRefresh: {
+            threshold: 60,
+            stop: 44
+          },
           pullUpLoad: true,
           directionLockThreshold: 0
         },
@@ -61,39 +90,52 @@
           }
         })
       },
+      onPullingDown () {
+        this.getData()
+      },
       onPullingUp () {
-        if (this.problemInfo.length > 0 && this.problemInfo.length % this.size === 0) {
-          this.current++
-        }
         this.$http.get('/problemInfo/PageProblemCollect', {
           params: {
             current: this.current,
-            size: this.size
+            size: this.size,
+            problemId: this.problemInfo[this.problemInfo.length - 1].problemId,
+            userId: this.userId
           }
         }).then((response) => {
-          let data = response.data.body.data
-          if (data.records.length > 0) {
-            let temp = this.problemInfo.length % this.size
-            this.problemInfo = this.problemInfo.concat(data.records.slice(temp))
+          let data = response.data.body.data.records
+          if (data.length > 0) {
+            this.problemInfo = this.problemInfo.concat(data)
           } else {
-            this.$refs.commentContainer.forceUpdate()
+            this.$refs.scroll.forceUpdate()
           }
-        }).catch((error) => {
-          console.log(error)
+        })
+      },
+      getData () {
+        this.$http.get('/problemInfo/PageProblemCollect', {
+          params: {
+            current: this.current,
+            size: this.size,
+            userId: this.userId
+          }
+        }).then((response) => {
+          if (response.data.body.data.records.length > 0) {
+            this.problemInfo = response.data.body.data.records
+          } else {
+            this.$refs.scroll.forceUpdate()
+          }
         })
       }
+    },
+    activated () {
+      this.userId = this.$route.params.userId
+      if (this.$route.params.backText) {
+        this.backText = this.$route.params.backText
+      }
+      this.getData()
     },
     mounted () {
       this.clientHeight = `${document.documentElement.clientHeight}`
       this.$refs.scrollWrapper.style.height = (this.clientHeight - 42) + 'px'
-      this.$http.get('/problemInfo/PageProblemCollect', {
-        params: {
-          current: this.current,
-          size: this.size
-        }
-      }).then((response) => {
-        this.problemInfo = response.data.body.data.records
-      })
     }
   }
 </script>
