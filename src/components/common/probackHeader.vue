@@ -46,6 +46,10 @@
         type: Boolean,
         default: true
       },
+      showDelete: {
+        type: Boolean,
+        default: true
+      },
       showCollect: {
         type: Boolean,
         default: true
@@ -73,9 +77,6 @@
         type: Boolean,
         default: true
       },
-      intoParams: {
-        type: Object
-      }
     },
     computed: {
       adoptText () {
@@ -89,17 +90,17 @@
           return '已收藏'
         }
         return '收藏'
-      },
-      showDelete () {
-        if (this.$router.currentRoute.name === 'homePage') {
-          return false
-        }
-        let userAccount = JSON.parse(window.localStorage.getItem('token'))
-        if (userAccount.type === 1 || userAccount.id) {
-          return true
-        }
-        return false
       }
+      // showDelete () {
+      //   if (this.$router.currentRoute.name === 'homePage') {
+      //     return false
+      //   }
+      //   let userAccount = JSON.parse(window.localStorage.getItem('token'))
+      //   if (userAccount.type === 1 || userAccount.id) {
+      //     return true
+      //   }
+      //   return false
+      // }
     },
     // activated () {
     //   if (this.$router.currentRoute.name === 'commentDetail') {
@@ -119,19 +120,7 @@
         this.$emit('deleteProblem')
       },
       back () {
-        if (this.backComponent === '') {
-          this.$router.go(BACK_FLAG)
-        } else {
-          if (this.intoParams) {
-            this.$router.push({
-                name: this.backComponent,
-                params: this.intoParams
-              }
-            )
-          } else {
-            this.$router.push(this.backComponent)
-          }
-        }
+        this.$router.go(BACK_FLAG)
       },
       showMoreAction () {
         this.show = !this.show

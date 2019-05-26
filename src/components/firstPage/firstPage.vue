@@ -14,7 +14,7 @@
       </div>
     </div>
     <div class="my-wrapper" ref="mywrapper">
-      <cube-scroll ref="scroll" :data="items"
+      <cube-scroll ref="firstScroll" :data="items"
                    :options="scrollOptions"
                    @pulling-down="onPullingDown"
                    @pulling-up="onPullingUp">
@@ -74,9 +74,9 @@
         // flushCount: this.$route.state.flushCount,
         scrollOptions: {
           pullDownRefresh: {
-            threshold: 50,
-            stop: 40,
-            txt: '刷新成功'
+            threshold: 60,
+            stop: 44
+            // txt: '刷新成功'
           },
           pullUpLoad: true,
           directionLockThreshold: 0
@@ -131,11 +131,11 @@
               this.items = this.items.concat(data.records)
               this.minProblemId = this.items[this.items.length - 1].id
             } else {
-              this.$refs.scroll.forceUpdate()
+              this.$refs.firstScroll.forceUpdate()
             }
           }).catch((error) => {
           console.log(error)
-          this.$refs.scroll.forceUpdate()
+          this.$refs.firstScroll.forceUpdate()
         })
       },
       getData () {

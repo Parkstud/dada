@@ -7,54 +7,70 @@
           <span class="cubeic-question"></span>
           <span class="question">{{question.title}}</span>
         </div>
-        <div class="no-anwser" v-show="answerData.length===0 && dataloaded">
-          暂无答案
+        <div class="load-wrapper" v-show="!dataloaded">
+          <div class="cube-loading">
+                <span class="cube-loading-spinners"><i
+                  class="cube-loading-spinner"></i><i class="cube-loading-spinner"></i><i
+                  class="cube-loading-spinner"></i><i class="cube-loading-spinner"></i><i
+                  class="cube-loading-spinner"></i><i class="cube-loading-spinner"></i><i
+                  class="cube-loading-spinner"></i><i class="cube-loading-spinner"></i><i
+                  class="cube-loading-spinner"></i><i class="cube-loading-spinner"></i><i
+                  class="cube-loading-spinner"></i><i class="cube-loading-spinner"></i>
+            </span>
+          </div>
         </div>
 
-        <div class="topic-wrapper" v-for="(item,index) in answerData" :key="index">
-          <div class="title">
-            <span class="title-content">匹配题目</span>
-          </div>
-          <div class="topic-content">
-            <div class="split-line"></div>
-            <div class="question-des">
-              <p v-html="item.problem.title ? transferString(item.problem.title):''">
-              </p>
+        <div class="no-anwser" v-show="answerData.length===0 && dataloaded">
+          <div class="show-no">暂无答案</div>
+          <div class="send-people">
+            <span class="txt">是否发送到人工回答？</span>
+            <div class="btn-wrapper">
+              <cube-button
+                :class="[hasSend ? 'send':'send-not']"
+                :inline="true" @click="sendPeople">
+                发送人工回答
+              </cube-button>
             </div>
+          </div>
+        </div>
+        <div class="topic-wrapper" v-for="(item,index) in answerData" :key="index"
+             v-show="dataloaded">
+          <div class="topic-content">
             <div class="answer-wrapper">
               <div class="split-line2"></div>
-              <div class="solve-name">解答</div>
-              <div class="solve-content">
-                {{item.problem.answerContent?item.problem.answerContent:''}}
+              <div class="solve-name">答案{{resolveIndex(index)}}</div>
+              <div class="solve-content"
+                   v-html="transferString(item.problem.answerContent?item.problem.answerContent:'')">
+
               </div>
               <div class="forecast">
                 <div class="forecast-title">匹配预估</div>
-                <div class="forecast-value">{{item.similarityDegree ?item.similarityDegree : ''}}%
+                <div class="forecast-value"><span class="my-tag">{{item.similarityDegree ?item.similarityDegree.toFixed(1) : ''}}%</span>
                 </div>
               </div>
               <div class="split-line3"></div>
               <div class="help-wrapper">
                 <div class="help-des">
-                  是否采纳该答案
+                  评价一下该答案
                 </div>
                 <div class="help-msg">
                   <div class="help-yes">
-                    <cube-button :inline="true" icon="cubeic-pullup"
-                                 :class="item.problem.id===adoption?'adoption':'adoption-not'"
-                                 @click="adoptionAnswer(item.problem.id)">
-                      <span class="text">赞同 {{item.problem.id===adoption?'1':''}}</span>
+                    <cube-button :inline="true" icon="cubeic-good"
+                                 :class="index===adoption?'adoption':'adoption-not'"
+                                 @click="adoptionAnswer(item,index)">
+                      <span class="text">赞同 {{index===adoption?'1':''}}</span>
                     </cube-button>
                     <!--<span class="help-info"">-->
                     <!--采纳</span>-->
-                    <cube-button :inline="true" icon="cubeic-pulldown"
-                                 :class="item.problem.id===oppose?'oppose':'oppose-not'"
-                                 @click="opposeAnswer(item.problem.id)">
-                      <span class="text">反对 {{item.problem.id===oppose?'1':''}}</span>
+                    <cube-button :inline="true" icon="cubeic-bad"
+                                 :class="index===oppose?'oppose':'oppose-not'"
+                                 @click="opposeAnswer(item,index)">
+                      <span class="text">反对 {{index===oppose?'1':''}}</span>
                     </cube-button>
                   </div>
                 </div>
               </div>
-              <div class="split-line2"></div>
+
             </div>
           </div>
         </div>
@@ -74,15 +90,23 @@
     name: 'quesion',
     data () {
       return {
+        hasSend: false,
         backText: '返回',
         // 赞同答案
         adoption: -1,
         oppose: -1,
-        question: this.$route.params.question,
+        question: {},
         answerData: [],
         // 数据加载完成
         dataloaded: false
       }
+    },
+    beforeRouteLeave (to, from, next) {
+      // 通知首页更新
+      if (this.oppose !== -1) {
+        this.$store.commit('setFlushCount')
+      }
+      next()
     },
     // beforeRouteEnter (to, from, next) {
     //   if (from.name === 'putQuestionPage') {
@@ -97,35 +121,44 @@
     //   this.$route.meta.isBack = false
     // },
     methods: {
+      resolveIndex (index) {
+        if (index === 0) {
+          return '一'
+        }
+        if (index === 1) {
+          return '二'
+        }
+        if (index === 2) {
+          return '三'
+        }
+      },
       test (item) {
         console.log(item)
       },
-      showBtn () {
-        this.$createDialog({
-          type: 'confirm',
-          icon: 'cubeic-important',
-          title: '确定要发布到人工回答?',
-          confirmBtn: {
-            text: '确定',
-            active: true,
-            disabled: false,
-            href: 'javascript:;'
-          },
-          cancelBtn: {
-            text: '取消',
-            active: false,
-            disabled: false,
-            href: 'javascript:;'
-          },
-          onConfirm: () => {
-            this.pushPerson()
-            this.$createToast({
-              type: 'info',
-              time: 1000,
-              txt: '发布成功'
-            }).show()
-          }
-        }).show()
+      sendPeople () {
+        if (this.hasSend) {
+          return
+        }
+        this.hasSend = true
+
+        // 设置问题开放
+        console.log(this.question)
+        if (this.answerData.length === 0) {
+          this.question.open = 0
+          this.$http.post('/control/problem/problemInfo',
+            this.$qs.stringify(this.question),
+            { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } }
+          ).then((res) => {
+            if (res.data.body.data) {
+              this.showToast('发送成功！')
+              this.$store.commit('setFlushCount')
+            }
+          }).catch((error) => {
+            this.showToast('发送失败！')
+            this.hasSend = false
+            console.log(error)
+          })
+        }
       },
       pushPerson () {
         let url = '/control/problem/putPersonAnswer'
@@ -141,36 +174,39 @@
         this.$router.go(-1)
       },
       // 反对
-      opposeAnswer (answerid) {
+      opposeAnswer (item, index) {
         this.adoption = -1
-        if (this.oppose === answerid) {
+        let flag = null
+        if (this.oppose === index) {
           this.oppose = -1
         } else {
-          this.oppose = answerid
+          this.oppose = index
+          flag = 2
         }
-        this.handleAdoptAndOppose(answerid)
+
+        this.handleAdoptAndOppose(item, flag)
       },
 
       // 赞同按钮
-      adoptionAnswer (answerid) {
+      adoptionAnswer (item, index) {
         this.oppose = -1
-        if (this.adoption === answerid) {
+        let flag = null
+        if (this.adoption === index) {
           this.adoption = -1
         } else {
-          this.adoption = answerid
+          this.adoption = index
+          flag = 1
         }
-        this.handleAdoptAndOppose(answerid)
+        this.handleAdoptAndOppose(item, flag)
       },
       // 处理反对或赞同
-      handleAdoptAndOppose (answerid) {
+      handleAdoptAndOppose (item, flag) {
         let url = '/control/problem/adoptAnswerProblem'
         let param = new URLSearchParams()
         param.append('problemId', this.question.id)
-        param.append('answerId', answerid)
-        if (this.adoption !== -1) {
-          param.append('flag', 'true')
-        } else {
-          param.append('flag', 'false')
+        param.append('comments', item.problem.answerContent)
+        if (flag) {
+          param.append('flag', flag)
         }
 
         this.$http.post(url, param)
@@ -179,6 +215,7 @@
           console.log(error)
         })
       },
+
       // 替换所有回车换行符
       transferString (content) {
         let string = content
@@ -191,52 +228,56 @@
         return string
       },
       getData () {
-        // 自动问答接口
-        let url = '/problem/intelligentQuestionAnswering'
+        this.dataloaded = false
+        this.hasSend = false
+        // 获取题目
+        let problemTitle = this.$route.params.problemTitle
+        let problemType = this.$route.params.problemType
+        let user = JSON.parse(localStorage.getItem('token'))
+
+        this.question.title = problemTitle
+        this.question.category = problemType
+
+        // 问题表中插入一条问题 open=3 不发布到显示列表显示
+        let url = '/control/problem/info'
+        this.$http.post(url, this.$qs.stringify({
+          category: problemType,
+          userId: user.id,
+          title: problemTitle,
+          open: 3
+        })).then((res) => {
+          this.question = res.data.body.data
+        })
+        // 自动问答接口获取答案
+        url = '/problem/intelligentQuestionAnswering' // 自动问答接口
         this.$http.get(url, {
           params: {
-            questionStr: this.question.title
+            questionStr: problemTitle,
+            userId: user.id,
+            problemType: problemType
           }
         }).then((response) => {
-          if (response.data.head.stateCode === 200) {
-            console.log(response.data.body.data)
+          if (response.data.body.data) {
             this.answerData = response.data.body.data
+          } else {
+            this.answerData = []
           }
-          // 设置问题开放
-          console.log(this.question)
-          if (this.answerData.length === 0) {
-            let temp = {}
-            console.log(this.question.id)
-            temp.id = this.question.id
-            temp.title = this.question.title
-            temp.userId = this.question.userId
-
-            temp.open = 1
-            this.$http.post('/control/problem/problemInfo',
-              this.$qs.stringify(temp)
-              ,
-              { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } }
-            ).then((res) => {
-
-            }).catch((error) => {
-              console.log(error)
-            })
-          }
-
           this.dataloaded = true
-          this.$nextTick(() => {
-            this.$refs.scroll.refresh()
-          })
+          // this.$nextTick(() => {
+          //   this.$refs.scroll.refresh()
+          // })
         }).catch((error) => {
           console.log(error)
         })
       }
     },
+    activated () {
+      this.getData()
+    },
     mounted () {
       // 获取浏览器可视区域高度
       this.clientHeight = `${document.documentElement.clientHeight}`
       this.$refs.question.style.height = (this.clientHeight - 42) + 'px'
-      this.getData()
     },
     components: { BackHeader }
   }
@@ -247,27 +288,59 @@
   .questionPage
     .scroll-list-wrap
       height 600px
-      background-color #f1f1f1
+      background-color #f4f6f9
+
+      .load-wrapper
+        display flex
+        justify-content center
+        align-items center
+        height 60px
 
       .question-wrapper
-        padding 20px
-        background-color #f1f1f1
-        font-size 20px
+        padding 10px 20px
+        background-color #fff
+        font-size 24px
         line-height 26px
-        letter-spacing 4px
+        letter-spacing 1px
 
         .cubeic-question
           margin-right 10px
           color #2faefe
 
-      .no-anwser
-        background-color white
-        height 100px
-        display flex
-        font-size 16px
-        justify-content center
+        .question
+          font-weight bold
 
-        align-items center
+      .no-anwser
+        margin-top 4px
+
+        .show-no
+          margin-top 4px
+          background-color #fff
+          text-align center
+          font-size 20px
+          height 40px
+          color: #FAA732
+          line-height 40px
+
+        .send-people
+          display flex
+          justify-content: space-between;
+          padding 0 10px
+          margin-top 4px
+          height 60px
+          line-height 60px
+          background-color #fff
+
+          .txt
+            margin-right 20px
+
+          .btn-wrapper
+            .send-not
+              background-color #007efe
+
+            .send
+              color gray
+              background-color #EFF3F8
 
       .topic-wrapper
         .title
@@ -281,7 +354,7 @@
             line-height 20px
 
         .topic-content
-          background-color #f1f1f1
+          background-color #f4f6f9
           font-size 16px
 
           .split-line
@@ -296,7 +369,7 @@
             line-height 24px
 
           .answer-wrapper
-            margin 0 20px
+            margin 0 10px
             background-color white
 
             .split-line2
@@ -304,25 +377,39 @@
               background-color #f8f8f8
 
             .solve-name
-              font-size 20px
-              font-weight bold
+              font-size 18px
+              color: #7A7A7A
               padding 20px 0 16px 10px
 
             .solve-content
               font-size 16px
               line-height 26px
-              letter-spacing 4px
+              letter-spacing 2px
               padding 0 16px
+              word-wrap: break-word;
 
             .forecast
               .forecast-title
-                color: #45bfff
-                font-size 20px
+                color: #007efe
+                font-size 16px
                 font-weight bold
                 padding 20px 0 16px 10px
 
               .forecast-value
-                padding 0 0 20px 16px
+                padding 0 0 10px 8px
+
+                .my-tag
+                  background-color: rgba(64, 158, 255, .1);
+                  display: inline-block;
+                  padding: 0 10px;
+                  height: 32px;
+                  line-height: 30px;
+                  font-size: 12px;
+                  color: #409eff;
+                  border-radius: 4px;
+                  box-sizing: border-box;
+                  border: 1px solid rgba(64, 158, 255, .2);
+                  white-space: nowrap;
 
             .split-line3
               height 2px
@@ -338,6 +425,7 @@
               .help-des
                 font-size 14px
                 line-height 30px
+                color: #7A7A7A
 
               .help-msg
                 display flex
@@ -365,11 +453,11 @@
                       display inline-block
                       padding-top 6px
                       margin-left -6px
+                      vertical-align: baseline;
 
-                    .cubeic-pullup, .cubeic-pulldown
-                      font-size 30px
-                      line-height 15px
-                      vertical-align: middle;
+                    .cubeic-good, .cubeic-bad
+                      font-size 14px
+                      margin-right 8px
 
                     &:nth-child(1)
                       margin-right 10px

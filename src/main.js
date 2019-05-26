@@ -76,7 +76,7 @@ Vue.directive('focus', {
 
 const router = new VueRouter({
   routes: [
-    { path: '/', redirect: '/mainApp', component: Main, meta: { keepAlive: true } },
+    { path: '/', redirect: '/mainApp', component: Main, meta: { keepAlive: false } },
     { path: '/login', component: Login, meta: { keepAlive: true } },
     { path: '/mainApp', component: Main, name: 'mainApp', meta: { keepAlive: true } },
     { path: '/register', component: Register, meta: { keepAlive: true } },
@@ -106,6 +106,7 @@ const router = new VueRouter({
       meta: { isBack: false, keepAlive: true }
     },
     {
+      name: 'onlySearchPage',
       path: '/onlySearchPage',
       component: onlySearchPage,
       meta: { isBack: false, keepAlive: true }
@@ -127,7 +128,7 @@ const router = new VueRouter({
       path: '/question',
       name: 'question',
       component: quesion,
-      meta: { isBack: false, keepAlive: false }
+      meta: { isBack: false, keepAlive: true }
     },
     {
       path: '/chatPage',
@@ -217,17 +218,23 @@ const store = new Vuex.Store({
     flushDetail: -1,
     // 更新mypage的关注数和粉丝数
     flushMyPageCare: -1,
-    // 全局websock
-    webSocket: null,
-    // msg界面是否需要更新
-    flushMsg: -1
+    // 私信界面是否需要更新
+    flushMsg: -1,
+    // 发送消息
+    sendInfo: null,
+    // 接收到的消息，
+    receiveInfo: null
   },
   mutations: {
+
+    updateReceiveInfo (state, info) {
+      state.receiveInfo = info
+    },
+    dataPush (state, info) {
+      state.sendInfo = info
+    },
     updateMsg (state, change) {
       state.flushMsg = change
-    },
-    updateWebSocket (state, webScoket) {
-      state.webSocket = webScoket
     },
     // 刷新mypage界面
     updateFlushMyPageCare (state, change) {
@@ -280,10 +287,8 @@ new Vue({
     this.checkLogin()
   },
   mounted () {
-    console.log('asdasd')
   },
   activated () {
-    console.log('active')
   },
   methods: {
     // websocket初始化

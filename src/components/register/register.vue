@@ -1,7 +1,7 @@
 <template>
   <div class="register">
     <div class="name">
-      <img src="../../assets/name1.png" alt="达达问答">
+      <img src="http://148.70.8.85/group1/M00/00/00/rBsAAlycfLuACLeuAAAQZ_P027g063_big.png" alt="达达问答">
     </div>
     <div class="content">
       <div class="nick-wrapper">

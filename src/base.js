@@ -14,7 +14,6 @@ exports.install = function (Vue, options) {
     maskToast.show()
     return maskToast
   }
-
   // 显示toast提示
   Vue.prototype.showToast = function (msg) {
     const toast = this.$createToast({

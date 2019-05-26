@@ -33,7 +33,7 @@
         value: '',
         modelName: null,
         modelIcon: null,
-        modelArray: ['', '数据结构理论', '线性表', '栈和对列', '字符串', '树', '图', '算法']
+        modelArray: ['', '数据结构概述', '线性表', '栈和对列', '字符串', '树', '图', '算法']
       }
     },
     beforeRouteEnter (to, from, next) {
@@ -63,23 +63,14 @@
       },
       // 发布问题按钮点击
       release () {
-        let url = '/control/problem/info'
-        let param = new URLSearchParams()
-        param.append('title', this.value)
-        if (this.modelName) {
-          param.append('category', this.modelName)
-        }
-        this.$http.post(url, param)
-          .then((response) => {
-            if (response.data.head.stateCode === 200) {
-              let data = response.data.body.data
-              this.$router.push({
-                name: 'question',
-                params: { question: data }
-              })
-            }
-          }).catch((error) => {
-          console.log(error)
+        let problemTitle = this.value
+        this.value = ''
+        this.$router.push({
+          name: 'question',
+          params: {
+            problemTitle: problemTitle,
+            problemType: this.modelName
+          }
         })
       }
     },

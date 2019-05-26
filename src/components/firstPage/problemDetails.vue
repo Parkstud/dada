@@ -2,7 +2,8 @@
   <div class="proble-details">
     <proback-header ref="backheader" :back-text="backText"
                     :has-collection="headerInfo.hasCollection"
-                    :intoParams="problem"
+                    :show-delete="nowUser.id===problem.userId || nowUser.type!==0"
+                    :show-report="nowUser.id!==problem.userId && nowUser.type===0"
                     v-on:changeHasCollection="changeHasCollection"
                     v-on:changeReport="changeReport"
                     v-on:deleteProblem="deleteProblem"
@@ -34,7 +35,6 @@
             </div>
           </div>
         </template>
-
         <div class="question-wrapper">
           <p class="question">{{problem.title}}</p>
           <div class="question-more">
@@ -43,27 +43,27 @@
             <span class="collection-num">{{headerInfo.collection}}</span>
             <span>个收藏</span>
           </div>
-          <div class="btn-wrapper" v-show="problem.open!==0">
+          <div class="btn-wrapper" v-show="problem.open===1">
             <cube-button icon="cubeic-person" :light="true" @click="invite">邀请回答</cube-button>
             <cube-button icon="cubeic-edit" :light="true" @click="writeaswer">写回答</cube-button>
           </div>
         </div>
-
         <div class="answer-wrapper" v-for="(item,index) in contentInfo" :key="index"
              @click=" toDetail(item)">
           <div class="author-type-wrapper">
             <hr
-              style="border:none"
-              :class="{ expand : item.userType==='SYSTEM' || item.userType==='TEACHER'}"
+              style="border:1px;" class="border-bottom-1px"
+              :class="{ expand : item.userType===2 || item.userType===1}"
               SIZE=1/>
-            <span class="author-type" v-show="item.userType==='SYSTEM'">智能回答</span>
-            <span class="author-type" v-show="item.userType==='TEACHER'">教师回答</span>
+            <span class="author-type" v-show="item.userType===2">智能回答</span>
+            <span class="author-type" v-show="item.userType===1">教师回答</span>
           </div>
           <div class="author-info">
           <span class="avatar" @click.stop="toHomepage(item.userId)">
             <img :src="imgURL+item.avatar" width="40" height="40">
           </span>
-            <span class="author-name" @click.stop="toHomepage(item.userId)">{{item.username}}</span>
+            <span class="author-name"
+                  @click.stop="toHomepage(item.userId)">{{item.username}}</span>
             <span class="answer-time">{{formatData(item.commentTime,1)}}</span>
             <span class="info-left">
               <span class="iconfont icon-caina" v-show="item.adopt>0"></span>
@@ -72,7 +72,7 @@
               <span class="comment-text" v-else>回复</span>
           </span>
           </div>
-          <p class="answer-content" v-html="item.comments">
+          <p class="answer-content" v-html="transferString(item.comments)">
           </p>
           <div class="btn-wrapper border-bottom-1px">
              <span class="approval-wrapper">
@@ -89,6 +89,7 @@
           </div>
         </div>
         <div style="height: 10px"></div>
+
       </cube-scroll>
 
     </div>
@@ -102,6 +103,7 @@
     name: 'problemDetails',
     data () {
       return {
+        nowUser: JSON.parse(window.localStorage.getItem('token')),
         // 阻止多次触发
         evTimeStamp: 0,
         // 返回页面
@@ -135,6 +137,16 @@
       }
     },
     methods: {
+      transferString (content) {
+        let string = content
+        try {
+          string = (string + '').replace(/\r\n/g, '<br>')
+          string = (string + '').replace(/\n/g, '<br>')
+        } catch (e) {
+          alert(e.message)
+        }
+        return string
+      },
       deleteProblem () {
         this.$createDialog({
           type: 'confirm',
@@ -359,6 +371,19 @@
           window.localStorage.setItem('proDet_problem', JSON.stringify(this.$route.params.problem))
         }
         this.problem = JSON.parse(window.localStorage.getItem('proDet_problem'))
+
+        // 获取问题信息
+        console.log(this.$route.params.problemId)
+        if (this.$route.params.problemId) {
+          this.problem.id = this.$route.params.problemId
+          this.$http.get('/problemInfo/oneProblemInfo', {
+            params: {
+              problemId: this.problem.id
+            }
+          }).then((res) => {
+            this.problem = res.data.body.data
+          })
+        }
         // 获取详细信息数据
         let url = '/problemInfo/problem/detail'
         this.$http.get(url, {
@@ -380,9 +405,11 @@
     },
     beforeRouteEnter (to, from, next) {
       if (from.name === 'mainApp' || from.name === 'myProblem' ||
-        from.name === 'myCollection' || from.name === 'myHistory') {
+        from.name === 'myCollection' || from.name === 'myHistory' ||
+        from.name === 'onlySearchPage') {
         to.meta.isBack = false
       }
+      console.log(from.name)
       next()
     },
     activated () {
@@ -403,7 +430,6 @@
       // 获取浏览器可视区域高度
       this.clientHeight = `${document.documentElement.clientHeight}`
       this.$refs.detailsWrapper.style.height = (this.clientHeight - 42) + 'px'
-      this.getData()
     }
   }
 </script>

@@ -57,7 +57,7 @@
     name: 'myHistory',
     data () {
       return {
-        backText: '我的问题',
+        backText: '浏览历史',
         current: 1,
         size: 10,
         scrollOptions: {

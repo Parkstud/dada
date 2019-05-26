@@ -6,6 +6,7 @@
                     :auto-play="false"
                     :show-dots="false"
                     :initial-index="index"
+                    :allow-vertical="true"
                     @change="onChange"
                     :options="slideOptons"
         >
@@ -82,10 +83,7 @@
         slideOptons: {
           directionLockThreshold: 0
         },
-        scrollOptions: {
-          directionLockThreshold: 0
-        }
-
+        websock: null
       }
     },
     computed: {
@@ -98,6 +96,11 @@
             return value.label === newVal
           })
         }
+      }
+    },
+    watch: {
+      '$store.state.sendInfo': function () {
+        this.webSocketSend(this.$store.state.sendInfo)
       }
     },
     methods: {
@@ -114,27 +117,78 @@
       onChange (current) {
         this.index = current
       },
-      // 第一次加载主界面的时候设置设置连接websocket
+      // websocket初始化
       initWebSocket () {
-        // 断开连接 并设置为
-        let webSocket = this.$store.state.webSocket
-        if (webSocket) {
-          // 关闭连接
-          webSocket.close()
-          this.$store.commit('updateWebSocket', null)
+        const wsuri = 'ws://192.168.43.106:8080/websocket/' + JSON.parse(window.localStorage.getItem('token')).id
+        // const wsuri = 'ws://106.14.4.232:8080/dsqas-0.0.1-SNAPSHOT/websocket/' + JSON.parse(window.localStorage.getItem('token')).id
+        this.websock = new WebSocket(wsuri)
+        this.websock.onmessage = this.webSocketOnMessage
+        this.websock.onopen = this.webSocketOnOpen
+        this.websock.onerror = this.webSocketOnError
+        this.websock.onclose = this.webSocketClose
+      },
+      // 连接建立之后执行send方法发送数据
+      webSocketOnOpen () {
+        console.log('建立连接')
+      },
+
+      // 连接建立失败重连
+      webSocketOnError () {
+        this.initWebSocket()
+      },
+      // 数据接收
+      webSocketOnMessage (e) {
+        // this.msgs.push(JSON.parse(e.data))
+        // console.log(e.data)
+        console.log(e.data)
+        let data = JSON.parse(e.data)
+        // 私信信息
+        if (data.type === 1) {
+          this.getMsgCount()
+          this.$store.commit('updateMsg', this.$store.flushMsg + 1)
+          this.$store.commit('updateReceiveInfo', e.data)
         }
-        // 连接服务器
-        let user = JSON.parse(window.localStorage.getItem('token'))
-        const wsuri = 'ws://192.168.43.106:8080/websocket/' + user.id
-        webSocket = new WebSocket(wsuri)
-        webSocket.onopen = () => {
-          console.log('建立连接')
+        // 通知消息
+        if (data.type === 2) {
+
         }
-        webSocket.onmessage = (e) => {
-          console.log('接收数据')
-          console.log(e)
+        // 心跳
+        if (data.type === 3) {
+
         }
       },
+      // 数据发送
+      webSocketSend (data) {
+        if (this.websock === null) {
+          this.initWebSocket()
+        }
+        this.websock.send(data)
+      },
+      // 关闭
+      webSocketClose (e) {
+        console.log('断开连接', e)
+      },
+      // 第一次加载主界面的时候设置设置连接websocket
+      // initWebSocket () {
+      //   // 断开连接 并设置为
+      //   let webSocket = this.$store.state.webSocket
+      //   if (webSocket) {
+      //     // 关闭连接
+      //     webSocket.close()
+      //     this.$store.commit('updateWebSocket', null)
+      //   }
+      //   // 连接服务器
+      //   let user = JSON.parse(window.localStorage.getItem('token'))
+      //   const wsuri = 'ws://192.168.43.106:8080/websocket/' + user.id
+      //   webSocket = new WebSocket(wsuri)
+      //   webSocket.onopen = () => {
+      //     console.log('建立连接')
+      //   }
+      //   webSocket.onmessage = (e) => {
+      //     console.log('接收数据')
+      //     console.log(e)
+      //   }
+      // },
       getMsgCount () {
         this.$http.get('/message/notReadCount', null).then((res) => {
           let data = res.data.body.data
@@ -151,6 +205,12 @@
       SearchPage,
       FirstPage
     },
+    activated () {
+      // this.$nextTick(() => {
+      //   this.$refs.slide.refresh()
+      // })
+      this.getMsgCount()
+    },
     mounted () {
       // 获取浏览器可视区域高度
       this.clientHeight = `${document.documentElement.clientHeight}`
@@ -163,6 +223,9 @@
 </script>
 
 <style lang='stylus' rel='stylesheet/stylus'>
+  .cube-dialog-title
+    height 32px
+
   .main-app
     .content
       .slide-wrapper
@@ -180,6 +243,7 @@
         background rgb(250, 250, 250)
         color #c3c3c3
 
+        height
         .cube-tab
           font-size 12px
           padding-top 3px

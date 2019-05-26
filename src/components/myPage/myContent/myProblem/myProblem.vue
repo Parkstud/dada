@@ -32,7 +32,6 @@
               </div>
             </div>
           </template>
-
           <ul class="list-wrapper">
             <li v-for="(item, index) in problemInfo" class="my-list-item border-top-1px"
                 @click="choseProblem(item)"

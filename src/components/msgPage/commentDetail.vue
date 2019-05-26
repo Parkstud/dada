@@ -2,10 +2,11 @@
   <div class="comment-detail">
 
     <proback-header ref="backheader" :back-text="backText"
-                    :show-adopt="showAdopt"
+                    :show-adopt="this.user.type!==0"
                     :has-adopt="commentInfo.adopt>0"
                     :show-collect="false"
-                    :show-report="showReport"
+                    :show-report="commentInfo.userId!==this.user.id && this.user.type===0 "
+                    :show-delete="commentInfo.userId === this.user.id || this.user.type!==0"
                     v-on:deleteProblem="deleteProblem"
                     v-on:changeReport="changeReport"
                     v-on:adoptComment="adoptComment"
@@ -14,7 +15,7 @@
     <div class="comment-wrapper" ref="commentScroll">
       <cube-scroll ref="commentContainer" :options="scrollOptions" @pulling-up="onPullingUp">
         <!--评论内容-->
-        <div class="comment-content" v-show="commentInfo">
+        <div class="comment-content" v-show="Object.keys(commentInfo).length>0">
           <div class="author-info">
             <span class="avatar">
             <img :src="imgURL+commentInfo.avatar" width="50" height="50"
@@ -31,7 +32,7 @@
               <!--              <span class="cubeic-bad"></span>-->
               <!--            <span class="approve">{{commentInfo.badReview}}</span>-->
           </span>
-            <p class="comments" @click="replyComment" v-html="commentInfo.comments">
+            <p class="comments" @click="replyComment" v-html="transferString(commentInfo.comments)">
             </p>
           </div>
         </div>
@@ -104,25 +105,9 @@
       }
     },
     computed: {
-      showReport () {
-        if (this.user.id === this.commentInfo.userId) {
-          // false
-          return true
-        }
-        return true
-      },
-      showAdopt () {
-        if (this.user.type !== 0) {
-          // false
-          return true
-        }
-        return true
-      },
       reportOrDelete () {
         if (this.replyOtherInfo) {
-          let user = JSON.parse(window.localStorage.getItem('token'))
-          console.log(user)
-          if (this.replyOtherInfo.replyUserId === user.id || user.type !== 0) {
+          if (this.replyOtherInfo.replyUserId === this.user.id || this.user.type !== 0) {
             return '删除'
           }
         }
@@ -130,6 +115,16 @@
       }
     },
     methods: {
+      transferString (content) {
+        let string = content
+        try {
+          string = (string + '').replace(/\r\n/g, '<br>')
+          string = (string + '').replace(/\n/g, '<br>')
+        } catch (e) {
+          alert(e.message)
+        }
+        return string
+      },
       // 点击头像跳转界面
       toHomepage (userId) {
         this.$router.push({
@@ -155,13 +150,9 @@
           if (response.data.body.data) {
             this.$store.commit('updateFlushDetail', this.commentInfo.questionId)
           }
-
         })
       },
       changeReport () {
-        if (!this.userId) {
-          return
-        }
         console.log('举报')
         let reportInfo = {}
         reportInfo['reportId'] = this.commentInfo.commentId
@@ -561,7 +552,8 @@
         .comments
           margin-top 10px
           letter-spacing 1px
-          font-size 20px
+          font-size 18px
+          line-height: 20px;
           color: #444
 
     .split

@@ -62,19 +62,17 @@
           <ul>
             <li class="tab-panel-li" v-for="(personItem, index) in tabs[1].personCall"
                 :key="index">
-              <hr class="hr-sty" style="filter: alpha(opacity=100,finishopacity=0,style=2)"
-                  color=#fff SIZE=5/>
               <div class="item-panl2">
                 <div class="letter-wrapper">
                   <div class="left">
                     <img :src="imgURL+(personItem.userInfo?personItem.userInfo.userAvatar:'')"
                          width="64" height="64">
                   </div>
-                  <div class="right" @click="chatWith(personItem.userInfo)">
+                  <div class="right" @click="chatWith(personItem)">
                     <div class="right-top">
                       <span class="letter-name">{{personItem.userInfo ? personItem.userInfo.userNickName:''}}</span>
                       <span class="letter-time">{{formatData(personItem.msg[0].time,1)}}
-                       <span class="badge" v-show="computeNewsCount(personItem.msg)">{{computeNewsCount(personItem.msg)}}</span>
+                        <span class="badge" v-show="computeNewsCount(personItem.msg)">{{computeNewsCount(personItem.msg)}}</span>
                       </span>
                     </div>
                     <div class="right-content">
@@ -83,8 +81,6 @@
                   </div>
                 </div>
               </div>
-              <hr class="hr-sty" style="filter: alpha(opacity=100,finishopacity=0,style=2)"
-                  color=#fff SIZE=5/>
             </li>
           </ul>
         </cube-scroll>
@@ -103,6 +99,8 @@
     },
     data () {
       return {
+        // 阻止多次触发
+        lastNoticeCount: 0,
         placeholder: '搜索',
         search: 'search',
         readonly: true,
@@ -134,14 +132,33 @@
     },
     methods: {
       // 聊天界面
-      chatWith (user) {
+      chatWith (item) {
+        // 处理多次点击
+        let now = new Date()
+        if (now - this.evTimeStamp < 100) {
+          return
+        }
+        this.evTimeStamp = now
+
         this.$store.commit('updateCount', 2)
         this.$store.commit('updateMessage', '私信')
+        let itemMsg = item.msg
+        let itemUser = item.userInfo
+        let user = JSON.parse(window.localStorage.getItem('token'))
+        let k = this.msginfo.newsCount
+        for (let i = 0; i < itemMsg.length; i++) {
+          if (itemMsg[i].hasRead === 0 && itemMsg[i].receiveUserId === user.id) {
+            this.msginfo.newsCount--
+          }
+        }
+        if (k !== this.msginfo.newsCount) {
+          this.changeDot()
+        }
 
         this.$router.push({
           name: 'chatPage',
           params: {
-            letterUser: user
+            letterUser: itemUser
           }
         })
       },
@@ -161,10 +178,6 @@
       },
       // 点击notice
       clickNotice (item) {
-        if (!item.infoId) {
-          this.showToastTime()
-          return
-        }
         // 处理多次点击
         let now = new Date()
         if (now - this.evTimeStamp < 100) {
@@ -199,6 +212,23 @@
               }
             }
           )
+        }
+        // 跳转问题界面
+        if (item.msgType === 1) {
+          this.$router.push({
+              name: 'problemDetails',
+              params: {
+                problemId: item.infoId
+              }
+            }
+          )
+        }
+        if (item.msgType > 4) {
+          this.$createDialog({
+            type: 'alert',
+            title: item.title,
+            content: item.content
+          }).show()
         }
       },
       // 修改红点状态
@@ -273,6 +303,7 @@
             for (let key in map) {
               let letters = {}
               letters.msg = map[key]
+              this.tabs[1].personCall = []
               // 通过key 获取information信息
               url = '/myPage/user/userInformation/' + key
               this.$http.get(url, null).then((response) => {
@@ -287,14 +318,25 @@
         })
       },
       computeNewsCount (msg) {
+        let user = JSON.parse(localStorage.getItem('token'))
         let count = 0
         for (let i = 0; i < msg.length; i++) {
-          if (msg[i].hasRead === 0) {
+          if (msg[i].hasRead === 0 && msg[i].receiveUserId === user.id) {
             count++
           }
         }
         return count
       }
+    },
+    watch: {
+      '$store.state.flushMsg': function () {
+        this.getNewsInfo()
+      }
+    },
+    beforeRouteLeave (to, from, next) {
+      // 通知首页更新
+      this.lastNoticeCount = this.msginfo.noticeCount
+      next()
     },
     // beforeRouteEnter (to, from, next) {
     //   if (from.name === 'putQuestionPage') {
@@ -309,9 +351,8 @@
     //   this.$route.meta.isBack = false
     // },
     activated () {
-      // 获取msg界面是否需要更新
-      if (this.$store.state.flushMsg !== -1) {
-        this.getNewsInfo()
+      if (this.lastNoticeCount !== this.msginfo.noticeCount) {
+        this.getNoticeInfo()
       }
     },
     mounted () {
@@ -397,6 +438,8 @@
             text-align center
 
     .cube-tab-bar
+      height 40px
+
       .cube-tab
         font-size 18px
 
@@ -425,8 +468,6 @@
           background #f4f6f9
 
           .tab-panel-li
-            margin-left 10px
-            margin-right 10px
             box-shadow: #ddd 0 0 5px;
             background-color #fff
 
@@ -467,18 +508,27 @@
                 white-space: nowrap
 
               .item-bttom
+                display -webkit-box;
+                -webkit-box-orient: vertical;
+                -webkit-line-clamp: 2;
+                overflow: hidden;
+                white-space: normal
                 margin 10px
                 color: #333
 
             .item-panl2
+
               .letter-wrapper
+                padding-top 6px
+                height 60px
                 display flex
 
                 .left
                   img
-                    width 40px
-                    height 40px
+                    width 42px
+                    height 42px
                     border-radius 50%
+                    padding-left 10px
 
                 .right
                   flex 1
@@ -510,6 +560,6 @@
                         border: 1px solid #fff;
 
                   .right-content
-                    margin-top 10px
+                    margin-top 16px
 
 </style>

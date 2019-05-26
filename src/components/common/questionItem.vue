@@ -12,7 +12,7 @@
         </div>
         <div class="question-header">
           <span class="cate">{{showCategory(problemItem.category)}}</span>
-          <span>
+          <span class="question-title">
              {{problemItem.title}}
           </span>
         </div>
@@ -22,13 +22,13 @@
                      v-show="commentInfo.username">{{commentInfo.username}}:
                </span>
             <span class="answer-content" v-show="commentInfo.comments"
-                  v-html="commentInfo.comments">
+                  v-html="transferString(commentInfo.comments)">
               </span>
           </div>
         </div>
       </div>
-      <div class="bottom-wrapper border-top-1px">
-        <div class="put-good border-right-1px" @click.stop="pullUp">
+      <div class="bottom-wrapper " :class="commentInfo.id?'border-top-1px':''">
+        <div class="put-good" @click.stop="pullUp">
           <div v-show="commentInfo.id">
             <i class="cubeic-good"
                :class="commentInfo.userLike===1?'adoption':'adoption-not'">
@@ -37,7 +37,7 @@
             </i>
           </div>
         </div>
-        <div class="put-bad border-right-1px" @click.stop="pullDown">
+        <div class="put-bad " :class="commentInfo.id?'border-right-1px':''" @click.stop="pullDown">
           <div v-show="commentInfo.id">
             <i class="cubeic-bad"
                :class="commentInfo.userLike===2?'oppose':'oppose-not'">
@@ -46,7 +46,7 @@
             </i>
           </div>
         </div>
-        <div class="put-comment">
+        <div class="put-comment" :class="commentInfo.id?'':'only-sty'">
           <div>
               <span class="comment-wrapper">
                 <span class="cubeic-message"></span>
@@ -96,6 +96,12 @@
         required: true
       }
     },
+    watch: {
+      problemItem () {
+        console.log('wathc problemItem')
+        this.getData()
+      }
+    },
     activated () {
       // 修改信息
       if (this.$store.state.updateProblem === this.problemItem.id) {
@@ -104,6 +110,17 @@
       }
     },
     methods: {
+      // 替换所有回车换行符
+      transferString (content) {
+        let string = content
+        try {
+          string = (string + '').replace(/\r\n/g, '<br>')
+          string = (string + '').replace(/\n/g, '<br>')
+        } catch (e) {
+          alert(e.message)
+        }
+        return string
+      },
       showCategory (index) {
         if (index) {
           return this.categoryArr[index]
@@ -118,6 +135,11 @@
           return
         }
         this.evTimeStamp = now
+
+        if (!this.commentInfo.id) {
+          this.toProblemDetails()
+        }
+
         if (this.commentInfo.userLike === 2) {
           this.commentInfo.userLike = 0
           this.commentInfo.badReview--
@@ -129,7 +151,6 @@
           this.commentInfo.userLike = 2
           this.commentInfo.badReview++
         }
-
         this.changeAwesome()
       },
       // 修改当前用户的赞成反对数
@@ -159,7 +180,13 @@
         if (now - this.evTimeStamp < 100) {
           return
         }
+
         this.evTimeStamp = now
+
+        if (!this.commentInfo.id) {
+          this.toProblemDetails()
+        }
+
         if (this.commentInfo.userLike === 1) {
           this.commentInfo.userLike = 0
           this.commentInfo.awesome--
@@ -274,8 +301,9 @@
           align-items center
 
     .bottom-wrapper
+      margin-top 6px
       color: rgb(169, 181, 192)
-      height 40px
+      height 32px
       display flex
       justify-items center
       align-items center
@@ -302,6 +330,7 @@
         align-items center
         justify-items center
         text-align center
+        font-weight bold
 
         .cubeic-good, .cubeic-message, .cubeic-bad
           font-size 18px
@@ -310,7 +339,6 @@
           margin 0 auto
 
         .text
-          font-weight lighter
           margin-left 6px
           font-size 16px
 

@@ -14,7 +14,7 @@
               <div class="time" v-show="showTime(index)">
                 {{formatData(msg.time,1)}}
               </div>
-              <div class="msg-style1" v-if="msg.receiveUserId === nowUser.userId">
+              <div class="msg-style1" v-if="msg.receiveUserId === nowUser.id">
                 <img class="image1" :src="imgURL+letterUser.userAvatar" height="40" width="40">
                 <p class="info1">
                   {{msg.msg}}
@@ -24,7 +24,7 @@
                 <p class="info2">
                   {{msg.msg}}
                 </p>
-                <img class="image2" :src="imgURL+nowUser.userAvatar" height="40" width="40">
+                <img class="image2" :src="imgURL+nowUser.avatar" height="40" width="40">
               </div>
             </div>
           </li>
@@ -78,13 +78,21 @@
     created () {
       // this.initWebSocket()
     },
+    '$store.state.receiveInfo': function () {
+      console.log(this.$state.receiveInfo)
+      if (this.$router.currentRoute.name === 'chatPage') {
+        if (this.$store.receiveInfo.type === 1 && this.$store.receiveInfo.content.receiveUserId === this.nowUser.id) {
+          this.msgs.push(this.$state.receiveInfo.content)
+        }
+      }
+    },
     methods: {
       sendMessageClick () {
         if (this.value.length === 0) {
           return
         }
         let newMsg = {}
-        newMsg.sendUserId = this.nowUser.userId
+        newMsg.sendUserId = this.nowUser.id
         newMsg.receiveUserId = this.letterUser.userId
         newMsg.msg = this.value
         newMsg.time = new Date().getTime()
@@ -92,9 +100,8 @@
         this.msgs.push(newMsg)
         this.value = ''
         // 设置websocket
-        this.webSocketSend(JSON.stringify(newMsg))
+        // this.webSocketSend(JSON.stringify(newMsg))
         // 保存信息
-
         this.saveMessage(newMsg)
       },
       // // websocket初始化
@@ -171,7 +178,7 @@
           return
         }
         let newMsg = {}
-        newMsg.sendUserId = this.nowUser.userId
+        newMsg.sendUserId = this.nowUser.id
         newMsg.receiveUserId = this.letterUser.userId
         newMsg.msg = this.value
         newMsg.time = new Date().getTime()
@@ -179,9 +186,12 @@
         this.msgs.push(newMsg)
         this.value = ''
         // 设置websocket
-        this.webSocketSend(JSON.stringify(newMsg))
+        // this.webSocketSend(JSON.stringify(newMsg))
         // 保存信息
-
+        let socketInfo = {}
+        socketInfo.type = 1
+        socketInfo.content = newMsg
+        this.$store.commit('dataPush', JSON.stringify(socketInfo))
         this.saveMessage(newMsg)
       },
       //  存储消息
@@ -189,7 +199,6 @@
         let url = '/message/newmsg'
         this.$http.post(url, msg)
           .then((response) => {
-            console.log(response)
           }).catch((error) => {
           console.log(error)
         })
@@ -198,26 +207,34 @@
         this.letterUser = this.$route.params.letterUser
         // 通过letter 和当前用户信息查询聊天记录
         // 查询当前的用户信息
-        let url = '/myPage/user/userInformation'
-        this.$http.get(url, null)
-          .then((response) => {
-            if (response.data.head.stateCode === 200) {
-              this.nowUser.userAvatar = response.data.body.data.path
-              // 获取历史消息
-              let url = '/message/news/history/list'
-              this.$http.get(url, {
-                params: {
-                  receiveId: this.nowUser.userId,
-                  sendId: this.letterUser.userId
+        let url = '/message/news/history/list'
+        this.$http.get(url, {
+          params: {
+            receiveId: this.nowUser.id,
+            sendId: this.letterUser.userId
+          }
+        }).then((response) => {
+          if (response.data.head.stateCode === 200) {
+            this.msgs = response.data.body.data
+
+            if (this.msgs.length > 0) {
+              // 设置消息已读
+              for (let i = 0; i < this.msgs.length; i++) {
+                if (this.msgs[i].hasRead === 0 && this.msgs[i].receiveUserId === this.nowUser.id) {
+                  this.$http.put('/message/newsRead', this.$qs.stringify({
+                      receiveId: this.letterUser.userId
+                    }
+                  )).then((res) => {
+                    this.$store.commit('updateMsg', this.$store.flushMsg + 1)
+                    console.log(res)
+                  }).catch((err) => {
+                    console.log(err)
+                  })
+                  return
                 }
-              }).then((response) => {
-                if (response.data.head.stateCode === 200) {
-                  this.msgs = response.data.body.data
-                }
-              })
+              }
             }
-          }).catch((error) => {
-          console.log(error)
+          }
         })
       }
     },
@@ -246,6 +263,7 @@
     },
 
     mounted () {
+      this.nowUser = JSON.parse(localStorage.getItem('token'))
       this.options.startY = document.documentElement.clientHeight - this.$refs.scrollChat.$refs.listWrapper.scrollHeight - 70
       // contentWrapper
       this.$refs.contentWrapper.style.height = document.documentElement.clientHeight - 80 + 'px'
@@ -255,7 +273,6 @@
         this.$refs.scrollChat.refresh()
         this.$refs.scrollChat.scroll.scrollTo(0, this.$refs.scrollChat.scroll.maxScrollY)
       })
-      this.getData()
     }
   }
 </script>

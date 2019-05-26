@@ -6,14 +6,14 @@
           <cube-input ref="search1" :placeholder="placeholder" :type="type" v-model="val"
                       @keyup.enter.native="searchInfo"
                       :autofocus="autofocus"
-                      ></cube-input>
+          ></cube-input>
       </span>
       <span class="temp"></span>
     </div>
     <ul class="history-wrapper" v-show="showHistory && historys.length>0">
       <li v-for="(item, index) in historys" :key="index" class="history-item">
         <span class="cubeic-time"></span>
-        <span class="text">{{item}}</span>
+        <span class="text" @click="clickHistoryItem(item)">{{item}}</span>
         <span class="cubeic-close" @click="deleteHistory(index)"></span>
       </li>
       <li class="clear-history" @click="clearAllHistory">
@@ -38,12 +38,12 @@
                   class="cube-loading-spinner"></i><i class="cube-loading-spinner"></i>
             </span>
             </div>
-
           </li>
           <li class="list-item" v-show="problemInfo.length===0 && !showload">
             没有搜索结果
           </li>
           <li v-for="(item, index) in problemInfo" class="list-item border-top-1px"
+              @click="toProblemDetail(item)"
               :key="index">
             <div class="item-top">
               {{item.title}}
@@ -84,6 +84,17 @@
       }
     },
     methods: {
+      // 跳转问题详情页
+      toProblemDetail (item) {
+        console.log(item)
+        this.$router.push({
+            name: 'problemDetails',
+            params: {
+              problemId: item.problemId
+            }
+          }
+        )
+      },
       clearAllHistory () {
         this.historys = []
       },
@@ -97,6 +108,10 @@
         }
         localStorage.setItem('search_history', JSON.stringify(this.historys))
         this.$router.go(BACK_FLAG)
+      },
+      clickHistoryItem (item) {
+        this.val = item
+        this.$refs.search1.focus()
       },
       searchInfo () {
         if (this.val.trim() === '') {
