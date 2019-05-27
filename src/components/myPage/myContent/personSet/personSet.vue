@@ -61,6 +61,7 @@
           onConfirm: () => {
             // 删除cookie 跳转登录页
             window.localStorage.setItem('token', '')
+            location.reload()
             this.$router.push('/login')
           }
 

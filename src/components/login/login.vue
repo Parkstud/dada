@@ -38,9 +38,9 @@
       return {
         phone: '',
         pwd: '',
-        phoneplaceholder: '手机号',
+        phoneplaceholder: '账号',
         pwdplaceholder: '密码',
-        typePhone: 'number',
+        typePhone: 'text',
         typePwd: 'password',
         stopLogin: false,
         eye: {
@@ -73,23 +73,28 @@
         let url = '/userAccount/login'
         this.$http.post(url, param)
           .then((response) => {
-            if (response.data.head.stateCode === 200) {
-              logintToast.hide()
+            logintToast.hide()
+            if (response.data.body.data) {
               window.localStorage.setItem('token', JSON.stringify(response.data.body.data))
               this.$router.push('/mainApp')
+              this.showToast('登录成功')
             } else {
-              const failToast = this.$createToast({
-                txt: response.data.head.msg,
-                time: 2000,
-                type: 'txt'
-              })
-              failToast.show()
+              if (response.data.head.msg) {
+                this.showToast(response.data.head.msg)
+              } else {
+                this.showToast('登录失败')
+              }
             }
           })
           .catch((error) => {
+            logintToast.hide()
+            this.showToast('登录异常')
             console.log(error)
           })
       }
+    },
+    activated () {
+
     }
   }
 </script>

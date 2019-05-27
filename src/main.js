@@ -11,8 +11,8 @@ import axios from 'axios'
 import Qs from 'qs'
 import animate from 'animate.css'
 import base from './base'
-
-import VConsole from 'vconsole'
+//
+// import VConsole from 'vconsole'
 import './common/stylus/index.styl'
 import myProblem from './components/myPage/myContent/myProblem/myProblem'
 import personSet from './components/myPage/myContent/personSet/personSet'
@@ -59,8 +59,10 @@ axios.interceptors.request.use(
   })
 Vue.use(base)
 Vue.prototype.$qs = Qs
+
 // const vConsole = new VConsole()
 // export default vConsole
+
 Vue.use(VueRouter)
 Vue.use(Vuex)
 Vue.use(animate)
@@ -190,7 +192,6 @@ const router = new VueRouter({
       component: myCareFans,
       meta: { isBack: false, keepAlive: true }
     }
-
   ]
 })
 // Vuex配置

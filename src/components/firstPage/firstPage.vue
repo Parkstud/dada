@@ -86,7 +86,6 @@
     methods: {
       // 提问
       putQuestion () {
-        this.$store.commit('updateCount', FIRST_PAGE)
         // 清除痕迹
         window.localStorage.setItem('modelName', null)
         window.localStorage.setItem('modelIcon', null)
@@ -94,7 +93,6 @@
       },
       // 打开搜索界面
       showSearch () {
-        this.$store.commit('updateCount', FIRST_PAGE)
         this.$router.push('/onlySearchPage')
       },
       onPullingDown () {

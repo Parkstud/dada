@@ -60,12 +60,10 @@
     methods: {
       myHistory () {
         this.$store.commit('setTransition', 'turn-on')
-        this.$store.commit('updateCount', MAIN_MY)
         this.$router.push('/myHistory')
       },
       myCollection () {
         this.$store.commit('setTransition', 'turn-on')
-        this.$store.commit('updateCount', MAIN_MY)
         this.$router.push({
             name: 'myCollection',
             params: {
@@ -78,7 +76,6 @@
       // 跳转myProblem组件界面
       myProblem () {
         this.$store.commit('setTransition', 'turn-on')
-        this.$store.commit('updateCount', MAIN_MY)
         this.$router.push({
             name: 'myProblem',
             params: {
@@ -89,7 +86,6 @@
         )
       },
       person_setting () {
-        this.$store.commit('updateCount', MAIN_MY)
         this.$router.push('/personSet')
       },
       getData () {

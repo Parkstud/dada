@@ -103,7 +103,6 @@
         })
       },
       updateCommit () {
-        this.$store.commit('updateCount', SEARCH)
       }
 
     }

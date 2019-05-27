@@ -3,7 +3,7 @@
     <div class="question-item">
       <div class="center">
         <div class="question-propose">
-          <div class="questioner-info">
+          <div class="questioner-info" @click.stop="toHomePage()">
             <img class="question-avatar" width="36" height="36" v-show="problemItem.avatar"
                  :src="this.imgURL+problemItem.avatar">
             <span class="questioner-name">{{problemItem.username}}</span>
@@ -66,6 +66,7 @@
     name: 'questionItem',
     data () {
       return {
+        nowUser: JSON.parse(localStorage.getItem('token')),
         // 阻止多次触发
         evTimeStamp: 0,
         // 提问人
@@ -110,6 +111,18 @@
       }
     },
     methods: {
+      toHomePage () {
+        if (this.problemItem.userId === this.nowUser.id) {
+          this.$router.push('/editPersonalInformation')
+        } else {
+          this.$router.push({
+            name: 'homePage',
+            params: {
+              userId: this.problemItem.userId
+            }
+          })
+        }
+      },
       // 替换所有回车换行符
       transferString (content) {
         let string = content
@@ -195,7 +208,7 @@
           this.commentInfo.awesome++
           this.commentInfo.badReview--
         } else {
-          this.commentInfo.nowUserLike = 1
+          this.commentInfo.userLike = 1
           this.commentInfo.awesome++
         }
 

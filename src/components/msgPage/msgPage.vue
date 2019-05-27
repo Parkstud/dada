@@ -65,18 +65,18 @@
               <div class="item-panl2">
                 <div class="letter-wrapper">
                   <div class="left">
-                    <img :src="imgURL+(personItem.userInfo?personItem.userInfo.userAvatar:'')"
+                    <img :src="imgURL+(personItem.sendUserInfo ? personItem.sendUserInfo.avatar:'')"
                          width="64" height="64">
                   </div>
                   <div class="right" @click="chatWith(personItem)">
                     <div class="right-top">
-                      <span class="letter-name">{{personItem.userInfo ? personItem.userInfo.userNickName:''}}</span>
-                      <span class="letter-time">{{formatData(personItem.msg[0].time,1)}}
-                        <span class="badge" v-show="computeNewsCount(personItem.msg)">{{computeNewsCount(personItem.msg)}}</span>
+                      <span class="letter-name">{{personItem.sendUserInfo ? personItem.sendUserInfo.username:''}}</span>
+                      <span class="letter-time">{{formatData(personItem.newsList[0].time,1)}}
+                        <span class="badge" v-show="computeNewsCount(personItem.newsList)">{{computeNewsCount(personItem.newsList)}}</span>
                       </span>
                     </div>
                     <div class="right-content">
-                      <span class="letter-main">{{personItem.msg[0].msg}}</span>
+                      <span class="letter-main">{{personItem.newsList[0].msg}}</span>
                     </div>
                   </div>
                 </div>
@@ -140,10 +140,10 @@
         }
         this.evTimeStamp = now
 
-        this.$store.commit('updateCount', 2)
         this.$store.commit('updateMessage', '私信')
-        let itemMsg = item.msg
-        let itemUser = item.userInfo
+
+        let itemMsg = item.newsList
+        let itemUser = item.sendUserInfo
         let user = JSON.parse(window.localStorage.getItem('token'))
         let k = this.msginfo.newsCount
         for (let i = 0; i < itemMsg.length; i++) {
@@ -186,7 +186,6 @@
         this.evTimeStamp = now
         // 设置评论信息
 
-        this.$store.commit('updateCount', 2)
         this.$store.commit('updateMessage', '通知')
         // 判断是已读
         if (item.hasRead === 0) {
@@ -205,6 +204,10 @@
         }
         // 跳转界面 阅读评论界面
         if (item.msgType === 2) {
+          if (!item.infoId) {
+            this.showToast('信息被删除')
+            return
+          }
           this.$router.push({
               name: 'commentDetail',
               params: {
@@ -215,6 +218,10 @@
         }
         // 跳转问题界面
         if (item.msgType === 1) {
+          if (!item.infoId) {
+            this.showToast('信息被删除')
+            return
+          }
           this.$router.push({
               name: 'problemDetails',
               params: {
@@ -223,6 +230,22 @@
             }
           )
         }
+
+        // 跳转评论界面
+        if (item.msgType === 3) {
+          if (!item.infoId) {
+            this.showToast('信息被删除')
+            return
+          }
+          this.$router.push({
+              name: 'commentDetail',
+              params: {
+                commentId: item.infoId
+              }
+            }
+          )
+        }
+
         if (item.msgType > 4) {
           this.$createDialog({
             type: 'alert',
@@ -298,20 +321,9 @@
         let url = '/message/news/groups'
         // 获取私信消息
         this.$http.get(url, null).then((response) => {
-          if (response.data.head.stateCode === 200) {
+          if (response.data.body.data) {
             let map = response.data.body.data
-            for (let key in map) {
-              let letters = {}
-              letters.msg = map[key]
-              this.tabs[1].personCall = []
-              // 通过key 获取information信息
-              url = '/myPage/user/userInformation/' + key
-              this.$http.get(url, null).then((response) => {
-                letters.userInfo = response.data.body.data
-                // 放到数组中
-                this.tabs[1].personCall.push(letters)
-              })
-            }
+            this.tabs[1].personCall = map
           }
         }).catch((error) => {
           console.log(error)
@@ -330,6 +342,7 @@
     },
     watch: {
       '$store.state.flushMsg': function () {
+        console.log('')
         this.getNewsInfo()
       }
     },
@@ -528,7 +541,7 @@
                     width 42px
                     height 42px
                     border-radius 50%
-                    padding-left 10px
+                    margin-left: 10px
 
                 .right
                   flex 1
@@ -558,8 +571,12 @@
                         padding: 0 6px;
                         white-space: nowrap;
                         border: 1px solid #fff;
-
                   .right-content
                     margin-top 16px
+                    width 260px
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                    white-space: nowrap
+
 
 </style>

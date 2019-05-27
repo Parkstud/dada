@@ -2,11 +2,11 @@
   <div class="comment-detail">
 
     <proback-header ref="backheader" :back-text="backText"
-                    :show-adopt="this.user.type!==0"
+                    :show-adopt="this.nowUser.type!==0"
                     :has-adopt="commentInfo.adopt>0"
                     :show-collect="false"
-                    :show-report="commentInfo.userId!==this.user.id && this.user.type===0 "
-                    :show-delete="commentInfo.userId === this.user.id || this.user.type!==0"
+                    :show-report="commentInfo.userId!==this.nowUser.id && this.nowUser.type===0 "
+                    :show-delete="commentInfo.userId === this.nowUser.id || this.nowUser.type!==0"
                     v-on:deleteProblem="deleteProblem"
                     v-on:changeReport="changeReport"
                     v-on:adoptComment="adoptComment"
@@ -83,7 +83,7 @@
         backText: '返回',
         // 回复输入框
         value: '',
-        user: JSON.parse(window.localStorage.getItem('token')),
+        nowUser: JSON.parse(window.localStorage.getItem('token')),
         commentId: this.$route.params.commentId,
         commentInfo: {},
         replys: [],
@@ -107,7 +107,7 @@
     computed: {
       reportOrDelete () {
         if (this.replyOtherInfo) {
-          if (this.replyOtherInfo.replyUserId === this.user.id || this.user.type !== 0) {
+          if (this.replyOtherInfo.replyUserId === this.nowUser.id || this.nowUser.type !== 0) {
             return '删除'
           }
         }
@@ -127,12 +127,16 @@
       },
       // 点击头像跳转界面
       toHomepage (userId) {
-        this.$router.push({
-          name: 'homePage',
-          params: {
-            userId: userId
-          }
-        })
+        if (userId === this.nowUser.id) {
+          this.$router.push('/editPersonalInformation')
+        } else {
+          this.$router.push({
+            name: 'homePage',
+            params: {
+              userId: userId
+            }
+          })
+        }
       },
       adoptComment (val) {
         if (val) {
@@ -409,6 +413,8 @@
         ).then((response) => {
           this.needClear = false
           this.getData()
+          // 通知详细更新
+          this.$store.commit('updateFlushDetail', 1)
         }).catch((error) => {
           console.log(error)
         })
@@ -475,7 +481,8 @@
     color: #999
     background-color: #fff
     margin-top 0
-
+  .cube-dialog-title
+    margin-bottom 10px
   .my-title
     height 50px
     line-height 50px

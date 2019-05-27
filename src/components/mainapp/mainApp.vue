@@ -100,6 +100,9 @@
     },
     watch: {
       '$store.state.sendInfo': function () {
+        console.log('sendInfo变化')
+        console.log(this.$store.state.sendInfo)
+        console.log(this.websock)
         this.webSocketSend(this.$store.state.sendInfo)
       }
     },
@@ -109,12 +112,13 @@
         this.msgInfo = data
       },
       clickHandler (label) {
-
+        console.log(label)
       },
       changeHandler (label) {
 
       },
       onChange (current) {
+        this.$store.commit('updateCount', current)
         this.index = current
       },
       // websocket初始化
@@ -145,7 +149,8 @@
         // 私信信息
         if (data.type === 1) {
           this.getMsgCount()
-          this.$store.commit('updateMsg', this.$store.flushMsg + 1)
+          console.log(this.$store.state.flushMsg)
+          this.$store.commit('updateMsg', this.$store.state.flushMsg + 1)
           this.$store.commit('updateReceiveInfo', e.data)
         }
         // 通知消息
@@ -199,6 +204,9 @@
         })
       }
     },
+    // deactivated () {
+    //   this.$destroy(true)
+    // },
     components: {
       MyPage,
       MsgPage,
@@ -206,6 +214,7 @@
       FirstPage
     },
     activated () {
+      this.index = this.$store.state.count
       // this.$nextTick(() => {
       //   this.$refs.slide.refresh()
       // })

@@ -261,12 +261,16 @@
       },
       // 点击头像跳转界面
       toHomepage (userId) {
-        this.$router.push({
-          name: 'homePage',
-          params: {
-            userId: userId
-          }
-        })
+        if (userId === this.nowUser.id) {
+          this.$router.push('/editPersonalInformation')
+        } else {
+          this.$router.push({
+            name: 'homePage',
+            params: {
+              userId: userId
+            }
+          })
+        }
       },
       toDetail (item) {
         this.$router.push({

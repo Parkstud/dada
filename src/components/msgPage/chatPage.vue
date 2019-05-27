@@ -2,7 +2,7 @@
   <div class="chatpage">
     <div class="chat-header">
       <span class="cubeic-back" @click="back"></span>
-      <span class="name">{{letterUser.userNickName}}</span>
+      <span class="name">{{letterUser.username}}</span>
       <span></span>
     </div>
     <div class="chat-content-wrapper" ref="contentWrapper">
@@ -15,7 +15,7 @@
                 {{formatData(msg.time,1)}}
               </div>
               <div class="msg-style1" v-if="msg.receiveUserId === nowUser.id">
-                <img class="image1" :src="imgURL+letterUser.userAvatar" height="40" width="40">
+                <img class="image1" :src="imgURL+letterUser.avatar" height="40" width="40">
                 <p class="info1">
                   {{msg.msg}}
                 </p>
@@ -29,6 +29,7 @@
             </div>
           </li>
         </ul>
+        <div class="msg-ul-bottom"></div>
       </cube-scroll>
 
     </div>
@@ -72,19 +73,10 @@
       }
     },
     destroyed () {
-      // console.log('客户端断开连接')
-      // this.websock.close()
+
     },
     created () {
-      // this.initWebSocket()
-    },
-    '$store.state.receiveInfo': function () {
-      console.log(this.$state.receiveInfo)
-      if (this.$router.currentRoute.name === 'chatPage') {
-        if (this.$store.receiveInfo.type === 1 && this.$store.receiveInfo.content.receiveUserId === this.nowUser.id) {
-          this.msgs.push(this.$state.receiveInfo.content)
-        }
-      }
+
     },
     methods: {
       sendMessageClick () {
@@ -93,7 +85,7 @@
         }
         let newMsg = {}
         newMsg.sendUserId = this.nowUser.id
-        newMsg.receiveUserId = this.letterUser.userId
+        newMsg.receiveUserId = this.letterUser.id
         newMsg.msg = this.value
         newMsg.time = new Date().getTime()
         newMsg.hasRead = 0
@@ -104,48 +96,6 @@
         // 保存信息
         this.saveMessage(newMsg)
       },
-      // // websocket初始化
-      // initWebSocket () {
-      //   const wsuri = 'ws://192.168.43.106:8080/websocket/' + JSON.parse(window.localStorage.getItem('token')).id
-      //   // const wsuri = 'ws://106.14.4.232:8080/dsqas-0.0.1-SNAPSHOT/websocket/' + JSON.parse(window.localStorage.getItem('token')).id
-      //   this.websock = new WebSocket(wsuri)
-      //   this.websock.onmessage = this.webSocketOnMessage
-      //   this.websock.onopen = this.webSocketOnOpen
-      //   this.websock.onerror = this.webSocketOnError
-      //   this.websock.onclose = this.webSocketClose
-      // },
-      // // 连接建立之后执行send方法发送数据
-      // webSocketOnOpen () {
-      //   this.sendFirstMsg()
-      //   console.log('建立连接')
-      // },
-      // // 第一次建立连接发送信息
-      // sendFirstMsg () {
-      //   let temp = JSON.parse(window.localStorage.getItem('token'))
-      //   this.nowUser.userNickName = temp.nickName
-      //   this.nowUser.userId = temp.id
-      //   let firstMsg = {}
-      //   firstMsg.sendUserId = this.nowUser.userId
-      //   firstMsg.receiveUserId = this.letterUser.userId
-      //   this.webSocketSend(JSON.stringify(firstMsg))
-      // },
-      // // 连接建立失败重连
-      // webSocketOnError () {
-      //   this.initWebSocket()
-      // },
-      // // 数据接收
-      // webSocketOnMessage (e) {
-      //   this.msgs.push(JSON.parse(e.data))
-      //   console.log(e.data)
-      // },
-      // // 数据发送
-      // webSocketSend (data) {
-      //   this.websock.send(data)
-      // },
-      // // 关闭
-      // webSocketClose (e) {
-      //   console.log('断开连接', e)
-      // },
       back () {
         // 通过评论信息 获取用户id
         if (this.problem) {
@@ -153,7 +103,7 @@
             name: 'homePage',
             params: {
               problem: this.problem,
-              userId: this.letterUser.userId
+              userId: this.letterUser.id
             }
           })
         } else {
@@ -179,7 +129,7 @@
         }
         let newMsg = {}
         newMsg.sendUserId = this.nowUser.id
-        newMsg.receiveUserId = this.letterUser.userId
+        newMsg.receiveUserId = this.letterUser.id
         newMsg.msg = this.value
         newMsg.time = new Date().getTime()
         newMsg.hasRead = 0
@@ -211,7 +161,7 @@
         this.$http.get(url, {
           params: {
             receiveId: this.nowUser.id,
-            sendId: this.letterUser.userId
+            sendId: this.letterUser.id
           }
         }).then((response) => {
           if (response.data.head.stateCode === 200) {
@@ -222,10 +172,10 @@
               for (let i = 0; i < this.msgs.length; i++) {
                 if (this.msgs[i].hasRead === 0 && this.msgs[i].receiveUserId === this.nowUser.id) {
                   this.$http.put('/message/newsRead', this.$qs.stringify({
-                      receiveId: this.letterUser.userId
+                      receiveId: this.letterUser.id
                     }
                   )).then((res) => {
-                    this.$store.commit('updateMsg', this.$store.flushMsg + 1)
+                    this.$store.commit('updateMsg', this.$store.state.flushMsg + 1)
                     console.log(res)
                   }).catch((err) => {
                     console.log(err)
@@ -238,7 +188,29 @@
         })
       }
     },
+    beforeRouteLeave (to, from, next) {
+      this.$store.commit('updateMsg', this.$store.state.flushMsg + 1)
+      next()
+    },
     watch: {
+      '$store.state.receiveInfo': function () {
+        console.log(this.$store.state.receiveInfo)
+        if (this.$router.currentRoute.name === 'chatPage') {
+          let receivInfo = JSON.parse(this.$store.state.receiveInfo)
+          if (receivInfo.type === 1 && receivInfo.content.receiveUserId === this.nowUser.id) {
+            this.$http.put('/message/newsRead', this.$qs.stringify({
+                receiveId: this.nowUser.id
+              }
+            )).then((res) => {
+              console.log(res)
+            }).catch((err) => {
+              console.log(err)
+            })
+
+            this.msgs.push(receivInfo.content)
+          }
+        }
+      },
       msgs () {
         setTimeout(() => {
           this.$refs.scrollChat.scrollTo(0, this.$refs.scrollChat.scroll.maxScrollY, 0)
@@ -381,6 +353,8 @@
                 top: 15px;
                 left: -14px;
 
+        .msg-ul-bottom
+          height 10px
       .chat-footer
         height: 40px
         background-color gray
