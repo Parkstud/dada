@@ -166,7 +166,6 @@
           },
           onConfirm: () => {
             this.$refs.backheader.$refs.showmore.click()
-
             this.$http.post('/control/problem/problemId',
               this.$qs.stringify({
                 problemId: this.problem.id
