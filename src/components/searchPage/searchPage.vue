@@ -8,7 +8,7 @@
       <div class="item-wrapper">
         <div class="item  block-item" @click="dataOverview">
           <span class="iconfont icon-shujujiegou-copy"></span>
-          <span>数据结构概述</span>
+          <span>数据结构</span>
         </div>
         <div class="item  block-item" @click="linearTable">
           <span class="iconfont icon-Group- data-struct"></span>
@@ -49,7 +49,6 @@
 </template>
 
 <script type='text/ecmascript-6'>
-  const SEARCH = 1
   export default {
     name: 'searchPage',
     methods: {

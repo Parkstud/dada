@@ -200,7 +200,6 @@
     methods: {
 
       deleteNotice () {
-        console.log('长按')
         this.longPress = true
       },
       // 聊天界面
@@ -275,8 +274,6 @@
               href: 'javascript:;'
             },
             onConfirm: () => {
-              console.log('删除')
-              console.log(item.id)
               // 删除通知
               this.$http.delete('/message/notice', {
                 params: {

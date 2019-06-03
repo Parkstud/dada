@@ -157,7 +157,6 @@
         })
       },
       changeReport () {
-        console.log('举报')
         let reportInfo = {}
         reportInfo['reportId'] = this.commentInfo.commentId
         reportInfo['toUserId'] = this.commentInfo.userId
@@ -173,7 +172,6 @@
       },
       // 删除评论
       deleteProblem () {
-        console.log('删除评论')
         this.$createDialog({
           type: 'confirm',
           icon: 'cubeic-alert',
@@ -225,9 +223,7 @@
       },
       // 点击回复item
       clickReply (item) {
-        console.log(item)
         this.replyOtherInfo = item
-
         this.dialog = this.$createDialog({
           type: 'alert',
           showClose: false,
@@ -235,7 +231,10 @@
             text: '取消',
             active: false,
             disabled: false,
-            href: 'javascript:;'
+            href: 'javascript:;',
+            'class': {
+              'test': true
+            }
           },
           onConfirm: (e) => {
             this.replyOtherInfo = null
@@ -263,11 +262,13 @@
             }, '回复')
           ]
         }).show()
+        this.dialog.$el.getElementsByClassName('cube-dialog-btns')[0].style.marginTop = '70px'
       },
       // 点击举报
       clickReport () {
         if (this.dialog) {
           this.dialog.hide()
+          this.dialog.$el.getElementsByClassName('cube-dialog-btns')[0].style.marginTop = '0'
         }
         if (this.reportOrDelete === '举报') {
           let reportInfo = {}
@@ -319,6 +320,7 @@
                 console.log(error)
                 this.showToast('删除异常!')
               })
+              this.replyOtherInfo = null
             },
             onCancel: () => {
 
@@ -365,7 +367,6 @@
           ,
           { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } }
         ).then((response) => {
-          console.log(response)
         }).catch((error) => {
           console.log(error)
         })
@@ -443,7 +444,6 @@
       }
     },
     beforeRouteEnter (to, from, next) {
-      console.log(from)
       if (from.name === 'problemDetails' || from.name === 'mainApp') {
         to.meta.isBack = false
       }
@@ -474,15 +474,17 @@
   .cube-dialog-title + .cube-dialog-content
     margin 0
 
-  .my-content
 
+  .my-content
     height 50px
     line-height 50px
     color: #999
     background-color: #fff
     margin-top 0
+
   .cube-dialog-title
     margin-bottom 10px
+
   .my-title
     height 50px
     line-height 50px

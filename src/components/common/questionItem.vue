@@ -90,7 +90,7 @@
         commentInfo: {},
         // 当前是否需要刷新
         flush: 0,
-        categoryArr: ['', '数据结构理论', '线性表', '栈和队列', '字符串', '树', '图', '算法']
+        categoryArr: ['', '数据结构', '线性表', '栈和队列', '字符串', '树', '图', '算法']
       }
     },
     props: {
@@ -179,7 +179,7 @@
           { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } }
         ).then((res) => {
           if (res.data.body.data) {
-            this.problemItem = res.data.body.data
+            this.problemItem.open = res.data.body.data.open
           }
         }).catch((err) => {
           console.log(err)

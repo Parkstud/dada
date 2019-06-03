@@ -54,6 +54,13 @@
         <span class="info-title">学号</span>
         <span class="info-real" :class="{'hint-text':!personInfo.schoolNumber}">{{personInfo.schoolNumber || '请输入学号' }}</span>
       </div>
+      <div class="split">
+        系统信息
+      </div>
+      <div class="information-item">
+        <span class="info-title">用户组</span>
+        <span class="info-real" style="color: #bababa;">一班</span>
+      </div>
     </div>
   </div>
 </template>

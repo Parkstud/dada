@@ -262,8 +262,6 @@
           { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } }
         ).then((res) => {
           if (res.data.body.data) {
-            console.log('有数据')
-            console.log(res.data.body.data)
             this.problem = res.data.body.data
           }
         }).catch((err) => {
@@ -414,7 +412,6 @@
         this.problem = JSON.parse(window.localStorage.getItem('proDet_problem'))
 
         // 获取问题信息
-        console.log(this.$route.params.problemId)
         if (this.$route.params.problemId) {
           this.problem.id = this.$route.params.problemId
           this.$http.get('/problemInfo/oneProblemInfo', {
@@ -450,7 +447,6 @@
         from.name === 'onlySearchPage') {
         to.meta.isBack = false
       }
-      console.log(from.name)
       next()
     },
 

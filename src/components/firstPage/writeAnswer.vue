@@ -44,7 +44,7 @@
         let url = '/control/problem/answer'
         let param = new URLSearchParams()
         param.append('questionId', this.problem.id)
-        param.append('comments', this.value.replace(/\n|\r\n/g, '<br/>'))
+        param.append('comments', this.value.replace(/\n|\r\n/g, '<br/>').replace(' ', '&#12288'))
         this.value = ''
         let toast = this.showMaskToast('发送中...')
         this.$http.post(url, param)
@@ -102,6 +102,9 @@
 
     .cube-textarea-wrapper
       height 100%
+
+      .cube-textarea
+        white-space: pre-wrap;
 
     .cube-textarea_expanded
       height 100%

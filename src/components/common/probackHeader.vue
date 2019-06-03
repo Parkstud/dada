@@ -135,7 +135,6 @@
       },
       adoptComment () {
         this.$emit('adoptComment', !this.hasAdopt)
-        console.log('采纳')
       },
       // 删除问题
       deleteProblem () {

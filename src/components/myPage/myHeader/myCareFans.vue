@@ -23,7 +23,7 @@
           <cube-scroll :data="recommendData" ref="scrollCare" :options="scrollOptions"
                        @pulling-up="onPullingUpCare">
             <ul class="list-wrapper">
-              <li v-if="followersData.length===0">
+              <li v-if="recommendData.length===0">
                 你还没有关注
               </li>
               <li v-for="(item, index) in recommendData" class="list-item border-top-1px"
@@ -225,7 +225,6 @@
 
         // 获取粉丝
         this.$http.get('/Interaction/fansInfoPage', null).then((response) => {
-          console.log(response)
           this.followersData = response.data.body.data.records
         }).catch((error) => {
           console.log(error)

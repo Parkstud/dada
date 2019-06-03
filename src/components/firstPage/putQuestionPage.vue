@@ -33,11 +33,10 @@
         value: '',
         modelName: null,
         modelIcon: null,
-        modelArray: ['', '数据结构概述', '线性表', '栈和对列', '字符串', '树', '图', '算法']
+        modelArray: ['', '数据结构', '线性表', '栈和对列', '字符串', '树', '图', '算法']
       }
     },
     beforeRouteEnter (to, from, next) {
-      console.log(from)
       if (from.name === 'mainApp') {
         to.meta.isBack = false
       }
@@ -63,7 +62,7 @@
       },
       // 发布问题按钮点击
       release () {
-        let problemTitle = this.value
+        let problemTitle = this.value.replace(/\n|\r\n/g, '<br/>').replace(' ', '&#12288')
         this.value = ''
         this.$router.push({
           name: 'question',
@@ -110,6 +109,8 @@
     .question-content-wrapper
       .cube-textarea-wrapper
         height 100px
+        .cube-textarea
+          white-space: pre-wrap;
 
       .cube-textarea_expanded
         height 150px

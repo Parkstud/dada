@@ -92,7 +92,6 @@
         socketInfo.type = 1
         socketInfo.content = newMsg
         this.$store.commit('dataPush', JSON.stringify(socketInfo))
-        console.log('dataPush.....')
         this.saveMessage(newMsg)
       },
       back () {
@@ -141,7 +140,6 @@
         socketInfo.type = 1
         socketInfo.content = newMsg
         this.$store.commit('dataPush', JSON.stringify(socketInfo))
-        console.log('dataPush.....')
         this.saveMessage(newMsg)
       },
       //  存储消息
@@ -155,7 +153,6 @@
       },
       getData () {
         this.letterUser = this.$route.params.letterUser
-        console.log(this.letterUser)
         // 通过letter 和当前用户信息查询聊天记录
         // 查询当前的用户信息
         let url = '/message/news/history/list'
@@ -177,7 +174,6 @@
                     }
                   )).then((res) => {
                     this.$store.commit('updateMsg', this.$store.state.flushMsg + 1)
-                    console.log(res)
                   }).catch((err) => {
                     console.log(err)
                   })
@@ -195,7 +191,6 @@
     },
     watch: {
       '$store.state.receiveInfo': function () {
-        console.log(this.$store.state.receiveInfo)
         if (this.$router.currentRoute.name === 'chatPage') {
           let receivInfo = JSON.parse(this.$store.state.receiveInfo)
           if (receivInfo.type === 1 && receivInfo.content.receiveUserId === this.nowUser.id) {
@@ -203,7 +198,7 @@
                 receiveId: this.nowUser.id
               }
             )).then((res) => {
-              console.log(res)
+
             }).catch((err) => {
               console.log(err)
             })

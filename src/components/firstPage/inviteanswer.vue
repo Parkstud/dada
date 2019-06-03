@@ -171,8 +171,6 @@
           window.localStorage.setItem('inv_problemId', this.$route.params.problemId)
         }
         this.problemId = window.localStorage.getItem('inv_problemId')
-        console.log('mounted')
-        console.log(this.problemId)
 
         // 获取推荐
         this.$http.get('/Interaction/recommend', {
@@ -191,7 +189,6 @@
             problemId: this.problemId
           }
         }).then((response) => {
-          console.log(response)
           this.followersData = response.data.body.data.records
         }).catch((error) => {
           console.log(error)

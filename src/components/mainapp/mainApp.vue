@@ -147,7 +147,6 @@
         // 私信信息
         if (data.type === 1) {
           this.getMsgCount()
-          console.log(this.$store.state.flushMsg)
           this.$store.commit('updateMsg', this.$store.state.flushMsg + 1)
           this.$store.commit('updateReceiveInfo', e.data)
         }

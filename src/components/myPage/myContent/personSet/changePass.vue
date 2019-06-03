@@ -41,7 +41,6 @@
         if (this.newpwd.trim() === '') {
           this.showToastTime('请输入新密码')
         }
-        console.log(this.pwd)
         this.$http.post('/userAccount/change/web/password', this.$qs.stringify({
           newPass: this.newpwd,
           oldPass: this.pwd
