@@ -2,16 +2,29 @@
   <div class="home-page">
     <proback-header ref="backheader" :back-text="backText"
                     :show-collect="false"
+                    :show-delete="false"
                     :show-more="showMore"
                     v-on:changeReport="changeReport"
     ></proback-header>
-
+    <div class="load-wrapper" v-show="showload">
+      <div class="cube-loading">
+                <span class="cube-loading-spinners"><i
+                  class="cube-loading-spinner"></i><i class="cube-loading-spinner"></i><i
+                  class="cube-loading-spinner"></i><i class="cube-loading-spinner"></i><i
+                  class="cube-loading-spinner"></i><i class="cube-loading-spinner"></i><i
+                  class="cube-loading-spinner"></i><i class="cube-loading-spinner"></i><i
+                  class="cube-loading-spinner"></i><i class="cube-loading-spinner"></i><i
+                  class="cube-loading-spinner"></i><i class="cube-loading-spinner"></i>
+            </span>
+      </div>
+    </div>
     <div class="header-info" v-show="showPage">
       <div class="avatar-wrapper">
         <img class="avatar" width="60" height="60" :src="this.imgURL+userData.avatar">
       </div>
       <div class="name-wrapper">
         <span class="name">{{userData.nickName}}</span>
+        <span class="badge" v-show="letterUser">{{showType(letterUser)}}</span>
       </div>
       <div class="care-wrapper">
         <span>关注了 {{userData.cares}} 人</span>
@@ -69,6 +82,8 @@
         userId: this.$route.params.userId,
         // 显示更多
         showMore: true,
+        showload: true,
+        letterUser: null,
         userData: {
           avatar: 'group1/M00/00/00/rBsAAlycfB-AA9jFAACjZJqjeEQ581_big.jpg',
           nickName: '小明明',
@@ -87,8 +102,19 @@
       }
     },
     methods: {
+      showType (letter) {
+        if (letter === null) {
+          return
+        }
+        if (letter.type === 1) {
+          return '教师'
+        }
+        if (letter.type === 2) {
+          return '系统'
+        }
+        return '学生'
+      },
       changeReport () {
-
         let reportInfo = {}
         reportInfo['reportId'] = this.userId
         reportInfo['toUserId'] = this.userId
@@ -145,21 +171,20 @@
       },
       // 私信界面
       privateLetter () {
-        let url = '/myPage/user/userInformation/'.concat(this.userId)
-        this.$http.get(url, null)
-          .then((response) => {
-            if (response.data.head.stateCode === 200) {
-              this.$router.push({
-                name: 'chatPage',
-                params: {
-                  letterUser: response.data.body.data
-                }
-              })
+        if (this.letterUser) {
+          this.$router.push({
+            name: 'chatPage',
+            params: {
+              letterUser: this.letterUser
             }
           })
+        } else {
+          this.showToast('你点击的太快请稍后重试！')
+        }
       },
       getData () {
         this.showPage = false
+        this.showload = true
         // 获取用户信息
         let url = '/problemInfo/userInfo'
         this.$http.get(url, {
@@ -170,8 +195,20 @@
           let data = response.data.body.data
           this.userData = data
           this.showPage = true
+          this.showload = false
         }).catch((error) => {
           console.log(error)
+        })
+
+        this.letterUser = null
+        // 获取账号信息
+        url = '/userAccount/user/account'
+        this.$http.get(url, {
+          params: {
+            userId: this.userId
+          }
+        }).then((response) => {
+          this.letterUser = response.data.body.data
         })
       }
     },
@@ -233,45 +270,12 @@
         height 30px
         font-size 22px
 
-    /* .moreAction
-       position absolute;
-       background-color #007efe
-       right 5px
-       width 150px
-       color white
-       z-index 20
-       top 50px
-       border-radius 5px
-       font-size 16px
-
-       ul
-         li
-           padding 10px
-           border-bottom 1px solid white
-           transition background-color 1s
-
-           .cubeic-star-collect
-             color aqua
-
-           &:active
-             background-color black
-
-           span
-             margin 10px
-             width 40px
-             text-align center
-
-       &:before
-         content: "";
-         width: 0;
-         height: 0;
-         border-left: 10px solid transparent;
-         border-right: 10px solid transparent;
-         border-bottom: 10px solid #007efe;
-         position: absolute;
-         top: -9px;
-         left: 106px;
-*/
+    .load-wrapper
+      background-color #f4f6f9
+      display flex
+      justify-content center
+      align-items center
+      height 60px
 
     .header-info
       color white
@@ -287,6 +291,22 @@
       .name-wrapper
         text-align center
         margin-bottom 10px
+        font-size 20px
+
+        .name
+          margin-right 6px
+
+        .badge
+          vertical-align top
+          font-size 16px
+          display inline-block
+          background-color #007efe
+          height 20px
+          text-align center
+          line-height 20px
+          border-radius: 4px
+          padding: 0 4px;
+          white-space: nowrap;
 
       .care-wrapper
         text-align center

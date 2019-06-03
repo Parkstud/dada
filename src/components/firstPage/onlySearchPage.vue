@@ -25,6 +25,7 @@
       <cube-scroll
         ref="scroll"
         :data="problemInfo"
+        @pulling-up="onPullingUp"
         :options="options">
         <ul class="list-wrapper">
           <li class="load-wrapper" v-show="showload">
@@ -101,6 +102,24 @@
       deleteHistory (index) {
         this.historys.splice(index, 1)
       },
+      onPullingUp () {
+        if (this.problemInfo.length === 0) {
+          this.$refs.scroll.forceUpdate()
+        }
+        this.$http.get('/problemInfo/webProblemVOLikePage', {
+          params: {
+            title: this.val,
+            current: this.current,
+            size: this.size
+          }
+        }).then((res) => {
+          if (res.data.body.data.records.length > 0) {
+            this.problemInfo = this.problemInfo.concat(res.data.body.data.records)
+            this.current++
+          }
+          this.$refs.scroll.forceUpdate()
+        })
+      },
       back () {
         if (!this.showHistory) {
           this.showHistory = true
@@ -114,6 +133,7 @@
         this.$refs.search1.focus()
       },
       searchInfo () {
+        this.current = 1
         if (this.val.trim() === '') {
           return
         }
@@ -135,6 +155,9 @@
         }).then((res) => {
           this.problemInfo = res.data.body.data.records
           this.showload = false
+          if (this.problemInfo.length > 0) {
+            this.current++
+          }
         })
       }
     },

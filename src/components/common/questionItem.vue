@@ -8,7 +8,9 @@
                  :src="this.imgURL+problemItem.avatar">
             <span class="questioner-name">{{problemItem.username}}</span>
           </div>
-          <span class="questioner-time">{{getDateDiff(problemItem.time)}}</span>
+          <span class="questioner-time"><span class="open-bdg"
+                                              :class="[problemItem.open===1?'bd-open':'bd-close']">
+            {{problemItem.open===1?'开放':'关闭'}} </span>{{getDateDiff(problemItem.time)}}</span>
         </div>
         <div class="question-header">
           <span class="cate">{{showCategory(problemItem.category)}}</span>
@@ -99,7 +101,6 @@
     },
     watch: {
       problemItem () {
-        console.log('wathc problemItem')
         this.getData()
       }
     },
@@ -178,8 +179,6 @@
           { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } }
         ).then((res) => {
           if (res.data.body.data) {
-            console.log('有数据')
-            console.log(res.data.body.data)
             this.problemItem = res.data.body.data
           }
         }).catch((err) => {
@@ -222,6 +221,17 @@
         })
       },
       getData () {
+        // 查询问题信息
+        this.$http.get('/problemInfo/oneProblemInfo', {
+          params: {
+            problemId: this.problemItem.id
+          }
+        }).then((res) => {
+          let data = res.data.body.data
+          if (data) {
+            this.problemItem.open = data.open
+          }
+        })
         // 查询提问人信息 , 评论 回复 点赞信息
         let url = '/problemInfo/problem/' + this.problemItem.id
         this.$http.get(url, null)
@@ -273,6 +283,20 @@
         .questioner-time
           position relative
           right 10px
+
+          .open-bdg
+            margin-right 4px
+            padding 4px
+            display inline-block
+            color: #fff
+            border-radius 2px
+            font-size 12px
+
+          .bd-open
+            background-color #409EFF
+
+          .bd-close
+            background-color #909399
 
       .question-header
         font-size 16px

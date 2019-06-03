@@ -51,9 +51,6 @@
 
 <script type='text/ecmascript-6'>
   import QuestionItem from '../common/questionItem'
-
-  const FIRST_PAGE = 0
-
   // let cnt = 1
   export default {
     name: 'recommend',
@@ -123,7 +120,6 @@
         this.$http.get(url, { params })
           .then((response) => {
             let data = response.data.body.data
-            console.log(data)
             // 有数据
             if (data.records.length > 0) {
               this.items = this.items.concat(data.records)
@@ -160,11 +156,13 @@
         this.flush = this.$store.state.flushCount
         this.getData()
       }
-    },
-    mounted () {
-      // 获取浏览器可视区域高度
       this.clientHeight = `${document.documentElement.clientHeight}`
       this.$refs.mywrapper.style.height = (this.clientHeight - 87) + 'px'
+    },
+    mounted () {
+      // // 获取浏览器可视区域高度
+      // this.clientHeight = `${document.documentElement.clientHeight}`
+      // this.$refs.mywrapper.style.height = (this.clientHeight - 87) + 'px'
       this.getData()
     }
   }

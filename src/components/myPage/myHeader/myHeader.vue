@@ -29,8 +29,8 @@
       return {
         avatar: '',
         nickName: '',
-        fans: '',
-        cares: ''
+        fans: 0,
+        cares: 0
       }
     },
     methods: {

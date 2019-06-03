@@ -28,13 +28,39 @@
           ref="noticeScroll"
           :data="this.tabs[0].content"
           @pulling-up="onPullingUp1"
-          :options="scrollOptions">
+          @pulling-down="onPullingDown1"
+          :options="scrollOptions1">
+          <template slot="pulldown" slot-scope="props">
+            <div v-if="props.pullDownRefresh"
+                 class="cube-pulldown-wrapper"
+                 :style="props.pullDownStyle">
+              <div v-if="props.beforePullDown"
+                   class="before-trigger"
+                   :style="{paddingTop: props.bubbleY + 'px'}">
+            <span
+              :class="{rotate: props.bubbleY > scrollOptions1.pullDownRefresh.threshold - 60}">↓</span>
+              </div>
+              <div class="after-trigger" v-else>
+                <div v-show="props.isPullingDown" class="loading">
+                  <cube-loading></cube-loading>
+                </div>
+                <transition name="success">
+                  <div v-show="!props.isPullingDown" class="text-wrapper"><span
+                    class="refresh-text">更新成功</span>
+                  </div>
+                </transition>
+              </div>
+            </div>
+          </template>
           <ul>
+            <li class="no-li" v-show="tabs[0].content.length===0">
+              <div class="no-notice">没有通知</div>
+            </li>
             <li class="tab-panel-li" v-for="(contentItem, index) in tabs[0].content" :key="index">
               <hr class="hr-sty" style="filter: alpha(opacity=100,finishopacity=0,style=2)"
                   color=#fff SIZE=5/>
               <div class="item-panl1"
-                   @click="clickNotice(contentItem)">
+                   @click="clickNotice(contentItem)" v-longpress="deleteNotice">
                 <div class="item-top">
                   <span v-if="contentItem.noticeInfo" class="name"
                         :style="{'color':setChangeColor()}">{{contentItem.noticeInfo.commentUserNickName || ''}}</span>
@@ -58,8 +84,35 @@
       <cube-tab-panel :label="tabs[1].label">
         <cube-scroll
           ref="newsScroll"
-          :options="scrollOptions1">
+          :options="scrollOptions2"
+          @pulling-down="onPullingDown2"
+        >
+          <template slot="pulldown" slot-scope="props">
+            <div v-if="props.pullDownRefresh"
+                 class="cube-pulldown-wrapper"
+                 :style="props.pullDownStyle">
+              <div v-if="props.beforePullDown"
+                   class="before-trigger"
+                   :style="{paddingTop: props.bubbleY + 'px'}">
+            <span
+              :class="{rotate: props.bubbleY > scrollOptions2.pullDownRefresh.threshold - 60}">↓</span>
+              </div>
+              <div class="after-trigger" v-else>
+                <div v-show="props.isPullingDown" class="loading">
+                  <cube-loading></cube-loading>
+                </div>
+                <transition name="success">
+                  <div v-show="!props.isPullingDown" class="text-wrapper"><span
+                    class="refresh-text">更新成功</span>
+                  </div>
+                </transition>
+              </div>
+            </div>
+          </template>
           <ul>
+            <li class="no-li" v-show="tabs[1].personCall.length===0">
+              <div class="no-notice">没有私信</div>
+            </li>
             <li class="tab-panel-li" v-for="(personItem, index) in tabs[1].personCall"
                 :key="index">
               <div class="item-panl2">
@@ -90,6 +143,7 @@
 </template>
 
 <script type='text/ecmascript-6'>
+
   export default {
     name: 'msgPage',
     props: {
@@ -117,13 +171,26 @@
           label: '私信',
           personCall: []
         }],
+        scrollOptions2: {
+          pullDownRefresh: {
+            threshold: 60,
+            stop: 44
+            // stopTime: 1000,
+            // txt: '更新成功'
+          },
+          directionLockThreshold: 0,
+          pullUpLoad: false
+        },
         scrollOptions1: {
+          pullDownRefresh: {
+            threshold: 60,
+            stop: 44
+            // stopTime: 1000,
+            // txt: '更新成功'
+          },
           directionLockThreshold: 0
         },
-        scrollOptions: {
-          pullUpLoad: true,
-          directionLockThreshold: 0
-        },
+        longPress: false,
         // 字体颜色
         colorGroups: ['#fedcbd', '#f47920', '#ef5b9c',
           '#d93a49', '#ae6642', '#6f60aa', '#694d9f',
@@ -131,6 +198,11 @@
       }
     },
     methods: {
+
+      deleteNotice () {
+        console.log('长按')
+        this.longPress = true
+      },
       // 聊天界面
       chatWith (item) {
         // 处理多次点击
@@ -184,7 +256,51 @@
           return
         }
         this.evTimeStamp = now
-        // 设置评论信息
+
+        if (this.longPress) {
+          this.$createDialog({
+            type: 'confirm',
+            icon: 'cubeic-alert',
+            title: '确认删除',
+            confirmBtn: {
+              text: '确认',
+              active: true,
+              disabled: false,
+              href: 'javascript:;'
+            },
+            cancelBtn: {
+              text: '取消',
+              active: false,
+              disabled: false,
+              href: 'javascript:;'
+            },
+            onConfirm: () => {
+              console.log('删除')
+              console.log(item.id)
+              // 删除通知
+              this.$http.delete('/message/notice', {
+                params: {
+                  sysMessageId: item.id
+                }
+              }).then((res) => {
+                if (res.data.body.data) {
+                  this.showToast('删除成功')
+                  this.getNoticeInfo()
+                  this.changeDot()
+                } else {
+                  this.showToast('删除失败')
+                }
+              }).catch((err) => {
+                console.log(err)
+                this.showToast('删除异常')
+              })
+            },
+            onCancel: () => {
+            }
+          }).show()
+          this.longPress = false
+          return
+        }
 
         this.$store.commit('updateMessage', '通知')
         // 判断是已读
@@ -271,8 +387,21 @@
       showSearch () {
         this.$router.push('/onlySearchPage')
       },
+      // 获取通知信息
+      onPullingDown1 () {
+        this.getNoticeInfo()
+        this.changeDot()
+      },
+      onPullingDown2 () {
+        this.getNewsInfo()
+        this.changeDot()
+      },
       // 上拉
       onPullingUp1 () {
+        if (this.tabs[0].content.length === 0) {
+          this.$refs.noticeScroll.forceUpdate()
+          return
+        }
         let url = '/message/notices/page'
         let param = {
           current: this.current,
@@ -286,11 +415,11 @@
           if (data.records.length > 0) {
             this.tabs[0].content = this.tabs[0].content.concat(data.records)
           } else {
-            // this.$refs.noticeScroll.forceUpdate()
+            this.$refs.noticeScroll.forceUpdate()
           }
         }).catch((error) => {
           console.log(error)
-          // this.$refs.noticeScroll.forceUpdate()
+          this.$refs.noticeScroll.forceUpdate()
         })
       },
       // 获取通知信息
@@ -308,6 +437,7 @@
           this.tabs[0].content = data.records
         }).catch((error) => {
           console.log(error)
+          this.$refs.noticeScroll.forceUpdate()
         })
       },
       translateType (type) {
@@ -324,9 +454,11 @@
           if (response.data.body.data) {
             let map = response.data.body.data
             this.tabs[1].personCall = map
+            this.$refs.newsScroll.forceUpdate()
           }
         }).catch((error) => {
           console.log(error)
+          this.$refs.newsScroll.forceUpdate()
         })
       },
       computeNewsCount (msg) {
@@ -342,8 +474,8 @@
     },
     watch: {
       '$store.state.flushMsg': function () {
-        console.log('')
         this.getNewsInfo()
+        this.changeDot()
       }
     },
     beforeRouteLeave (to, from, next) {
@@ -480,6 +612,46 @@
           height: 600px
           background #f4f6f9
 
+          .cube-pulldown-wrapper
+            text-align: center
+
+            .after-trigger
+              flex: 1
+              margin: 0
+
+              .text-wrapper
+                margin: 0 auto
+                margin-top: 14px
+                padding: 5px 0
+                color: #498ec2
+                background-color: #d6eaf8
+
+              .cube-loading-spinners
+                margin: auto
+
+            .before-trigger
+              height: auto
+              align-self: flex-end
+              font-size: 30px
+
+              span
+                display: inline-block
+                line-height: 1
+                transition: all 0.3s
+                color: #666
+                padding: 15px 0
+
+                &.rotate
+                  transform: rotate(180deg)
+
+          .no-li
+            .no-notice
+              background-color #f4f6f9
+              margin-top 20px
+              font-size 20px
+              color #dedede
+              text-align center
+
           .tab-panel-li
             box-shadow: #ddd 0 0 5px;
             background-color #fff
@@ -571,6 +743,7 @@
                         padding: 0 6px;
                         white-space: nowrap;
                         border: 1px solid #fff;
+
                   .right-content
                     margin-top 16px
                     width 260px
@@ -578,5 +751,12 @@
                     text-overflow: ellipsis;
                     white-space: nowrap
 
+  .success-enter-active, .success-leave-active
+    transition: width .5s
 
+  .success-enter, .success-leave-to
+    width: 70%
+
+  .success-enter-to, .success-leave
+    width: 100%
 </style>

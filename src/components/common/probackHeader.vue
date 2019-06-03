@@ -22,6 +22,14 @@
             <i class="iconfont icon-caina" :class="{'cubeic-star-collect':hasAdopt}"></i>
             <span>{{adoptText}}</span>
           </li>
+          <li @click="closeProblem" v-show="showClose">
+            <i class="cubeic-close"></i>
+            <span>关闭</span>
+          </li>
+          <li @click="openProblem" v-show="showOpen">
+            <i class="cubeic-ok"></i>
+            <span>开放</span>
+          </li>
         </ul>
       </div>
     </transition>
@@ -42,6 +50,14 @@
       }
     },
     props: {
+      showOpen: {
+        type: Boolean,
+        default: false
+      },
+      showClose: {
+        type: Boolean,
+        default: false
+      },
       showReport: {
         type: Boolean,
         default: true
@@ -76,7 +92,7 @@
       showMore: {
         type: Boolean,
         default: true
-      },
+      }
     },
     computed: {
       adoptText () {
@@ -108,6 +124,12 @@
     //   }
     // },
     methods: {
+      openProblem () {
+        this.$emit('changeOpen')
+      },
+      closeProblem () {
+        this.$emit('changeClose')
+      },
       reportProblem () {
         this.$emit('changeReport')
       },

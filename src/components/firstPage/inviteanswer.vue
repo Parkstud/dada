@@ -22,6 +22,9 @@
         <cube-slide-item>
           <cube-scroll :data="recommendData" :options="scrollOptions">
             <ul class="list-wrapper">
+              <li v-if="recommendData.length===0">
+                没有推荐用户！
+              </li>
               <li v-for="(item, index) in recommendData" class="list-item border-top-1px"
                   :key="index">
                 <div class="top">

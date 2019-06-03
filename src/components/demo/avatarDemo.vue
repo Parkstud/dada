@@ -36,8 +36,6 @@
       imageuploading (res) {
       },
       imageuploaded (res) {
-        console.log(res)
-        console.log(this.src)
         this.src = this.imgURL + res.body.data
         // thisVue.src = res.body.data
       }

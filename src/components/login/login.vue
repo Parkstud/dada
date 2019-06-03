@@ -52,9 +52,16 @@
     methods: {
       // 登录验证 :type="typePwd"
       loginVai () {
-        if (this.phone !== '' && this.pwd !== '') {
-          this.toLogin()
+        if (this.phone.trim() === '') {
+          this.showToast('请输入账号！')
+          return
         }
+        if (this.pwd.trim() === '') {
+          this.showToast('请输入密码！')
+          return
+        }
+
+        this.toLogin()
       },
       // 登录请求
 

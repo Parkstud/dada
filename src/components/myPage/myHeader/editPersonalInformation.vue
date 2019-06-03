@@ -19,6 +19,7 @@
              @imagechanged="imagechanged"
              @imageuploading="imageuploading"
              @imageuploaded="imageuploaded"
+             :headers="myheader"
              :data="data"
              :max-file-size="maxFileSize"
              :url="serverUrl">
@@ -64,6 +65,7 @@
     name: 'editPersonalInformation',
     data () {
       return {
+        myheader: null,
         // 是否销毁input元素, 解决在第二次和第一次选择的文件相同时不触发onchange事件的问题
         destroyInput: false,
         save: true,
@@ -88,6 +90,12 @@
       showBirthday () {
         return this.formatData(this.personInfo.birthday, 2)
       }
+    },
+    activated () {
+      let temp = JSON.parse(localStorage.getItem('token'))
+      temp.username = ''
+      console.log(temp)
+      this.myheader = { Authorization: JSON.stringify(temp) }
     },
     methods: {
       back () {
@@ -114,10 +122,7 @@
         this.datePicker.show()
       },
       selectDateHandle (date, selectedVal, selectedText) {
-        console.log(selectedText.join('-'))
-
         this.personInfo.birthday = this.getTime(selectedText.join('-'))
-        console.log(this.personInfo.birthday)
         // this.updatePersonInfo()
       },
       showActiveSex () {
@@ -193,9 +198,9 @@
       imageuploading (res) {
       },
       imageuploaded (res) {
-        this.src = this.imgURL + res.body.data
+        this.src = this.imgURL + res.body.data.avatar
         // 设置user的path
-        this.personInfo.path = res.body.data
+        this.personInfo.path = res.body.data.avatar
         this.updatePersonInfo()
       }
     },

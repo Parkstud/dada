@@ -41,11 +41,11 @@
         <div class="reply-wrapper border-bottom-1px" v-for="(item,index) in replys" :key="index">
           <span class="avatar">
               <img :src="imgURL+item.replyAvatar" width="40" height="40"
-                   @click="toHomepage(item.replyId)">
+                   @click="toHomepage(item.replyUserId)">
           </span>
           <div class="reply-content" @click="clickReply(item)">
             <span class="reply-name"
-                  @click.stop="toHomepage(item.replyId)">{{item.replyUsername}}</span>
+                  @click.stop="toHomepage(item.replyUserId)">{{item.replyUsername}}</span>
             <span class="reply-time">{{formatData(item.replyTime,1)}}</span>
             <p class="reply-content">
               {{item.repliedUserId?'回复 '+item.repliedUsername+' 的评论 :'

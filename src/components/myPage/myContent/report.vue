@@ -56,7 +56,6 @@
     },
     methods: {
       submitReport () {
-
         // 设置举报信息并提交
         let report = {}
         report.reportId = this.reportInfo.reportId
@@ -92,7 +91,6 @@
       },
       selectReason (item) {
         this.choose = item.id
-        console.log(item)
       }
     },
     mounted () {

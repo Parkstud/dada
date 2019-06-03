@@ -50,7 +50,9 @@ axios.interceptors.request.use(
     let token = window.localStorage.getItem('token')
     if (token) {
       // 这里将token设置到headers中，header的key是Authorization，这个key值根据你的需要进行修改即可
-      config.headers.Authorization = token
+      let tokenUser = JSON.parse(token)
+      tokenUser.username = ''
+      config.headers.Authorization = JSON.stringify(tokenUser)
     }
     return config
   },
@@ -276,6 +278,64 @@ const store = new Vuex.Store({
 
   }
 })
+// 长按
+Vue.directive('longpress', {
+  bind: function (el, binding, vNode) {
+    // Make sure expression provided is a function
+    if (typeof binding.value !== 'function') {
+      // Fetch name of component
+      const compName = vNode.context.name
+      // pass warning to console
+      let warn = `[longpress:] provided expression '${binding.expression}' is not a function, but has to be`
+      if (compName) {
+        warn += `Found in component '${compName}' `
+      }
+
+      console.warn(warn)
+    }
+
+    // Define variable
+    let pressTimer = null
+    // Define funtion handlers
+    // Create timeout ( run function after 1s )
+    let start = (e) => {
+      if (e.type === 'click' && e.button !== 0) {
+        return
+      }
+      e.preventDefault()
+
+      if (pressTimer === null) {
+        pressTimer = setTimeout(() => {
+          // Run function
+          handler()
+        }, 1000)
+      }
+    }
+
+    // Cancel Timeout
+    let cancel = (e) => {
+      e.preventDefault()
+      // Check if timer has a value or not
+      if (pressTimer !== null) {
+        clearTimeout(pressTimer)
+        pressTimer = null
+      }
+    }
+    // Run Function
+    const handler = (e) => {
+      binding.value(e)
+    }
+
+    // Add Event listeners
+    el.addEventListener('mousedown', start)
+    el.addEventListener('touchstart', start)
+    // Cancel timeouts if this events happen
+    el.addEventListener('click', cancel)
+    el.addEventListener('mouseout', cancel)
+    el.addEventListener('touchend', cancel)
+    el.addEventListener('touchcancel', cancel)
+  }
+})
 
 new Vue({
   render: h => h(App),
@@ -324,7 +384,6 @@ new Vue({
     // 数据接收
     webSocketOnMessage (e) {
       this.msgs.push(JSON.parse(e.data))
-      console.log(e.data)
     },
     // 数据发送
     webSocketSend (data) {
@@ -336,7 +395,6 @@ new Vue({
     },
 
     checkLogin () {
-      console.log('created')
       // 检查是否存在token
       if (this.$router.currentRoute.fullPath === '/register' || this.$router.currentRoute.fullPath === '/forgetPwd') {
         return

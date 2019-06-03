@@ -108,18 +108,6 @@
       }
       next()
     },
-    // beforeRouteEnter (to, from, next) {
-    //   if (from.name === 'putQuestionPage') {
-    //     to.meta.isBack = false
-    //   }
-    //   next()
-    // },
-    // activated () {
-    //   if (!this.$route.meta.isBack) {
-    //     this.getData()
-    //   }
-    //   this.$route.meta.isBack = false
-    // },
     methods: {
       resolveIndex (index) {
         if (index === 0) {
@@ -133,7 +121,6 @@
         }
       },
       test (item) {
-        console.log(item)
       },
       sendPeople () {
         if (this.hasSend) {
@@ -142,7 +129,6 @@
         this.hasSend = true
 
         // 设置问题开放
-        console.log(this.question)
         if (this.answerData.length === 0) {
           this.question.open = 0
           this.$http.post('/control/problem/problemInfo',

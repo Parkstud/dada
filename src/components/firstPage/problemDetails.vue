@@ -4,9 +4,13 @@
                     :has-collection="headerInfo.hasCollection"
                     :show-delete="nowUser.id===problem.userId || nowUser.type!==0"
                     :show-report="nowUser.id!==problem.userId && nowUser.type===0"
+                    :show-close="problem.open===1 &&  nowUser.type!==0"
+                    :show-open="problem.open===0 &&  nowUser.type!==0"
                     v-on:changeHasCollection="changeHasCollection"
                     v-on:changeReport="changeReport"
                     v-on:deleteProblem="deleteProblem"
+                    v-on:changeOpen="changeOpen"
+                    v-on:changeClose="changeClose"
     ></proback-header>
     <div class="my-details" ref="detailsWrapper">
       <cube-scroll ref="answer"
@@ -55,7 +59,7 @@
               style="border:1px;" class="border-bottom-1px"
               :class="{ expand : item.userType===2 || item.userType===1}"
               SIZE=1/>
-            <span class="author-type" v-show="item.userType===2">智能回答</span>
+            <span class="author-type" v-show="item.userType===2">自动问答</span>
             <span class="author-type" v-show="item.userType===1">教师回答</span>
           </div>
           <div class="author-info">
@@ -137,6 +141,40 @@
       }
     },
     methods: {
+      // 当前开放，变为关闭
+      changeOpen () {
+        this.$http.post('/control/problem/problemInfo',
+          this.$qs.stringify({
+            id: this.problem.id,
+            open: 1
+          })).then((res) => {
+          if (res.data.body.data) {
+            this.problem.open = 1
+            // 通知修改
+            this.$store.commit('setProblem', this.problem.id)
+          } else {
+            this.showToast('设置失败！')
+          }
+        })
+        this.$refs.backheader.$refs.showmore.click()
+      },
+      // 当前关闭，变开放
+      changeClose () {
+        this.$http.post('/control/problem/problemInfo',
+          this.$qs.stringify({
+            id: this.problem.id,
+            open: 0
+          })).then((res) => {
+          if (res.data.body.data) {
+            this.problem.open = 0
+            // 通知修改
+            this.$store.commit('setProblem', this.problem.id)
+          } else {
+            this.showToast('设置失败！')
+          }
+        })
+        this.$refs.backheader.$refs.showmore.click()
+      },
       transferString (content) {
         let string = content
         try {
@@ -415,6 +453,7 @@
       console.log(from.name)
       next()
     },
+
     activated () {
       if (this.$store.state.flushDetail !== -1) {
         this.getData()

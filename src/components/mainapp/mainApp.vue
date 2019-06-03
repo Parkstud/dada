@@ -9,6 +9,7 @@
                     :allow-vertical="true"
                     @change="onChange"
                     :options="slideOptons"
+                    :refreshResetCurrent="false"
         >
           <cube-slide-item>
             <first-page></first-page>
@@ -61,7 +62,7 @@
       return {
         msgInfo: {},
         showDot: false,
-        index: this.$store.state.count,
+        index: 0,
         tabs: [
           {
             label: '首页',
@@ -100,9 +101,6 @@
     },
     watch: {
       '$store.state.sendInfo': function () {
-        console.log('sendInfo变化')
-        console.log(this.$store.state.sendInfo)
-        console.log(this.websock)
         this.webSocketSend(this.$store.state.sendInfo)
       }
     },
@@ -110,9 +108,9 @@
       // 修改dot
       updateDot (data) {
         this.msgInfo = data
+        this.getMsgCount()
       },
       clickHandler (label) {
-        console.log(label)
       },
       changeHandler (label) {
 
@@ -200,6 +198,8 @@
           this.msgInfo = data
           if (data.newsCount > 0 || data.noticeCount > 0) {
             this.showDot = true
+          } else {
+            this.showDot = false
           }
         })
       }
@@ -214,10 +214,18 @@
       FirstPage
     },
     activated () {
-      this.index = this.$store.state.count
+      // let temp = this.$refs.slide
       // this.$nextTick(() => {
-      //   this.$refs.slide.refresh()
+      //   setTimeout(function () {
+      //     temp.refresh()
+      //   }, 3000)
       // })
+      // console.log('设置slide')
+      // this.clientHeight = `${document.documentElement.clientHeight}`
+      this.$refs.slide.refresh()
+      // console.log(this.$refs.slide)
+      // // this.$refs.slide.$el.style.height = (this.clientHeight - 46) + 'px'
+      // // this.index = this.$store.state.count
       this.getMsgCount()
     },
     mounted () {
@@ -225,7 +233,6 @@
       this.clientHeight = `${document.documentElement.clientHeight}`
       this.$refs.containerPage.style.height = (this.clientHeight - 46) + 'px'
       this.initWebSocket()
-      this.getMsgCount()
     }
 
   }

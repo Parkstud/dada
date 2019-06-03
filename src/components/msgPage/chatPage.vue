@@ -54,16 +54,7 @@
         problem: this.$route.params.problem,
         value: '',
         websock: null,
-        msgs: [
-          {
-            id: 1,
-            sendUserId: 1,
-            receiveUserId: 1,
-            time: 1554953244000,
-            msg: '测试',
-            hasRead: 0
-          }
-        ],
+        msgs: [],
         letterUser: {},
         nowUser: {},
         options: {
@@ -83,6 +74,9 @@
         if (this.value.length === 0) {
           return
         }
+        if (this.value.length === 0) {
+          return
+        }
         let newMsg = {}
         newMsg.sendUserId = this.nowUser.id
         newMsg.receiveUserId = this.letterUser.id
@@ -94,6 +88,11 @@
         // 设置websocket
         // this.webSocketSend(JSON.stringify(newMsg))
         // 保存信息
+        let socketInfo = {}
+        socketInfo.type = 1
+        socketInfo.content = newMsg
+        this.$store.commit('dataPush', JSON.stringify(socketInfo))
+        console.log('dataPush.....')
         this.saveMessage(newMsg)
       },
       back () {
@@ -142,6 +141,7 @@
         socketInfo.type = 1
         socketInfo.content = newMsg
         this.$store.commit('dataPush', JSON.stringify(socketInfo))
+        console.log('dataPush.....')
         this.saveMessage(newMsg)
       },
       //  存储消息
@@ -155,6 +155,7 @@
       },
       getData () {
         this.letterUser = this.$route.params.letterUser
+        console.log(this.letterUser)
         // 通过letter 和当前用户信息查询聊天记录
         // 查询当前的用户信息
         let url = '/message/news/history/list'
@@ -206,7 +207,6 @@
             }).catch((err) => {
               console.log(err)
             })
-
             this.msgs.push(receivInfo.content)
           }
         }
@@ -219,8 +219,7 @@
     },
 
     beforeRouteEnter (to, from, next) {
-      console.log(from)
-      if (from.name === 'mainApp') {
+      if (from.name === 'mainApp' || from.name === 'homePage') {
         to.meta.isBack = false
       }
       next()
@@ -355,6 +354,7 @@
 
         .msg-ul-bottom
           height 10px
+
       .chat-footer
         height: 40px
         background-color gray
