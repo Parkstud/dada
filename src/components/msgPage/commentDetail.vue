@@ -474,7 +474,6 @@
   .cube-dialog-title + .cube-dialog-content
     margin 0
 
-
   .my-content
     height 50px
     line-height 50px
