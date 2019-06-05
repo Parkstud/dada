@@ -23,7 +23,9 @@
              :data="data"
              :max-file-size="maxFileSize"
              :url="serverUrl">
-             <img class="avatar" width="35" height="35" :src="this.imgURL+personInfo.path">
+             <img class="avatar" width="35" height="35" v-if="personInfo.path"
+                  :src="this.imgURL+this.personInfo.path">
+             <img class="avatar" width="35" height="35" v-else :src="this.imgURL+this.defaultImg">
          </vue-core-image-upload>
         </span>
       </div>
@@ -76,20 +78,20 @@
         // 是否销毁input元素, 解决在第二次和第一次选择的文件相同时不触发onchange事件的问题
         destroyInput: false,
         save: true,
-        img: 'http://148.70.8.85/group1/M00/00/00/rBsAAlyd2OqAfMy_AAAGveq-234459.jpg',
+        img: 'http://148.70.8.85/group1/M00/00/00/rBsAAlyd2OqAfMyAAAGveq-234459.jpg',
         // 图像信息
         data: {},
         crop: 'local',
+        nowUser: JSON.parse(localStorage.getItem('token')),
         maxFileSize: 5242880,
         serverUrl: 'http://192.168.43.106:8080/myPage/upload/avatar',
         // 个人信息
         personInfo: {
-          name: '陈苗',
-          sex: '男',
-          birthday: '20180617',
-          school: '西华大学',
-          schoolNumber: '3120150905308',
-          path: 'group1/M00/00/00/rBsAAlyd2OqAfMy_AAAGveq-234459.jpg'
+          name: '',
+          sex: '',
+          birthday: '',
+          school: '',
+          schoolNumber: ''
         }
       }
     },
@@ -101,8 +103,10 @@
     activated () {
       let temp = JSON.parse(localStorage.getItem('token'))
       temp.username = ''
-      console.log(temp)
-      this.myheader = { Authorization: JSON.stringify(temp) }
+      this.myheader = {
+        'authorization': JSON.stringify(temp)
+      }
+      this.getData()
     },
     methods: {
       back () {
@@ -130,7 +134,7 @@
       },
       selectDateHandle (date, selectedVal, selectedText) {
         this.personInfo.birthday = this.getTime(selectedText.join('-'))
-        // this.updatePersonInfo()
+        this.updatePersonInfo()
       },
       showActiveSex () {
         this.$createActionSheet({
@@ -167,16 +171,23 @@
       updatePersonInfo () {
         let url = '/myPage/user/userInformation'
         this.$http.post(url, this.personInfo).then((respose) => {
+          if (respose.data.body.data) {
+            this.personInfo = respose.data.body.data
+          }
         }).catch((error) => {
           console.log(error)
         })
       },
       showAlertSchoolNumber () {
+        let temp = this.personInfo.schoolNumber
+        if (!temp) {
+          temp = ''
+        }
         this.dialog = this.$createDialog({
           type: 'prompt',
           title: '修改学校学号',
           prompt: {
-            value: this.personInfo.schoolNumber,
+            value: temp,
             placeholder: '请输入学校学号'
           },
           onConfirm: (e, promptValue) => {
@@ -186,11 +197,15 @@
         }).show()
       },
       showAlertSchool () {
+        let temp = this.personInfo.school
+        if (!temp) {
+          temp = ''
+        }
         this.dialog = this.$createDialog({
           type: 'prompt',
           title: '修改学校名称',
           prompt: {
-            value: this.personInfo.school,
+            value: temp,
             placeholder: '请输入学校名称'
           },
           onConfirm: (e, promptValue) => {
@@ -209,20 +224,26 @@
         // 设置user的path
         this.personInfo.path = res.body.data.avatar
         this.updatePersonInfo()
+      },
+      getData () {
+        // 获取当前用户信息
+
+        let url = '/myPage/user/userInformation'
+        this.$http.get(url, null)
+          .then((response) => {
+            if (response.data.body.data) {
+              this.personInfo = response.data.body.data
+            }
+            console.log(this.personInfo)
+          }).catch((error) => {
+          console.log(error)
+        })
       }
     },
     components: {
       'vue-core-image-upload': VueCoreImageUpload
     },
     mounted () {
-      // 获取当前用户信息
-      let url = '/myPage/user/userInformation'
-      this.$http.get(url, null)
-        .then((response) => {
-          this.personInfo = response.data.body.data
-        }).catch((error) => {
-        console.log(error)
-      })
     }
   }
 </script>

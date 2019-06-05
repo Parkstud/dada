@@ -93,18 +93,12 @@
         this.$http.get('/myPage/content/information/count', null)
           .then((response) => {
             let data = response.data.body.data
-            if (this.change(this.collectProblemCount, data.collectProblemCount)) {
-              this.collectProblemCount = data.collectProblemCount
-            }
-            if (this.change(this.awesomeCount, data.awesomeCount)) {
-              this.awesomeCount = data.awesomeCount
-            }
-            if (this.change(this.myQuestionCount, data.myQuestionCount)) {
-              this.myQuestionCount = data.myQuestionCount
-            }
-            if (this.change(this.browseCount, data.browseCount)) {
-              this.browseCount = data.browseCount
-            }
+
+            this.collectProblemCount = data.collectProblemCount
+            this.awesomeCount = data.awesomeCount
+            this.myQuestionCount = data.myQuestionCount
+            this.browseCount = data.browseCount
+
           }).catch((error) => {
           console.log(error)
         })

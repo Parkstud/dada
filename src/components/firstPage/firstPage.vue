@@ -156,13 +156,11 @@
         this.flush = this.$store.state.flushCount
         this.getData()
       }
-      this.clientHeight = `${document.documentElement.clientHeight}`
-      this.$refs.mywrapper.style.height = (this.clientHeight - 87) + 'px'
     },
     mounted () {
       // // 获取浏览器可视区域高度
-      // this.clientHeight = `${document.documentElement.clientHeight}`
-      // this.$refs.mywrapper.style.height = (this.clientHeight - 87) + 'px'
+      this.clientHeight = `${document.documentElement.clientHeight}`
+      this.$refs.mywrapper.style.height = (this.clientHeight - 87) + 'px'
       this.getData()
     }
   }

@@ -194,6 +194,9 @@
         if (flag) {
           param.append('flag', flag)
         }
+        if (item.recordId) {
+          param.append('recordId', item.recordId)
+        }
 
         this.$http.post(url, param)
           .then((response) => {
@@ -213,9 +216,16 @@
         }
         return string
       },
-      getData () {
+      initPage () {
         this.dataloaded = false
         this.hasSend = false
+        this.adoption = -1
+        this.oppose = -1
+        this.question = {}
+        this.answerData = []
+      },
+      getData () {
+        this.initPage()
         // 获取题目
         let problemTitle = this.$route.params.problemTitle
         let problemType = this.$route.params.problemType

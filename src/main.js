@@ -39,7 +39,7 @@ import myCareFans from './components/myPage/myHeader/myCareFans'
 Vue.config.productionTip = false
 
 Vue.prototype.imgURL = 'http://148.70.8.85/'
-
+Vue.prototype.defaultImg = 'group1/M00/00/00/rBsAAlyd2OqAfMy_AAAGveq-234459.jpg'
 Vue.prototype.$http = axios
 // http://106.14.4.232:8080/dsqas-0.0.1-SNAPSHOT
 axios.defaults.baseURL = 'http://192.168.43.106:8080'
@@ -400,7 +400,7 @@ new Vue({
         return
       }
       let token = window.localStorage.getItem('token')
-      if (token === '') {
+      if (!token) {
         this.$router.push('/login')
       }
     }

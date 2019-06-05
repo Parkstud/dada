@@ -36,6 +36,11 @@
         return true
       }
     },
+    activated () {
+      if (this.$route.params.problem) {
+        this.problem = this.$route.params.problem
+      }
+    },
     methods: {
       back () {
         this.$router.go(-1)

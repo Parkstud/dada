@@ -2,7 +2,9 @@
   <div class="my-header" @click="editPerson">
     <div class="header-content">
       <div class="myavatar">
-        <img :src="this.imgURL+avatar"
+        <img v-if="avatar" :src="this.imgURL+avatar"
+             width="64" height="64">
+        <img v-else :src="this.imgURL+this.defaultImg"
              width="64" height="64">
       </div>
       <div class="info-wrapper">
@@ -90,9 +92,7 @@
       }
     },
     activated () {
-      if (this.$store.state.flushMyPageCare !== -1) {
-        this.getData()
-      }
+      this.getData()
     },
     mounted () {
       this.getData()

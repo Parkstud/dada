@@ -28,7 +28,7 @@
     name: 'changeTel',
     data () {
       return {
-        myphone: '18280406477',
+        myphone: '',
         code: '',
         phone: '',
         backText: '修改手机号',

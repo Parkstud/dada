@@ -151,6 +151,8 @@
         )
       },
       clickCare: function () {
+        this.$store.commit('updateFlushMyPageCare', -1)
+
         this.userData.cared = !this.userData.cared
         if (this.userData.cared) {
           this.userData.fans++

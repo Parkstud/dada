@@ -62,7 +62,7 @@
       },
       // 发布问题按钮点击
       release () {
-        let problemTitle = this.value.replace(/\n|\r\n/g, '<br/>').replace(' ', '&#12288')
+        let problemTitle = this.value.trim()
         this.value = ''
         this.$router.push({
           name: 'question',
@@ -109,6 +109,7 @@
     .question-content-wrapper
       .cube-textarea-wrapper
         height 100px
+
         .cube-textarea
           white-space: pre-wrap;
 

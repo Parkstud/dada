@@ -5,7 +5,7 @@
                     :show-delete="nowUser.id===problem.userId || nowUser.type!==0"
                     :show-report="nowUser.id!==problem.userId && nowUser.type===0"
                     :show-close="problem.open===1 &&  nowUser.type!==0"
-                    :show-open="problem.open===0 &&  nowUser.type!==0"
+                    :show-open="problem.open!==1 &&  nowUser.type!==0"
                     v-on:changeHasCollection="changeHasCollection"
                     v-on:changeReport="changeReport"
                     v-on:deleteProblem="deleteProblem"
